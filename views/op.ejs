@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Панель оператора</title>
+    <link rel="stylesheet" href="public/css/style_op.css">
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="content">
+        <div class="op__main">
+            <div class="ticket__content">
+                <div class="ticket__block">
+                    <span>Номер талона:</span>
+                    <span class="ticket__text"></span>
+<!--                    <span class="ticket__text-blocks">-->
+<!--                        &#45;&#45;&#45;&#45;-->
+<!--                    </span>-->
+                    <div class="service">
+                        <span>Услуга:</span>
+                        <span class="service__text"></span>
+                    </div>
+                </div>
+            </div>
+            <span class="queue__text">Живая очередь:0</span>
+            <div class="op__main-button">
+                <button class="next__button">Следующий</button>
+<!--                <button class="postpone__button" disabled>Отложить</button>-->
+<!--                <button class="served__button" disabled>Обслужен</button>-->
+                <button class="repeat__button" disabled>Повтор вызова</button>
+                <button class="transfer__button" disabled>Перевод</button>
+              <button class="list__postponed">Список отложенных</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+<script src="node_modules/moment/moment.js"></script>
+<script src="node_modules/moment/locale/ru.js"></script>
+<script src="public/js/op.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+@media print {
+    head,title,.header__main,.button_wrapper,.button_ticket,.header__wrapper,.header__clock,.header__date{
+      display:none;
+    }
+	@page{
+		size:a8;
+		margin:0;
+	}
+    .ticket{
+      margin:0 auto;
+      height:85mm;
+      width: 73mm;
+      outline: 7px solid black;
+      outline-offset: -0.5mm;
+      background: white;
+      opacity: 1;
+      visibility:visible;
+      font-size: 8mm;
+  }
+}

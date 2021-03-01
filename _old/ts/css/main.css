@@ -1,0 +1,53 @@
+@import "ticket.css";
+body{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+.header__main{
+    height: 15em;
+    background-color: aqua;
+}
+.button_wrapper{
+   display: flex;
+   justify-content: center;
+   margin-top: 150px;
+}
+.button_ticket{
+    height: 150px;
+    width: 300px;
+    background-color: aqua;
+    border-radius: 10px;
+    text-align: center;
+}
+.window_ticket{
+    position:fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    /* background: black;
+    opacity: 0.6; */
+    /* z-index: 3; */
+    background: black;
+    opacity: 0.9;
+    overflow:auto;
+}
+.ticket{
+    height:300px;
+    width: 300px;
+    outline: 5px solid black;
+    outline-offset: -6px;
+    background: white;
+    opacity: 1;
+}
+.renderTicket{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    white-space: nowrap;
+}
+.renderTicket div{
+    text-align: center;
+    margin:15px 10px 0 0;
+}

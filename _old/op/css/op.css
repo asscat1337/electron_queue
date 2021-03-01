@@ -1,0 +1,33 @@
+body{
+    margin:0;
+    padding:0;
+    box-sizing: border-box;
+}
+.op__header{
+    height: 10em;
+    background: green;
+}
+.op__block-queue{
+    height: 400px;
+    width: 200px;
+    border: 1px solid;
+    margin-right: 10px;  
+}
+.op__block-served{
+    height: 400px;
+    width: 200px;
+    border: 1px solid;
+}
+.op__block{
+    display: flex;
+    margin-top: 10px;
+}
+.item{
+    z-index: 999;
+}
+.hide{
+    display: none;
+}
+.active{
+    display: block;
+}
