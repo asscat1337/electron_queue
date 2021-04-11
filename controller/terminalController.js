@@ -1,6 +1,7 @@
 const config = require('../core/config.js');
 const mysql = require('mysql2');
 const connection = mysql.createConnection(config).promise();
+const  io = require('../server');
 exports.ts = (req,res)=>{
     let data;
     connection.query(`SELECT * FROM qs.service where  setTerminalName='${req.query.id}' and status = 1`)
