@@ -1,7 +1,19 @@
-const socket = io('/');
+const socket = io('localhost:3003',{
+    credentials:true,
+    transport:['pooling']
+});
 const tvInfo = document.querySelector('.eq__content');
 const tvContent = document.querySelector('.tv__content');
 let player;
+
+if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('../sw.js')
+        .then(()=>navigator.serviceWorker.ready.then((worker)=>{
+            worker.sync.register('syncdata')
+        }))
+        .catch((err)=>console.log(err))
+}
+
 const getQueryStringParams = query => {
     return query
         ? (/^[?#]/.test(query) ? query.slice(1) : query)
@@ -161,40 +173,41 @@ let ObjectSound = {
     800:"public/sound/800.wav",
     900:"public/sound/900.wav"
 };
-const   [audioStart='public/sound/client.wav',audioCab = 'public/sound/tocabinet.wav',...rest] = [];
+let  [audioStart='public/sound/client.wav',audioCab = 'public/sound/tocabinet.wav',...rest] = [];
 let   sound = [];
 
 document.addEventListener('DOMContentLoaded',()=>{
     socket.on('message',data=>{
-        if(data.length===0) return;
+        console.log(data)
+        if(data===undefined) return;
      data.map(item=>{
+         item.terminalName.includes('reg') ? audioCab = 'public/sound/towindow.wav':audioCab = 'public/sound/tocabinet.wav'
            const service = item.number.split('');
            const letterService = service.slice(0,1).join('');
            const numberService = +service.slice(1,5).join('');
-           const arrCab = +[item.cabinet].join('').split('');
+           const arrCab = +item.cabinet;
+         ///// нужно переделать
              const someFunc =(object,arg)=>{
-                 return Object.entries(object).find(([key,value])=>{
+                 let arr = [];
+                 Object.entries(object).find(([key,value])=>{
                      if(typeof(arg)==="number"){
                          let modul = arg%100 || arg;
                          let raz = arg-modul;
                          if(modul === +key || raz === +key){
-                             rest.push(value)
+                             arr.push(value)
                          }
                      }
                      else if(key===arg){
-                         rest.push(value)
+                         arr.push(value)
                      }
                  });
+                 return arr
              }
-             someFunc(ObjectSound,arrCab);
-             someFunc(ObjectSound,numberService)
-             someFunc(arr_RU,letterService)
-         ///// нужно переделать
-         let test = [audioStart].concat([audioCab,...rest].reverse());
-         const deleteCount = test.splice(-2,2).reverse()
-         sound = test.concat(deleteCount);
-         test.length = 0;
-         rest.length = 0
+             let number = someFunc(ObjectSound,numberService).reverse();
+             let cab =  someFunc(ObjectSound,arrCab).reverse();
+             let letter= someFunc(arr_RU,letterService).join(',')
+         sound = [audioStart,letter,number,audioCab,cab].reduce((acc,val)=>acc.concat(val),[]);
+         //sound.length = 0;
              /////
          socket.emit('update info',item.tvinfo_id);
 
@@ -203,31 +216,30 @@ document.addEventListener('DOMContentLoaded',()=>{
 <svg class="arrow-bottom-4" viewBox="0 0 100 85">
   <polygon points="58.263,0.056 100,41.85 58.263,83.641 30.662,83.641 62.438,51.866 0,51.866 0,31.611 62.213,31.611 30.605,0 58.263,0.056" />
 </svg>
-<span>${arrCab}</span>
+<span>${item.cabinet}</span>
 </div>`)
          document.body.insertAdjacentHTML('afterbegin',`<audio class=player autoplay></audio>`)
          let player = document.querySelector('.player');
          let current = 0;
 
-         let arr1=sound.filter(item=> item!==undefined && item!==0)
+         sound.filter(item=> item!==undefined && item!==0);
          const videoTv = document.querySelector('.video__tv');
-         player.src = arr1[0];
+         player.src = sound[0];
          player.addEventListener('ended',()=>{
              current++;
-             if(current>=arr1.length){
+             if(current===sound.length){
                  player.remove();
-                 sound.length = 0;
-                 console.log(sound.length)
+             }else if(current!==sound.length){
+                 player.src = sound[current];
+                 player.play();
              }
-             player.src = arr1[current];
-             player.play();
 
          });
         const video = document.querySelector('.video__tv');
         if(item.number && tvContent.contains(video)){
             videoTv.pause()
         }
-            tvInfo.insertAdjacentHTML('afterbegin',`<div class="result added" data-id='${item.id}'>
+            tvInfo.insertAdjacentHTML('afterbegin',`<div class="result added"'>
                     <span>${item.number}</span> <svg class="arrow-right-4" viewBox="0 0 100 100">
               <polygon points="58.263,0.056 100,41.85 58.263,83.641 30.662,83.641 62.438,51.866 0,51.866 0,31.611 62.213,31.611 30.605,0 58.263,0.056" />
             </svg>
@@ -235,8 +247,8 @@ document.addEventListener('DOMContentLoaded',()=>{
             </div>`)
         })
         setTimeout(()=>{
-            document.querySelector('.result').classList.remove('added')
-            document.querySelector('.content__box').remove()
+            document.querySelectorAll('.result').forEach(item=>item.classList.remove('added'));
+            document.querySelectorAll('.content__box').forEach(item=>item.remove())
         },15000)
         let test = document.querySelectorAll('.result');
         for(let i=0;i<test.length;i++){
@@ -246,7 +258,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         }
         })
     });
-    socket.on('repeat data',data=> {
+    socket.on('repeat ticket',data=> {
+        console.log(data)
         if(data===undefined) return;
         data.map(item => {
             //// дуплируется код,нужно вынести глобально
@@ -278,11 +291,16 @@ document.addEventListener('DOMContentLoaded',()=>{
             test.length = 0;
             rest.length = 0;
             /////
+            const promises = ()=>{
+                return new Promise((resolve, reject) => {
+                    resolve(sound)
+                })
+            };
+            console.log(promises());
             document.body.insertAdjacentHTML('afterbegin', `<audio class=player autoplay></audio>`)
             player = document.querySelector('.player');
 
             let current = 0;
-            console.log(sound)
             sound.filter(item => item !== undefined)
             player.src = sound[0];
             player.addEventListener('ended', () => {

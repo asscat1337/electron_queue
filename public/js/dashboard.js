@@ -116,37 +116,41 @@ document.addEventListener('DOMContentLoaded',()=>{
                })
            })
         });
-}
+};
     fetchData();
-    let val = document.querySelectorAll('.res');
+    let data = []
+    document.querySelectorAll('.service__user').forEach(item=> {
+        item.addEventListener('click', (event) => {
+           data.push(event.target.dataset.id)
+        })
+    });
     const serviceConfirm = document.querySelector('.service__confirm');
     const selectTerminal = document.querySelector('.select__terminal');
-    serviceConfirm.addEventListener('click',()=>{
-        val.forEach(item=>{
-          if(item.checked){
-              const serviceInput = document.querySelector('.service__input').value;
-              const descriptionInput = document.querySelector('.service__description').value;
-              const numberCabinet = document.querySelector('.service__cabinet').value;
-              const object1 = {
-                  "letter":serviceInput.split('').slice(0,1).join('').toUpperCase(),
-                  "ServiceName":serviceInput,
-                  "description":descriptionInput,
-                  "pointer":0,
-                  "Priority":1,
-                  "status":1,
-                  "setService":item.getAttribute('data-role'),
-                  "setTerminalName":selectTerminal.value,
-                  "cabinet":numberCabinet
-              }
-              fetch('/addNewService',{
-                  method:'POST',
-                  headers:{
-                      "Content-type":"application/json;charset=utf-8"
-                  },
-                  body:JSON.stringify(object1)
-              })
-          }
-        })
+    serviceConfirm.addEventListener('click',(event)=>{
+           const serviceInput = document.querySelector('.service__input').value;
+           const descriptionInput = document.querySelector('.service__description').value;
+           const numberCabinet = document.querySelector('.service__cabinet').value;
+           const object1 = {
+               "letter":serviceInput.split('').slice(0,1).join('').toUpperCase(),
+               "ServiceName":serviceInput,
+               "description":descriptionInput,
+               "pointer":0,
+               "Priority":1,
+               "status":1,
+               "role":data,
+               "setTerminalName":selectTerminal.value,
+               "start_time":document.querySelector('.service__start').value,
+               "end_time":document.querySelector('.service__end').value,
+               "cabinet":numberCabinet
+           };
+           console.log(object1);
+           fetch('/addNewService',{
+               method:'POST',
+               headers:{
+                   "Content-type":"application/json;charset=utf-8"
+               },
+               body:JSON.stringify(object1)
+           })
     })
 });
 const roleButton = document.querySelector('.role__button');
@@ -154,7 +158,7 @@ roleButton.addEventListener('click',()=>{
     const roleInput = document.querySelector('.role__input').value;
     const cabInput = document.querySelector('.role__cab').value;
     const terminlInput = document.querySelector('.role_terminal').value;
-
+    console.log({"role":roleInput,"cab":cabInput,"terminalName":terminlInput});
     fetch('/addNewRole',{
         method:'POST',
         headers:{
@@ -220,3 +224,4 @@ $isActive.forEach(item=>{
        fetchData()
     })
 })
+console.log(moment.format("L"))
