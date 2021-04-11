@@ -4,7 +4,13 @@ const express = require('express'),
  http = require('http').createServer(app),
  mysql = require('mysql2'),
  bodyParser = require('body-parser'),
- io = socket(http),
+ io = socket(http,{
+     cors:{
+         origin:'*',
+         methods:['GET','POST'],
+         withCredentials: true
+     }
+ });
  cors = require('cors'),
  events = require('events'),
  port = process.env.port || 5000,
@@ -15,7 +21,7 @@ const express = require('express'),
  config = require('./core/config.js');
  moment = require('moment')();
  multer = require('multer');
-
+const user = require('./midlleware/user');
 const terminalRouter = require('./routes/terminalRouter.js');
 const tvRouter = require('./routes/tvRouter.js');
 const opRouter = require('./routes/opRouter.js');
@@ -47,13 +53,13 @@ const deleteUser = require('./models/deleteUser');
 const http1 = require('http').createServer(app);
 const io1 = socket(http1,{
     cors:{
-        origin:"*"
-    }
-});
+        origin: "*",
+        credentials:true,
+}});
 http1.listen(port1);
 const socketObject = io;
-const socketObject1 = io1;
-module.exports.isObject1 = socketObject1;
+//const socketObject1 = io1;
+//module.exports.isObject1 = socketObject1;
 module.exports.ioObject = socketObject;
 events.EventEmitter.prototype._maxListeners = Infinity;
 
@@ -61,7 +67,6 @@ events.EventEmitter.prototype._maxListeners = Infinity;
 
 const connection = mysql.createConnection(config).promise();
 app.use(cookieParser());
-
 app.use(session({
     secret:"keyboard cat",
     name:"cookie_name",
@@ -74,13 +79,6 @@ app.set('view engine','ejs');
 
 app.use(express.static(__dirname+'/'));
 app.use(cors());
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-    next();
-});
 app.use(bodyParser.json({
     limit: '50mb',
     extended: true
@@ -92,7 +90,6 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 const jSonParser = bodyParser.json();
-
 app.post('/getTicket',getTicket.getTicket);
 app.post('/setStateTicket',setStateTicket.setStateTicket);
 app.post('/showService',showService.showService);
@@ -123,14 +120,79 @@ app.post('/uploads',uploadFile.array('files'),(req,res)=>{
 app.delete('/deleteUserService',deletePrivilege.deletePrivilege);
 app.delete('/deleteUser',deleteUser.deleteUser);
 
-
+app.use(user);
 app.use('/ts',terminalRouter);
 app.use('/op',opRouter);
 app.use('/tv',tvRouter);
 app.use('/dashboard',dashboardRouter);
 app.use('/login',loginRouter);
 app.use('/videos',videoRouter);
+let room,responses;
+    io1.on('connection',async(socket)=>{
+        socket.on('room',async(data)=>{
+            room = data;
+            socket.join(data)
+            await socket.on('clicked',async(data)=>{
+                console.log(data)
+                await connection.query(`SELECT * from tvinfo__${room} WHERE number='${data}'`)
+                    .then(async(result)=>{
+                        if(result[0]){
+                            responses = result[0]
+                        }
+                    });
+                await socket.to(room).emit('message',responses)
+            })
 
+            await socket.on('update info', data => {
+                connection.query(`UPDATE tvinfo__${room} set isChecked=0 WHERE tvinfo_id='${data}'`)
+            })
+            let updateData = [];
+            let arr1 = []
+            await socket.on('repeat data',data=>{
+                const {ticket,terminalName} = data;
+                connection.query(`UPDATE tvinfo__${terminalName} SET isCalledAgain=1 WHERE number='${ticket}'`)
+                    .then(()=>{
+                    connection.query(`SELECT * from tvinfo__${terminalName} WHERE number = '${ticket}'`)
+                        .then(result=>{
+                            arr1 =  updateData.concat(result[0]);
+                            socket.to(terminalName).emit('repeat ticket',arr1);
+                            connection.query(`UPDATE tvinfo__${terminalName} SET isCalledAgain = 0 WHERE tvinfo_id='${result[0].map(item=>item.tvinfo_id)}'`)
+                        })
+                })
+            })
+        })
+    });
+    app.use((req,res)=>{
+        console.log(req.session)
+        io.once('connection', async(socket) => {
+            console.log(`${socket.id} connected to ${res.locals.user}`);
+            socket.on('update queue',async(data)=>{
+                await connection.query(`SELECT role_id,setPrivilege from role WHERE setPrivilege = '${res.locals.user}' AND terminalName = '${res.locals.terminal}'`)
+                    .then(async(res)=>{
+                        await connection.query(`SELECT * from roles WHERE users_id='${res[0].map(item=>item.role_id).join()}'`)
+                            .then((result)=>{
+                                result[0].find(item1=>{
+                                    data.map(async(item)=>{
+                                        if(item1.services_id==item.id){
+                                            socket.broadcast.emit('await queue',{ticket:`${item.Letter}${item.pointer}`,service:item.ServiceName})
+                                        }
+                                    })
+                                });
+                            })
+                    });
+            })
+            socket.on('add data',data=>{
+                const {number,terminalName} = data;
+                connection.query(`UPDATE tvinfo__${terminalName} set isCall = 1 WHERE number='${number}'`)
+            })
+            socket.on('loaded data',async(data)=>{
+                await connection.query(`SELECT * from tvinfo__${data} WHERE isCall = 0 and isChecked = 1`)
+                    .then(result=>{
+                        socket.emit('show data',result[0])
+                    })
+            })
+        })
+    })
 http.listen(port,()=>{
     console.log(`Listen in $${port}`);
 });
