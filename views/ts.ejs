@@ -6,6 +6,9 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/moment/locale/ru.js"></script>
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
     <link rel="stylesheet" href="public/css/style_ts.css">
 </head>
 <body>
@@ -15,15 +18,13 @@
         <p><%=JSON.stringify(data1[0].description__text).replace(/"/g,'')%></p>
     </div>
     <div class="take__ticket">
-        <%const res = data[0]%>
-        <div class="btn__ticket" data-id="<%=JSON.stringify(res.id)%>">
-            <span>ПОЛУЧИТЬ ТАЛОН</span>
+        <%for(let i=0;i<data.length;i++){%>
+        <div class="btn__ticket" data-id="<%=JSON.stringify(data[i].id)%>">
+            <span><%=JSON.stringify(data[i].description)%></span>
         </div>
+        <%}%>
     </div>
 </div>
-    <script src="node_modules/moment/moment.js"></script>
-    <script src="node_modules/moment/locale/ru.js"></script>
-    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
     <script src="public/js/ts.js"></script>
 </body>
 </html>

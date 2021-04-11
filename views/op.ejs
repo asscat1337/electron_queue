@@ -7,6 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Панель оператора</title>
     <link rel="stylesheet" href="public/css/style_op.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/moment/locale/ru.js"></script>
 </head>
 <body>
 
@@ -17,31 +21,28 @@
                 <div class="ticket__block">
                     <span>Номер талона:</span>
                     <span class="ticket__text"></span>
-<!--                    <span class="ticket__text-blocks">-->
-<!--                        &#45;&#45;&#45;&#45;-->
-<!--                    </span>-->
                     <div class="service">
                         <span>Услуга:</span>
                         <span class="service__text"></span>
                     </div>
                 </div>
             </div>
-            <span class="queue__text">Живая очередь:0</span>
             <div class="op__main-button">
-                <button class="next__button">Следующий</button>
+                <button class="btn next__button light-green darken-2">Следующий</button>
 <!--                <button class="postpone__button" disabled>Отложить</button>-->
 <!--                <button class="served__button" disabled>Обслужен</button>-->
-                <button class="repeat__button" disabled>Повтор вызова</button>
-                <button class="transfer__button" disabled>Перевод</button>
-              <button class="list__postponed">Список отложенных</button>
+                <button class="btn repeat__button light-green darken-2" disabled>Повтор вызова</button>
+                <button class="btn transfer__button light-green darken-2 " disabled>Перевод</button>
             </div>
         </div>
+        <div class="op__list">
 
+            <button class="btn call__button light-green darken-2">Вызвать</button>
+        </div>
+        <input type="hidden" name="terminal" class="terminalVal" value=<%=JSON.stringify(sessionTer).replace(/"/g,'')%>>
     </div>
 </div>
 <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
-<script src="node_modules/moment/moment.js"></script>
-<script src="node_modules/moment/locale/ru.js"></script>
 <script src="public/js/op.js"></script>
 </body>
 </html>
