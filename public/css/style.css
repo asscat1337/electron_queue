@@ -180,11 +180,24 @@ div {overflow: hidden;}
     width: 55px;
     transform: rotate(90deg);
 }
+@keyframes show {
+    0%{
+        opacity: 0;
+    }
+    100%{
+        opacity: 1;
+    }
+}
 .content__box{
     flex-direction: column;
     display: flex;
     justify-content: center;
     align-items: center;
+    opacity: 0;
+    transition: 1s;
+    animation:show 1s 1;
+    animation-fill-mode: forwards;
+    animation-delay: 1s;
 }
 
 .result{

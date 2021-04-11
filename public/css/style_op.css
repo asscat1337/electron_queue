@@ -148,7 +148,9 @@ body{margin: 0; box-sizing: border-box; font-family: Arial, sans-serif; height: 
 }
 .result span{
     font-size: 48px;
-
+}
+.result:hover{
+    background: #388e3c;
 }
 .added{
 color:red;
@@ -161,6 +163,7 @@ color:red;
     border-radius: 5px;
     border: 1px solid black;
     z-index: 9999;
+    overflow-x: scroll;
 }
 .hide{
     display: none;
@@ -174,4 +177,32 @@ color:red;
 }
 .active{
     background: #15bf05;
+}
+.op__main-button{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 0 5px;
+}
+.btn{
+    margin: 3px 0px;
+}
+.next__button{
+    background: #689f38;
+}
+.list{
+    z-index: 999;
+}
+.content{
+    display: flex;
+}
+.op__list{
+    position: relative;
+    margin: 10px;
+    height: 90vh;
+    width: 50vh;
+    border-radius: 5px;
+    border: 1px solid black;
+    z-index: 9999;
+    overflow-x: scroll;
 }
