@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 const connection = mysql.createConnection(config).promise();
 
 
-exports.updateUserTerminal = (req,res)=>{
+exports.updateUserTerminal = (req,response)=>{
     const {serviceName,user} = req.body;
     console.log(serviceName,user);
     connection.query(`SELECT serviceName,setTerminalName from service WHERE serviceName='${serviceName}'`)
@@ -12,9 +12,9 @@ exports.updateUserTerminal = (req,res)=>{
             connection.query(`UPDATE role SET terminalName='${item.setTerminalName}' WHERE setPrivilege='${user}'`)
                 .then(result=>{
                     if(result){
-                        res.json({"success":true})
+                        response.json({"success":true})
                     }
                 })
-                .catch(err=>res.json({"error":err}))
+                .catch(err=>response.json({"error":err}))
         }))
 }

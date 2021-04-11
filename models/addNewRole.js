@@ -5,13 +5,19 @@ const connection = mysql.createConnection(config).promise();
 
 exports.addNewRole = (req,res)=>{
     const {role,cab,terminalName}= req.body;
-    console.log(req.body);
-    connection.query(`INSERT into role(role_id,setPrivilege,cab,terminalName) VALUES(NULL,'${role}','${cab}','${terminalName}')`)
+    console.log(role,cab,terminalName);
+    connection.query(`SELECT * from role WHERE setPrivilege='${role}' AND terminalName='${terminalName}' and cab = '${cab}'`)
+        .then(result=>{
+            if(result[0].length){
+                res.json({"error":"Пользователь существует"})
+            }
+        })
+        .catch(err=>res.json({"error":err}));
+
+    connection.query(`INSERT into role(role_id,setPrivilege,cab,isActive,terminalName) VALUES(NULL,'${role}','${cab}','1','${terminalName}')`)
         .then(result=>{
             if(result){
                 res.json({"success":true})
             }
         })
-        .catch(err=>res.json({"error":err}));
-    connection.query(`INSERT into ${terminalName}(role_id,setPrivilege,cab,terminalName) VALUES(NULL,'${role}','${cab}','${terminalName}')`)
 }

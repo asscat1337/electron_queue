@@ -16,7 +16,5 @@ exports.addNewTerminal = (req,res)=>{
     connection.query(`INSERT into description__term(description_id,description__text,terminalName) VALUES(NULL,'${descriptionText}','${terminalName}')`);
     connection.query(`CREATE TABLE tvinfo__${terminalName} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
     date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-    cabinet VARCHAR(45) NULL,isChecked TINYINT(4) NULL,PRIMARY KEY (tvinfo_id))`);
-    connection.query(`CREATE TABLE ${terminalName} (role_id INT NOT NULL AUTO_INCREMENT,
-    setPrivilege VARCHAR(45) NULL,cab VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,PRIMARY KEY (role_id))`)
+    cabinet VARCHAR(45) NULL,isChecked TINYINT(4) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`);
 }
