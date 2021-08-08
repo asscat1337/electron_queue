@@ -328,7 +328,7 @@ io.on('connection', async(socket) => {
              const {terminal} = data
              const {userdata} = socket.handshake.session;
              const repeatData = Object.assign(userdata,data)
-             console.log(terminal)
+             socket.to(terminal).emit('repeat ticket',Array(repeatData))
             // const {ticket,terminalName} = data;
             // console.log(ticket.split(''))
             // connection.query(`UPDATE tvinfo__${terminalName} SET isCalledAgain=1 WHERE number='${ticket}'`)
