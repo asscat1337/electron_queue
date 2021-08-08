@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/moment/locale/ru.js"></script>
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <link rel="stylesheet" href="public/css/style_ts.css">
+</head>
+<body>
+    
+<div class="wrapper">
+    <div class="header">
+        <p><%=JSON.stringify(data1.description).replace(/"/g,'')%></p>
+    </div>
+    <div class="take__ticket">
+        <div class="btn__ticket" data-id="<%=JSON.stringify(data.id)%>">
+            <span><%=JSON.stringify(data.description).replace(/"/g,'')%></span>
+        </div>
+    </div>
+</div>
+    <script src="public/js/ts.js"></script>
+</body>
+</html>

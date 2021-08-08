@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Панель оператора</title>
+    <link rel="stylesheet" href="public/css/style_op.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/moment/locale/ru.js"></script>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="content">
+        <div class="op__main">
+            <div class="ticket__content">
+                <div class="ticket__block">
+                    <span>Номер талона:</span>
+                    <span class="ticket__text"></span>
+                    <div class="service">
+                        <span>Услуга:</span>
+                        <span class="service__text"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="op__main-button">
+                <button class="btn next__button light-green darken-2">Следующий</button>
+                <button class="btn next__complete light-green darken-2" disabled>Обслужен</button>
+                <button class="btn repeat__button light-green darken-2" disabled>Повтор вызова</button>
+                <button data-target="modal1" class="btn transfer__button modal-trigger light-green" disabled>Перевод</button>
+            </div>
+        </div>
+
+        <div class="op__list">
+            <h5>Первичный прием</h5>
+<!--            <button class="btn call__button light-green darken-2">Вызвать</button>-->
+        </div>
+</div>
+</div>
+<div id="modal1" class="modal modal-fixed-footer">
+    <div class="modal-content">
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
+    </div>
+</div>
+<input type="hidden" name="terminal" class="terminalVal" value=<%=JSON.stringify(sessionTer).replace(/"/g,'')%>>
+<input type="hidden" name="cab" class="cabinetVal" value=<%=JSON.stringify(sessionCab).replace(/"/g,'')%>>
+<script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+<script src="public/js/op.js"></script>
+</body>
+</html>

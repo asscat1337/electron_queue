@@ -1,0 +1,17 @@
+body{
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.wrapper{
+    display: flex;
+    justify-content: center;
+    align-content: space-between;
+    align-items: center;
+    flex-direction: column;
+}
+.wrapper .content{
+    border: 1px solid black;
+    width: 500px;
+    height: 300px;
+}

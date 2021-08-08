@@ -1,0 +1,214 @@
+@import 'ticket.css';
+
+:root {
+  --grid-height: 100vh;
+  --grid-width: 100%;
+  --eq-width: 38%;
+  --content-width: 62%;
+  --head-height: 150px;
+}
+
+/*@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap');*/
+
+body{margin: 0; box-sizing: border-box; font-family: Arial, sans-serif; height: var(--grid-height); width: var(--grid-width); overflow: hidden;}
+
+.header {
+    /* height: 100px; */
+    width: 100%;
+    /* background: #15bf05; */
+    text-align: center;
+    font-weight: 800;
+    line-height: 1em;
+    color: #729700;
+  }
+  .header span {display: block; font-size: 30px; color: #425602}
+.time{
+    color:#ffff;
+    font-size: 32px;
+    font-family:"Arial";
+    font-weight: bold;
+}
+.take__ticket {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* height: 250px; */
+    /* width: 100%; */
+    /* margin: 5em auto;*/
+    margin: 150px 0;
+    }
+.take__ticket span {
+    font-size: 32px;
+    text-align: center;
+    margin: 35px auto;
+    color: #ffff;
+    font-size: 70px;
+    font-weight: 800;}
+.modal__ticket {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 3;
+    /* background: black; */
+    /* opacity: 0.9; */
+    /* overflow: auto;*/}
+
+.ticket{
+    margin: 0 auto;
+    height:300px;
+    width: 300px;
+    outline: 5px solid black;
+    outline-offset: -6px;
+    background: white;
+    opacity: 1;
+}
+
+    .ticket div {width: 100%; text-align: center;}
+    .org_name {font-size: 14px; font-weight: 800; padding: 30px 0 0;}
+    .tick__date {font-size: 20px; font-weight: 800;}
+    .tick__numb {font-size: 80px; font-weight: 800; padding: 30px 0;}
+    .tick__logo {
+    height: 45px;
+    /* width: 130px !important; */
+    /* margin: 20px auto 0; */
+    padding: 5px 0 0 0;}
+    .tick__logo img {-o-object-fit: cover;
+    object-fit: cover;
+    object-position: center; width: 120px;}
+
+.btn__ticket {
+    background: rgb(127,168,0);
+    background: linear-gradient(351deg, rgba(127,168,0,1) 0%, rgba(168,208,1,1) 100%);
+    border-radius: 10px;
+    height: 250px;
+    width: 900px;
+    margin: 0 auto;
+    /* border-bottom: 10px solid; */
+    outline: none;
+    box-shadow: 0px 10px 0 0 #425602;
+    line-height: 250px;
+    text-align: center;}
+
+.btn__ticket:active {
+    margin: 10px auto 0;
+    box-shadow: none}
+
+
+.op__main{
+    position: relative;
+    margin: 10px;
+    height: 90vh;
+    width: 50vh;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+.ticket__content{
+    height: 45%;
+    width: 100%;
+    border: 1px solid silver;
+}
+.ticket__block{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+.ticket__text{
+    font-size: 60pt;
+    letter-spacing: 20px;
+}
+/*.ticket__text-blocks{*/
+/*    letter-spacing: 20px;*/
+/*    font-size: 24px;*/
+/*}*/
+.service{
+    display: flex;
+    flex-direction: column;
+}
+.service__text{
+    font-size: 30pt;
+}
+.service span{
+ text-align: center;
+}
+.arrow-right-4{
+    height: 80px;
+    width: 80px;
+}
+
+
+
+.result{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    border-bottom: 1px solid #bf0a8e;
+    cursor:pointer;
+}
+.result span{
+    font-size: 48px;
+}
+.result:hover{
+    background: #388e3c;
+}
+.added{
+color:red;
+}
+.show__postponed{
+    position: relative;
+    margin: 10px;
+    height: 90vh;
+    width: 50vh;
+    border-radius: 5px;
+    border: 1px solid black;
+    z-index: 9999;
+    overflow-x: scroll;
+}
+.hide{
+    display: none;
+}
+.active{
+    background: #15bf05;
+}
+.op__main-button{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin: 0 5px;
+}
+.btn{
+    margin: 3px 0px;
+}
+.next__button{
+    background: #689f38;
+}
+.list{
+    z-index: 999;
+}
+.content{
+    display: flex;
+}
+.op__list{
+    position: relative;
+    margin: 10px;
+    height: 90vh;
+    width: 70vh;
+    border-radius: 5px;
+    border: 1px solid black;
+    z-index: 9999;
+    overflow-x: scroll;
+}
+.op__patients{
+    position: relative;
+    margin: 10px;
+    height: 90vh;
+    width: 70vh;
+    border-radius: 5px;
+    border: 1px solid black;
+    z-index: 9999;
+    overflow-x: scroll;
+}
+.op__list h5,.op__patients h5 {
+    border-bottom: 1px solid #bf0a8e;
+}

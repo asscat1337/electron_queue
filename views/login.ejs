@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Авторизация</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="/public/css/style_login.css">
+</head>
+<body>
+<div class="wrapper">
+    <div class="content">
+        <h4>Авторизация</h4>
+        <form action="" method="post" class="auth__form">
+            <div class="input-field col s12">
+                <select class="selectedVal">
+                    <%for(let i=0;i<result.length;i++){%>
+                    <option><%=JSON.stringify(result[i].setPrivilege).replace(/"/g,'')%></option>
+                    <%}%>
+                </select>
+                <label>Выберите значение</label>
+            </div>
+            <button class="btn submit">Авторизация</button>
+        </form>
+    </div>
+</div>
+<script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+<script src="public/js/login.js"></script>
+</body>
+</html>
