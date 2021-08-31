@@ -8,14 +8,11 @@ class LoginController{
             res.render('login',{
                 result:Array.from(findUser)
             })
-            if(!findUser){
-                res.status(500).render('template/error',{
-                                error:'Не найдено пользователей'
-                             })
-            }
         }
         catch (e) {
-            console.log(e)
+            res.status(500).render('template/error',{
+                error:`type ${e}`
+            })
         }
     }
     async authUser(req,res,next){
@@ -24,12 +21,7 @@ class LoginController{
             const user = await User.findOne({where:{setPrivilege,terminalName:terminalVal},raw:true})
             const roles = await Roles.findOne({where:{users_id:user.role_id}})
             if(user){
-                // req.session.username = setPrivilege;
-                // req.session.terminal = user.terminalName;
-                // req.session.cabinet = user.cab;
-                // req.session.isCab = user.isCab;
-                // req.session.user_id = user.role_id;
-                 return res.redirect(302,`/op?service=${user.terminalName}&id=${roles.services_id}`)
+                 return res.redirect(302,`/op?service=${user.terminalName}&id=${user.role_id}`)
             }
         }
         catch (e) {

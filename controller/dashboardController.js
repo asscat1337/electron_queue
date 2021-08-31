@@ -2,6 +2,8 @@ const Users = require('../models/model__test/User');
 const Terminal = require('../models/model__test/Terminal');
 const Service = require('../models/model__test/Service');
 const Roles = require('../models/model__test/Roles');
+const {Op}= require('sequelize')
+const sequelize = require('../core/config1')
 class dashboardController {
     async renderDashboard(req,res,next){
         const users = await Users.findAll({raw:true})
@@ -34,9 +36,25 @@ class dashboardController {
              .then(data=>res.json(data))
     }
     async showUsers(req,res,next){
-        const {id} = req.body
-        await Users.findAll({where:{terminalName:id}})
-            .then(data=>res.json(data))
+        try{
+            ///говнокод,педередать позже,возможно мутации
+            const {id} = req.body
+            let arr = []
+            await Roles.findAll({where:{services_id:id}})
+                .then(data=>{
+                    console.log(data)
+                    data.map(item=>arr.push({role_id:item.users_id}))
+                }).then(async()=>{
+                    await Users.findAll({
+                        where:{
+                            [Op.or]:arr
+                        }
+                    }).then(query=>res.json(query))
+                })
+                ///
+        }catch (e) {
+            res.status(500).json(e)
+        }
     }
     async updateUserTerminal(req,res,next){
         const {serviceName,user} = req.body
@@ -57,23 +75,21 @@ class dashboardController {
     }
     async showTerminalUser(req,res,next){
         const {data} = req.body
-        await Users.findOne({
+        await Users.findAll({
             where: {
                 terminalName:data
            }
-        },{
-            raw:true
-        }).then(data=>res.json([data]))
+        }).then(data=>res.json(data))
     }
     async addUser(req,res,next){
-        const {user,terminal,cabinet} = req.body;
-
-        const test = await Service.findOne({
+        const {user,terminal,cabinet,isReg,id} = req.body;
+        console.log(req.body);
+        const service = await Service.findOne({
             where: {
-                setTerminalName:terminal
+                setTerminalName:terminal,
+                id
             },
         });
-        const {dataValues:service} = test
         const checkUser = await Users.findAll(
             {
                 where:{
@@ -88,7 +104,7 @@ class dashboardController {
                 terminalName:terminal,
                 isActive:1,
                 cab:cabinet,
-                isCab:0
+                isCab:isReg
             },{raw:true}).then(async (data)=>{
                 const {dataValues}=data
                 await Roles.create({
@@ -101,6 +117,90 @@ class dashboardController {
         }
         if(checkUser.length){
             res.json({'message':'Пользователь уже существует'})
+        }
+    }
+    async deleteUser(req,res,next){
+        const {role} = req.body
+        await Users.destroy({
+            where:{
+                setPrivilege:role
+            }
+        }).then(res.json({'message':'Пользователь удален'}))
+    }
+    async disableUser(req,res,next){
+        const {id,status} = req.body
+        console.log(req.body);
+        await Users.update({isActive:status},{
+            where:{
+                role_id:id
+            }
+        }).then(status ? res.json({'message':'Пользователь активирован'}):res.json({'message':'Пользователь отключен'}))
+    }
+    async changeUserData(req,res,next){
+        const {user,cabinet,terminal} = req.body
+        await Users.update({setPrivilege:user,cab:cabinet},
+            {
+                where:{
+                    terminalName:terminal
+                }
+            }).then(res.json({'message':'Данные о пользователе обновились'}))
+    }
+    async updateServiceData(req,res,next){
+        try{
+            const {ServiceName,description,id,startTime,endTime} = req.body
+            await Service.update({
+                "start_time":startTime,
+                "end_time":endTime,
+                ServiceName,description},{
+                where:{
+                    id:id
+                }
+            })
+                .then(res.json({'message':'Данные о терминале обновились'}))
+        }catch (e) {
+            res.status(500).json(e)
+        }
+    }
+    async addNewService(req,res,next){
+        try{
+            const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,cabinet,roles,start_time,end_time} = req.body;
+            await Service.create({
+                Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,cabinet,start_time,end_time
+            }).then(async(data)=>{
+                if(roles.length){
+                    const {id} = data.dataValues
+                    roles.map(async(role)=>{
+                        await Roles.update({services_id:id},{
+                            where:{
+                                users_id:role
+                            }
+                        })
+                    })
+                }
+            }).then(res.json({'message':'Сервис добавлен'}))
+
+        }catch (e) {
+            console.log(e)
+        }
+    }
+
+    async AddNewTerminal(req,res,next){
+        try{
+            const {terminalName,descriptionText}= req.body;
+            await Terminal.findAll({
+                where:terminalName
+            }).then(result=>{
+                if(result){
+                    return res.json({'message':'Данный терминал уже существует'}).status(400)
+                }
+            })
+            await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
+                .then(res.json({'message':'success'}))
+            await sequelize.query(`CREATE TABLE tvinfo__${terminalName} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
+    date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
+    cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
+        }catch (e) {
+            return res.json({'error':e}).status(400)
         }
     }
 

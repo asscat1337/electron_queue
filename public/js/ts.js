@@ -26,24 +26,21 @@ const getQueryStringParams = query => {
 socket.on('connect',()=>{
     socket.emit('room',Object.values(getQueryStringParams(window.location.search)).join(''))
 })
-// socket1.on('connect',()=>{
-//     socket1.emit('room',Object.values(getQueryStringParams(window.location.search)).join(''))
-// })
-take__ticket.forEach((item)=>{
-    item.addEventListener('click',async()=>{
-         await fetch('/ts/getTicket', {
-             method: 'POST',
-               headers:{
-                 'Content-type':'application/json;charset=utf-8'
-               },
-               body:JSON.stringify({'data':item.getAttribute('data-id')})
-     })
-         .then(res => res.json())
-        .then(data => {
-            let res = data;
-            res.forEach(item=>{
-                if(time>=item.end_time || time<=item.start_time){
-                    document.body.insertAdjacentHTML('beforeend',`
+take__ticket.forEach((item)=> {
+    item.addEventListener('click', async () => {
+        await fetch('/ts/getTicket', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({'data': item.getAttribute('data-id')})
+        })
+            .then(res => res.json())
+            .then(data => {
+                let res = data;
+                res.forEach(item => {
+                    if (time >= item.end_time || time <= item.start_time) {
+                        document.body.insertAdjacentHTML('beforeend', `
                     <div class="modal">
                         <div class="modal__wrap">
                           <div class="tv__end">
@@ -52,10 +49,10 @@ take__ticket.forEach((item)=>{
                         </div>
                     </div>
                     `)
-                    setTimeout(()=>{
-                        document.location.reload()
-                    },3000)
-                }else{
+                        setTimeout(() => {
+                            document.location.reload()
+                        }, 3000)
+                    } else {
                         wrapper.insertAdjacentHTML('afterend', `<div class="modal__ticket">
 <div class="wrapper-ticket">
         <div class="ticket">
@@ -66,85 +63,61 @@ take__ticket.forEach((item)=>{
         </div>
 </div>
     </div>`);
-                        if(item.pointer===999){
-                            async function fetchReset(){
-                              await fetch('ts/updatePointerNull',{
-                                    method:'POST',
-                                    headers:{
-                                        "Content-type":"application/json;charset=utf-8"
+                        if (item.pointer === 999) {
+                            async function fetchReset() {
+                                await fetch('ts/updatePointerNull', {
+                                    method: 'POST',
+                                    headers: {
+                                        "Content-type": "application/json;charset=utf-8"
                                     },
-                                    body:JSON.stringify({"service":item.ServiceName,"terminal":item.setTerminalName})
+                                    body: JSON.stringify({
+                                        "service": item.ServiceName,
+                                        "terminal": item.setTerminalName
+                                    })
                                 })
                             }
+
                             fetchReset()
                         }
                         let object = {
-                            "id":`${item.id}`,
+                            "id": `${item.id}`,
                             "number": `${item.Letter}${item.pointer}`,
-                            "service":`${item.ServiceName}`,
-                            "Privilege":`${item.setService}`,
-                            "nameTerminal":`${item.setTerminalName}`,
-                            "cabinet":`${item.cabinet}`
+                            "service": `${item.ServiceName}`,
+                            "Privilege": `${item.setService}`,
+                            "nameTerminal": `${item.setTerminalName}`,
+                            "cabinet": `${item.cabinet}`
                         };
-                        console.log(object)
-                        const fetchData = async()=>{
-                            const response = await fetch('ts/setStateTicket', {
-                                method: 'POST',
-                                headers:{
-                                    "Content-type":"application/json;charset=utf-8"
-                                },
-                                body:JSON.stringify(object)
-                            })
-                            const data = await response.json();
-                            console.log(data)
+                        const fetchData = async () => {
+                            try {
+                                const response = await fetch('ts/setStateTicket', {
+                                    method: 'POST',
+                                    headers: {
+                                        "Content-type": "application/json;charset=utf-8"
+                                    },
+                                    body: JSON.stringify(object)
+                                })
+                                const data = await response.json();
+                                 socket.emit('update queue', data);
+                                 socket.emit('show tv', data);
 
+                            } catch (e) {
+                                console.log(`Произошла ошибка:${e}`);
+                            }
                         };
-                    socket.emit('update queue',data);
-                    socket.emit('update pointer',{"terminal":item.setTerminalName,"service":item.ServiceName,"pointer":item.pointer})
-                    socket.emit('show tv',data);
-                       async function fetchUpdate(){
-                           await fetch('ts/updatePointer',{
-                               method:'POST',
-                               headers:{
-                                   "Content-type":"application/json;charset=utf-8"
-                               },
-                               body:JSON.stringify({"terminal":item.setTerminalName,"service":item.ServiceName,"pointer":item.pointer})
-                           });
-                       }
-                       fetchUpdate();
-                       fetchData();
+
+                        fetchData();
+                    }
+
+                });
+                let ticket = document.querySelector('.ticket');
+                if (ticket) {
+                    setTimeout(() => {
+                        window.print()
+                        setTimeout(() => {
+                            document.location.reload()
+                        }, 500)
+                    }, 1000)
                 }
             })
-
-        })
-        let ticket = document.querySelector('.ticket');
-         if(ticket){
-             setTimeout(()=>{
-                 setTimeout(()=>{
-                     //window.print()
-                     document.location.reload()
-                 },500)
-             },1000)
-             // setTimeout(()=>{
-             //     let start = Date.now();
-             //     let timer = setInterval(()=>{
-             //         let timePassed = Date.now() - start;
-             //         if(timePassed>=2000){
-             //             clearInterval(timer)
-             //             window.print(ticket);
-             //             setTimeout(()=>{
-             //                 location.reload()
-             //             },1000)
-             //             return
-             //         }
-             //         draw(timePassed);
-             //     },20)
-             //
-             //     function draw(timePassed) {
-             //         document.querySelector('.modal__ticket').style.top = `${timePassed/5}px`;
-             //
-             //     }
-             // },100)
-         }
-    })
     });
+});

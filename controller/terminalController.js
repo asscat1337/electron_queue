@@ -7,7 +7,7 @@ const sequelize = require('../core/config1')
 class TerminalController {
     async renderTerminal(req,res,next){
         try{
-           const service = await Service.findOne({where:{setTerminalName:req.query.id,id:req.query.service}})
+           const service = await Service.findAll({where:{setTerminalName:req.query.id}})
             const terminal = await Terminal.findOne({where:{nameTerminal:req.query.id}})
             res.render('ts',{
                 data:service,
@@ -30,30 +30,24 @@ class TerminalController {
     async setStateTicket(req,res,next){
         try{
             const {number,service,nameTerminal,cabinet,id}=req.body
-             await sequelize.query(`INSERT into  tvinfo__${nameTerminal} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,:cabinet,:isCalledAgain,:isCall,:service_id)`,{
-                replacements:{tvinfo_id:null,time:moment().format('HH:mm:ss'),date:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,cabinet:cabinet,isCalledAgain:0,isCall:0,service_id:id},
+            console.log(id)
+            const addedData = await sequelize.query(`INSERT into  tvinfo__${nameTerminal} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,:cabinet,:isCalledAgain,:isCall,:service_id,:isComplete)`,{
+                replacements:{tvinfo_id:null,time:moment().format('HH:mm:ss'),date:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,cabinet:cabinet,isCalledAgain:0,isCall:0,service_id:id,isComplete:0},
                 type:QueryTypes.INSERT
-            }).then(()=>res.json({'success':true}))
+            })
+            const addedDataId = addedData[0]
+                    await Service.increment({pointer:1},{
+                        where:{id}
+                    })
+            await sequelize.query(`SELECT * from tvinfo__${nameTerminal} WHERE tvinfo_id = :tvinfo_id`,{
+                replacements:{tvinfo_id:addedDataId},
+                type:QueryTypes.SELECT
+            }).then(data=>res.json(data))
         }
         catch (e) {
             console.log(e)
         }
     }
-    async updatePointer(req,res,next){
-        try{
-            const {terminal,service,pointer} = req.body
-            await Service.update({pointer:pointer+1},{
-                where:{
-                    setTerminalName:terminal,
-                    ServiceName:service
-                }
-            })
-                .then(()=>res.json({"success":true}))
-        }
-        catch (e) {
-            console.log(e)
-        }
-}
 async updatePointerNull(req,res,next){
         try{
             const {service,terminal} = req.body

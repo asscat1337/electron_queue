@@ -40,8 +40,8 @@
             <div class="input-field col s12">
                 <select class="select-service">
                     <option value="" disabled selected>Выберите терминал</option>
-                    <%for (let i=0;i<stats.length;i++){%>
-                        <option><%=JSON.stringify(stats[i].setTerminalName).replace(/"/g,'')%></option>
+                    <%for (let i=0;i<data1.length;i++){%>
+                        <option><%=JSON.stringify(data1[i].nameTerminal).replace(/"/g,'')%></option>
                     <%}%>
                 </select>
             </div>

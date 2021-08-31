@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded',()=>{
+    let terminalObject;
     M.Tabs.init(document.querySelector('.tabs'))
     const elems = document.querySelectorAll('select');
     M.FormSelect.init(elems);
@@ -6,9 +7,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     selectOptions.addEventListener('change',(event)=>{
        const {children} = event.target
         if(document.querySelector('.result')){
-            document.querySelector('.result').remove()
+            document.querySelectorAll('.result').forEach(item=>item.remove())
         }
-       Array.from(children).forEach(item=>{
+        for(let item of Array.from(children)){
            if(item.selected){
                async function showData(){
                    await fetch('dashboard/showService',{
@@ -21,10 +22,13 @@ document.addEventListener('DOMContentLoaded',()=>{
                        .then(response=>response.json())
                        .then(data=>{
                            data.map(item=>{
+                               terminalObject = item
+                               console.log(item)
                                if(item.status===1){
                                    document.querySelector('.show__service').insertAdjacentHTML('beforeend',`
                     <div class="result checked" data-id="${item.id}" id="${item.setTerminalName}">
-                    <span data-terminal="${item.setTerminalName}" class="service__name">${item.ServiceName}</span>
+                    <span data-terminal="${item.setTerminalName}" class="service__name">Название услуги:${item.ServiceName}</span>
+                    <span class="service__number">Номер услуги:${item.id}</span>
                     <label>
                           <input type="checkbox" class= "filled-in checked__service" checked="checked">
                      <span></span>
@@ -35,7 +39,8 @@ document.addEventListener('DOMContentLoaded',()=>{
                                if(item.status !==1){
                                    document.querySelector('.show__service').insertAdjacentHTML('beforeend',`
                     <div class="result" data-id="${item.id}">
-                    <span data-terminal="${item.setTerminalName}" class="service__name">${item.ServiceName}</span>
+                    <span data-terminal="${item.setTerminalName}" class="service__name">Название услуги:${item.ServiceName}</span>
+                    <span class="service__number">Номер услуги:${item.id}</span>
                          <label>
                             <input type="checkbox" class="checked__service filled-in" />
                             <span></span>
@@ -47,33 +52,38 @@ document.addEventListener('DOMContentLoaded',()=>{
                            document.querySelectorAll('.change__service').forEach(item=>{
                                const data__button = item.getAttribute('data-id');
                                item.addEventListener('click',()=>{
-                                   document.querySelectorAll('.result').forEach(item1=>{
-                                       const  data__block = item1.getAttribute('data-id');
-                                       if(data__block===data__button){
-                                           fetch('dashboard/showUsers',{
-                                               method:'POST',
-                                               headers:{
-                                                   'Content-type':'application/json;charset=utf-8'
-                                               },
-                                               body:JSON.stringify({"id":item1.querySelector('.service__name').getAttribute('data-terminal')})
-                                           })
-                                               .then(res=>res.json())
-                                               .then(data=>{
-                                                   data.forEach(item2=>{
-                                                       /// говногод
-                                                       if(item2.isActive){
-                                                           item1.insertAdjacentHTML('beforeend',`
+                                   async function changeServiceData(){
+                                       const result = document.querySelectorAll('.result')
+                                       for(let  item1 of  result){
+                                           const  data__block = item1.getAttribute('data-id');
+                                           if(data__block===data__button){
+                                               await fetch('dashboard/showUsers',{
+                                                   method:'POST',
+                                                   headers:{
+                                                       'Content-type':'application/json;charset=utf-8'
+                                                   },
+                                                   body:JSON.stringify({"id":data__block})
+                                               })
+                                                   .then(res=>res.json())
+                                                   .then(data=>{
+                                                       data.forEach(item2=>{
+                                                           /// говногод
+                                                           if(item2.isActive){
+                                                               item1.insertAdjacentHTML('beforeend',`
                                             <div class="user__privilege">
                                                <p>
                                                   <label>
-                                                    <input type="checkbox" class="filled-in" checked="checked" />
+                                                    <input type="checkbox" class="filled-in checked__user" checked="checked" />
                                                     <span>${item2.setPrivilege}</span>
                                                   </label>
                                                 </p>
+                                                <div class="change_user-data" data-user=${item2.role_id}>
+                                                   <button class="btn change-users">Изменить</button> 
+                                                </div>
                                            </div>`)
-                                                       }
-                                                       if(!item2.isActive){
-                                                           item1.insertAdjacentHTML('beforeend',`
+                                                           }
+                                                           if(!item2.isActive){
+                                                               item1.insertAdjacentHTML('beforeend',`
                                             <div class="user__privilege">
                                                <p>
                                                   <label>
@@ -82,118 +92,206 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                   </label>
                                                 </p>
                                            </div>`)
-                                                       }
-                                                       ///говнокод
-                                                   })
-                                                   document.querySelectorAll('.user__privilege').forEach(item=>{
-                                                       item.addEventListener('change',(event)=>{
-                                                           async function disabledUser(){
-                                                               await fetch('dashboard/disabledUserService',{
-                                                                   method:'POST',
-                                                                   headers:{
-                                                                       "Content-type":"application/json;charset=utf-8"
-                                                                   },
-                                                                   body:JSON.stringify({"user":item.textContent.trim()})
-                                                               })
                                                            }
-                                                           async function enableUser() {
-                                                               await fetch('/dashboard/enableUserService',{
-                                                                   method:'POST',
-                                                                   headers:{
-                                                                       'Content-type':'application/json;charset=utf-8'
-                                                                   },
-                                                                   body:JSON.stringify({"user":item.textContent.trim()})
+                                                           ///говнокод
+                                                           document.querySelectorAll('.change-users').forEach(button=>{
+                                                               button.addEventListener('click',(event)=>{
+                                                                   const findIdButton = event.target.parentNode
+                                                                   console.log(item2.role_id,findIdButton.dataset.user)
+                                                                   if(item2.role_id === Number(findIdButton.dataset.user)){
+                                                                       document.querySelector('.user__privilege').insertAdjacentHTML(`beforeend`,
+                                                                           `
+                                                               <div class="change-user__form">
+                                                                    <form action="" method="POST">
+                                                                     <div class="col">
+                                                                       <div class="input-field col s6">
+                                                                          <input placeholder="Placeholder" value="${item2.setPrivilege}" id="change_name" type="text">
+                                                                          <label for="change_name">Имя пользователя</label>
+                                                                      </div>
+                                                                           <div class="input-field col s6">
+                                                                          <input placeholder="Placeholder" value=${item2.cab} id="cabinet" type="text">
+                                                                          <label for="cabinet">Кабинет/окно</label>
+                                                                      </div>
+                                                                      <button class="btn change-button">Изменить</button>
+                                                                     </div>
+                                                                    </form>
+                                                                </div>
+                                                               `)
+                                                                   }
+                                                                   const changeButton = document.querySelector('.change-button');
+                                                                   if(document.querySelector('#cabinet')){
+                                                                       document.querySelector('#cabinet').addEventListener('input',(event)=>{
+                                                                           event.target.value = event.target.value.replace(/[^0-9+]/g,'')
+                                                                       })
+                                                                   }
+                                                                   if(changeButton){
+                                                                       changeButton.addEventListener('click',(event)=>{
+                                                                           const object = {
+                                                                               "user":document.querySelector('#change_name').value,
+                                                                               "cabinet":document.querySelector('#cabinet').value,
+                                                                               "terminal":selectOptions.value
+                                                                           }
+                                                                           event.preventDefault()
+                                                                           async function fetchChangeUserData(){
+                                                                               await fetch('dashboard/changeUserData',{
+                                                                                   method:'POST',
+                                                                                   headers:{
+                                                                                       'Content-type':'application/json;charset=utf-8'
+                                                                                   },
+                                                                                   body:JSON.stringify(object)
+                                                                               })
+                                                                                   .then(res=>res.json())
+                                                                                   .then(data=>{
+                                                                                       M.toast({html:data.message})
+                                                                                   })
+                                                                           }
+                                                                           fetchChangeUserData()
+                                                                       })
+                                                                   }
                                                                })
-                                                           }
-                                                           event.target.checked ? enableUser():disabledUser()
-                                                       });
-                                                   })
-                                               });
-                                           item1.insertAdjacentHTML('beforeend',`
+                                                           })
+                                                       })
+                                                       document.querySelectorAll('.checked__user').forEach(item=>{
+                                                           item.addEventListener('change',(event)=>{
+                                                               async function disabledUser(){
+                                                                   await fetch('dashboard/disabledUserService',{
+                                                                       method:'POST',
+                                                                       headers:{
+                                                                           "Content-type":"application/json;charset=utf-8"
+                                                                       },
+                                                                       body:JSON.stringify({"user":item.textContent.trim()})
+                                                                   })
+                                                                       .then(res=>res.json())
+                                                                       .then(data=>{
+                                                                           M.toast({html:data.message})
+                                                                       })
+                                                               }
+                                                               async function enableUser() {
+                                                                   await fetch('dashboard/enableUserService',{
+                                                                       method:'POST',
+                                                                       headers:{
+                                                                           'Content-type':'application/json;charset=utf-8'
+                                                                       },
+                                                                       body:JSON.stringify({"user":item.textContent.trim()})
+                                                                   })
+                                                                       .then(res=>res.json())
+                                                                       .then(data=>{
+                                                                           M.toast({html: data.message})
+                                                                       })
+                                                               }
+                                                               event.target.checked ? enableUser():disabledUser()
+                                                           });
+                                                       })
+                                                   });
+                                               item1.insertAdjacentHTML('beforeend',`
                                   <div class="row">
                                     <form class="col s12">
                                       <div class="row">
                                         <div class="input-field col s6">
-                                          <input placeholder="Введите логин" id="first_name" type="text" class="validate">
+                                          <input placeholder="Введите логин" id="first_name" type="text">
                                           <label for="first_name">Логин</label>
                                         </div> 
                                         <div class="input-field col s6">
-                                          <input placeholder="Введите номер кабинета/окна" id="cab" type="text" class="validate">
+                                          <input placeholder="Введите номер кабинета/окна" id="cab" type="text">
                                           <label for="cab">Кабинет</label>
                                         </div>
+                                         <p>
+                                          <label>
+                                            <input type="checkbox" class="filled-in isReg" />
+                                            <span>Относится к регистратуре</span>
+                                          </label>
+                                        </p>
                                          <button class="btn waves-effect waves-light add-user" type="submit" name="action">Добавить пользователя</button>
                                       </div>
                                       </form>
                                       </div>
+                                      
+                                  <div class="row">
+                                    <form class="col s12">
+                                      <div class="row">
+                                        <div class="input-field col s6">
+                                          <input placeholder="Введите название услуги" id="service" type="text" value=${terminalObject.ServiceName}>
+                                          <label for="service">Услуга</label>
+                                        </div> 
+                                        <div class="input-field col s6">
+                                          <input placeholder="Введите описание" id="description" type="text" value="${terminalObject.description}">
+                                          <label for="description">Описание</label>
+                                        </div>
+                                        <div class="input-field col s6">
+                                          <input placeholder="" id="start_time" type="time" value="${terminalObject.start_time}">
+                                          <label for="description">Начало работы</label>
+                                        </div>
+                                         <div class="input-field col s6">
+                                          <input placeholder="" id="end_time" type="time" value="${terminalObject.end_time}">
+                                          <label for="description">Окончание работы</label>
+                                        </div>
+                                         <button class="btn waves-effect waves-light update-terminal" type="submit" name="action">Обновить данные</button>
+                                      </div>
+                                      </form>
+                                      </div>
+                                      
+                                      
                                     `)
-                                           const addUser = document.querySelector('.add-user')
-                                           addUser.addEventListener('click',(event)=>{
-                                               event.preventDefault()
-                                               const firstName = document.querySelector('#first_name').value
-                                               const cab = document.querySelector('#cab').value
-                                               async function fetchAddUser(){
-                                                   await fetch('dashboard/addUser',{
-                                                       method:'POST',
-                                                       headers:{
-                                                           'Content-type':'application/json;charset=utf-8'
-                                                       },
-                                                       body:JSON.stringify({'user':firstName,'terminal':selectOptions.value,'cabinet':cab})
-                                                   })
-                                               }
-                                               fetchAddUser()
-                                           })
+                                               const addUser = document.querySelector('.add-user')
+                                               addUser.addEventListener('click',(event)=>{
+                                                   const findElParent = event.target.closest('.result').dataset.id
+                                                   event.preventDefault()
+                                                   const firstName = document.querySelector('#first_name').value
+                                                   const cab = document.querySelector('#cab').value;
+                                                   const isReg = document.querySelector('.isReg').checked
+                                                   async function fetchAddUser(){
+                                                       await fetch('dashboard/addUser',{
+                                                           method:'POST',
+                                                           headers:{
+                                                               'Content-type':'application/json;charset=utf-8'
+                                                           },
+                                                           body:JSON.stringify({'user':firstName,'terminal':selectOptions.value,'cabinet':cab,'isReg':isReg,id:findElParent})
+                                                       })
+                                                           .then(res=>res.json())
+                                                           .then(data=>{
+                                                               M.toast({html:data.message})
+                                                           })
+                                                   }
+                                                   fetchAddUser()
+                                               })
+                                               const updateTerminal = document.querySelector('.update-terminal');
+                                               updateTerminal.addEventListener('click',(event)=>{
+                                                   const {id} = terminalObject
+                                                   event.preventDefault()
+                                                   const ServiceName = document.querySelector('#service').value;
+                                                   const description = document.querySelector('#description').value;
+                                                   const startTime = document.querySelector('#start_time').value;
+                                                   const endTime = document.querySelector('#end_time').value;
+
+                                                   async function fetchUpdateTerminal(){
+                                                       await fetch('dashboard/updateServiceData',{
+                                                           method:'POST',
+                                                           headers:{
+                                                               'Content-type':'application/json;charset=utf-8'
+                                                           },
+                                                           body:JSON.stringify({ServiceName,description,id,startTime,endTime})
+                                                       })
+                                                           .then(res=>res.json())
+                                                           .then(data=>{
+                                                               M.toast({html:data.message})
+                                                           })
+                                                   }
+                                                   fetchUpdateTerminal()
+                                               })
+                                           }
                                        }
-                                   })
+
+                                   }
+                                   changeServiceData()
                                })
                            });
                        })
                }
                showData()
            }
-       })
+       }
     })
-    const fetchData = async()=>{
-    await fetch('/showService',{
-        method:'POST'
-    })
-        .then(response=>response.json())
-        .then(data=>{
-            data.forEach(item=>{
 
-                   //  else{
-                   //      document.querySelector('.show__service').insertAdjacentHTML('beforeend',`
-                   //  <div class="result" data-id="${item.id}">
-                   //  <span data-terminal="${item.setTerminalName}" class="service__name">${item.ServiceName}</span>
-                   //       <label>
-                   //          <input type="checkbox" class="checked__service filled-in" />
-                   //          <span></span>
-                   //        </label>
-                   //  <button class="btn change__service" data-id="${item.id}">Изменить</button>
-                   // </div>`)
-                   //  }
-                })
-           document.querySelectorAll('.result').forEach(item=>{
-               let check = item.querySelector('.checked__service ');
-               const ticketText =item.querySelector('.service__name').textContent;
-               check.addEventListener('click',(event)=>{
-                   console.log(event.target);
-                   const inputChecked = item.querySelector('input');
-                   let object = {
-                       "serviceName":ticketText,
-                       "update":inputChecked.checked
-                   }
-                   fetch('/updateService',{
-                       method:"POST",
-                       headers:{
-                           "Content-type":"application/json;charset=utf-8"
-                       },
-                       body:JSON.stringify(object)
-                   })
-               })
-           })
-        });
-};
-    //fetchData();
     const serviceConfirm = document.querySelector('.service__confirm');
     const selectTerminal = document.querySelector('.select__terminal');
     let data = []
@@ -208,7 +306,6 @@ document.addEventListener('DOMContentLoaded',()=>{
             })
                 .then(response=>response.json())
                 .then(data=>{
-                    console.log(data)
                     data.map(item=>{
                         document.querySelector('.add__service').insertAdjacentHTML(`beforeend`,`
                        <p>
@@ -237,23 +334,25 @@ document.addEventListener('DOMContentLoaded',()=>{
                "ServiceName":serviceInput,
                "description":descriptionInput,
                "pointer":0,
-               "Priority":1,
                "status":1,
-               "role":data,
+               "roles":data,
                "setTerminalName":selectTerminal.value,
                "start_time":document.querySelector('.service__start').value,
                "end_time":document.querySelector('.service__end').value,
                "cabinet":numberCabinet
            };
-           console.log(object1);
            async function fetchData(){
-               await fetch('/addNewService',{
+               await fetch('dashboard/addNewService',{
                    method:'POST',
                    headers:{
                        "Content-type":"application/json;charset=utf-8"
                    },
                    body:JSON.stringify(object1)
                })
+                   .then(res=>res.json())
+                   .then(data=>{
+                       M.toast({html:data.message})
+                   })
            }
            fetchData()
     })
@@ -265,26 +364,32 @@ roleButton.addEventListener('click',()=>{
     const cabInput = document.querySelector('.role__cab').value;
     const terminlInput = document.querySelector('.role_terminal').value;
     const checkedVal = isReg.checked ? "1":"0";
-    fetch('/addNewRole',{
-        method:'POST',
-        headers:{
-            "Content-type":"application/json;charset=utf-8"
-        },
-        body:JSON.stringify({"role":roleInput,"cab":cabInput,"terminalName":terminlInput,"isCab":checkedVal})
-    })
+    async function addNewRole(){
+        await fetch('/addNewRole',{
+            method:'POST',
+            headers:{
+                "Content-type":"application/json;charset=utf-8"
+            },
+            body:JSON.stringify({"role":roleInput,"cab":cabInput,"terminalName":terminlInput,"isCab":checkedVal})
+        })
+    }
+    addNewRole()
 })
 const termninalButton = document.querySelector('.terminal__button');
 termninalButton.addEventListener('click',()=>{
     const terminalInput = document.querySelector('.terminal__input').value;
     const terminalDesc = document.querySelector('.terminal__desc').value;
     console.log({"terminalName":terminalInput,"descriptionText":terminalDesc});
-    fetch('/addNewTerminal',{
-        method:'POST',
-        headers:{
-            "Content-type":"application/json;charset=utf-8"
-        },
-        body:JSON.stringify({"terminalName":terminalInput,"descriptionText":terminalDesc})
-    })
+    async function addNewTerminal(){
+        await fetch('dashboard/addNewTerminal',{
+            method:'POST',
+            headers:{
+                "Content-type":"application/json;charset=utf-8"
+            },
+            body:JSON.stringify({"terminalName":terminalInput,"descriptionText":terminalDesc})
+        })
+    }
+    addNewTerminal()
 })
 const deleteRole = document.querySelectorAll('.delete__role');
 deleteRole.forEach(item=>{
@@ -292,42 +397,40 @@ deleteRole.forEach(item=>{
         document.querySelectorAll('.result__role').forEach(itemClick=>{
                if(item.getAttribute('data-id')===itemClick.getAttribute('data-id')){
                    const user = itemClick.children[0].textContent;
-                   console.log({"role":user});
-                   fetch('/deleteUser',{
+                   fetch('dashboard/deleteUser',{
                        method:"DELETE",
                        headers:{
                            "Content-type":"application/json;charset=utf-8"
                        },
                        body:JSON.stringify({"role":user})
                    })
+                       .then(res=>res.json())
+                       .then(data=>{
+                            M.toast({html:data.message})
+                       })
                }
             })
     })
 })
 const $isActive = document.querySelectorAll('.deactive__user');
 $isActive.forEach(item=>{
-    let status = 1;
     item.addEventListener('click',(event)=>{
        let parent1 = item.parentNode.parentElement.parentElement;
+       console.log(parent1)
        let getAttr = parent1.getAttribute('data-id');
        const fetchData=async()=>{
-           await fetch('/dashboard/disableAcc',{
+           await fetch('dashboard/disableAcc',{
                method:'POST',
                headers: {
                    'Content-type': 'application/json;charset=utf-8',
                },
-               body: JSON.stringify({"id": getAttr, "status":item.checked ? status:status=0})
+               body: JSON.stringify({"id": getAttr, "status":item.checked})
            })
                .then(res=>res.json())
                .then(data=>{
-                       document.body
-                           .insertAdjacentHTML('afterbegin',`<div class="message__box">${data.message}</div>`)
-                   setTimeout(()=>{
-                       document.querySelector('.message__box').remove()
-                   },5000)
+                   M.toast({html:data.message})
                })
        }
        fetchData()
     })
 })
-// console.log(moment.format("L"))

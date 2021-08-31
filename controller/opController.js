@@ -1,16 +1,31 @@
-const  io = require('../server');
-const mysql = require('mysql2');
-const config = require('../core/config.js');
-const connection = mysql.createConnection(config).promise();
+const Roles = require('../models/model__test/Roles')
 
-exports.op = async (req,res)=>{
-    if(!req.session.userdata) res.redirect(`/login`);
-    else{
-        res.render('op',{
-            userId:req.session.userdata.role_id,
-            sessionTer:req.session.userdata.terminalName,
-            sessionCab:req.session.userdata.cab
-        });
-     }
+class opController{
+    async renderOp(req,res,next){
+        try{
+            res.render('op',{
+                userId:req.session.userdata.role_id,
+                sessionTer:req.session.userdata.terminalName,
+                sessionCab:req.session.userdata.cab
+            })
+        }catch (e) {
+            if(!req.session.userdata) return res.redirect(`/login`)
+        }
+    }
+    async getCabinet(req,res,next){
+        try{
+            const {service,id} = req.body
+            await Roles.findAll({
+                attributes:['cab'],
+                where:{
+                    terminalName:service
+                }
+            }).then(data=>res.json(data))
+        }catch (e) {
+
+        }
+    }
 }
 ////
+
+module.exports = new opController()

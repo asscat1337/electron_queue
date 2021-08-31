@@ -26,6 +26,7 @@
     "socket.io-client": "^3.0.3"
   },
   "dependencies": {
+    "amqplib": "^0.8.0",
     "cron": "^1.8.2",
     "dotenv": "^10.0.0",
     "express-mysql-session": "^2.1.5",

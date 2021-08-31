@@ -29,5 +29,5 @@ const User =  sequelize.define('role',{
     freezeTableName: true,
     timestamps:false
 });
-User.hasMany(Roles,{as:'roles',foreignKey:'users_id'});
+User.hasMany(Roles,{as:'roles',foreignKey:'users_id',onDelete:'cascade'});
 module.exports = User

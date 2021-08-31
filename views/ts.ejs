@@ -18,9 +18,11 @@
         <p><%=JSON.stringify(data1.description).replace(/"/g,'')%></p>
     </div>
     <div class="take__ticket">
-        <div class="btn__ticket" data-id="<%=JSON.stringify(data.id)%>">
-            <span><%=JSON.stringify(data.description).replace(/"/g,'')%></span>
+        <%for(let i=0;i<data.length;i++){%>
+        <div class="btn__ticket" data-id="<%=JSON.stringify(data[i].id)%>">
+            <span><%=JSON.stringify(data[i].description).replace(/"/g,'')%></span>
         </div>
+        <%}%>
     </div>
 </div>
     <script src="public/js/ts.js"></script>
