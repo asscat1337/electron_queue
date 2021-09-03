@@ -1,4 +1,6 @@
 const sequelize = require('../../core/config1');
+const Service = require('./Service');
+
 const {Sequelize,DataTypes} = require('sequelize');
 
 const Terminal = sequelize.define('terminal',{
@@ -21,4 +23,5 @@ const Terminal = sequelize.define('terminal',{
     updatedAt:false,
     freezeTableName: true
 })
+Terminal.hasMany(Service,{onDelete:'cascade'});
 module.exports = Terminal;

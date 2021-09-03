@@ -20,11 +20,11 @@ const express = require('express'),
  sessionStorage = require('express-mysql-session'),
  cookieParser = require('cookie-parser');
  config = require('./core/config.js');
- moment = require('moment')();
  multer = require('multer');
  sharedSession = require('express-socket.io-session');
 
 const fs = require('fs');
+const moment =  require('moment')();
 // const  amqp = require('amqplib/callback_api')
  const {Sequelize,QueryTypes,Op} = require('sequelize')
 const User = require('./models/model__test/User')
@@ -103,19 +103,27 @@ app.use('/dashboard',dashboardRouter);
 app.use('/login',loginRouter);
 app.use('/videos',videoRouter);
 
-const delay = ms=>new Promise(resolve => setTimeout(resolve,ms))
+const delay = (ms)=>new Promise(resolve => setTimeout(resolve,ms))
+async function init(){
+    try{
+        await Terminal.findAll().then(async (service)=>{
+            service.map(async (terminal)=>{
+                const {nameTerminal} = terminal
+                await sequelize.query(`CREATE TABLE tvinfo__${nameTerminal}${moment.format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
+        date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
+        cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
+                await delay(5000)
+            })
+        })
+    }catch (e) {
+        console.log(e)
+    }
+}
+// init()
 
 const job = new cron('0 22 * * 0-6',async()=>{
     try{
         await sequelize.query(`UPDATE service SET pointer = 1`)
-        await Service.findAll().then(service=>{
-            service.map(async (terminal)=>{
-                await sequelize.query(`CREATE TABLE tvinfo__${terminal}-${moment().format('DD/MMMM/YYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
-    date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-    cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
-                await delay(5000)
-            })
-        })
     }catch (e) {
         console.log(`Произошла ошибка ${e}`)
     }
@@ -228,59 +236,71 @@ io.on('connection', async(socket) => {
             })
             const {number:ticket,service} = findTicket[0]
             const user = await User.findOne({where:{terminalName:terminal,cab}})
-            const result = Object.assign({isCab:user.isCab,cabinet:user.cab},{ticket,service})
-
+            const {cab:cabinet,isCab} = user
+            soundData(ticket,cabinet,isCab)
+                .then((files)=>socket.to(terminal).emit('repeat ticket',files))
+                .catch(err=>console.log(err))
             await socket.broadcast.to(terminal).emit('message',Array(result))
         })
         function toType(file){
             return `${file}.wav`
         }
+        function soundData(ticket,cabinet,isCab) {
+            return new Promise((resolve,reject)=>{
+                fs.readdir('public/sound',(err,files)=>{
+                    if(err){
+                        reject(err)
+                    }else{
+                        const ticketToArr = ticket.split('');
+                        const letter = ticketToArr.slice(0,1).join('');
+                        const number = ticketToArr.slice(1,5).join('');
+                        let  [numberCabinet,letterTicket,toStatus,cabinetClient] = []
+                            let sound = []
+                            let module
+                            let raz
+                            let arr = []
+                            if(number.split('').length >2){
+                                module = number%100;
+                                raz = number - module
+                            }
+                            files.filter(item=>{
+                                if(item===toType(number) || item===toType(module) || item === toType(raz)){
+                                    arr.push(item)
+                                    numberCabinet = arr;
+                                }
+                                if(item===toType(cabinet)){
+                                    cabinetClient = item
+                                }
+                                isCab ? toStatus = 'public/sound/tocabinet.wav':toStatus = 'public/sound/towindow.wav';
+                            })
+                            fs.readFile('public/sound/russia_letters.json',(error,data)=>{
+                                const filesData =JSON.parse(data);
+                                Object.entries(filesData).find(([key,value])=>{
+                                    if(key===letter){
+                                        letterTicket = value
+                                    }
+                                })
+                                    sound = ['public/sound/client.wav',`${letterTicket}`,
+                                    `public/sound/${numberCabinet}`,toStatus,`public/sound/${cabinetClient}`]
+                                    .reduce((acc,val)=>acc.concat(val),[])
+                                resolve(sound)
+                            })
+                    }
+                })
+            })
+        }
          socket.on('repeat data',async(data)=>{
              const {terminal,tvinfo_id,ticket} = data
              const {cab:cabinet,isCab} = socket.handshake.session.userdata;
              const repeatData = Object.assign({cabinet,isCab},data)
-             // socket.to(terminal).emit('repeat ticket',Array(repeatData))
-             const ticketToArr = ticket.split('');
-             const letter = ticketToArr.slice(0,1).join('');
-             const number = ticketToArr.slice(1,5).join('');
-             let sound = []
-             let  [numberCabinet,letterTicket,toStatus,cabinetClient] = []
+            soundData(ticket,cabinet,isCab)
+                 .then((files)=>socket.to(terminal).emit('repeat ticket',files))
+                 .catch(err=>console.log(err))
 
-             fs.readdir('public/sound',(err,files)=>{
-                 let module
-                 let raz
-                 let arr = []
-                 if(number.split('').length >2){
-                     module = number%100;
-                     raz = number - module
-                 }
-                 files.filter(item=>{
-                     if(item===toType(number) || item===toType(module) || item === toType(raz)){
-                        arr.push(item)
-                         numberCabinet = arr;
-                     }
-                     if(item===toType(cabinet)){
-                         cabinetClient = item
-                     }
-                     isCab ? toStatus = 'public/sound/tocabinet.wav':toStatus = 'public/sound/towindow.wav';
-                 })
-                 fs.readFile('public/sound/russia_letters.json',(error,data)=>{
-                    const filesData =JSON.parse(data);
-                    Object.entries(filesData).find(([key,value])=>{
-                        if(key===letter){
-                            letterTicket = value
-                        }
-                    })
-                     sound = ['public/sound/client.wav',`${letterTicket}`,
-                         `public/sound/${numberCabinet}`,toStatus,`public/sound/${cabinetClient}`]
-                         .reduce((acc,val)=>acc.concat(val),[])
-                     socket.to(terminal).emit('repeat ticket',sound)
-                 })
-             })
         })
         socket.on('show tv',async(data)=>{
-            const {setTerminalName} = data[0]
-            await socket.broadcast.to(`${setTerminalName}`).emit('show result',data)
+            const {terminalName} = data[0]
+            await socket.broadcast.to(`${terminalName}`).emit('show result',data)
         })
         socket.on('complete data',(data)=>{
             const {terminal}=data

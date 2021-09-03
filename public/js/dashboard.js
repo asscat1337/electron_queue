@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded',()=>{
     let terminalObject;
+    const deleteTerminalDiv = document.querySelector('.delete-terminal__button');
     M.Tabs.init(document.querySelector('.tabs'))
     const elems = document.querySelectorAll('select');
     M.FormSelect.init(elems);
@@ -21,9 +22,8 @@ document.addEventListener('DOMContentLoaded',()=>{
                    })
                        .then(response=>response.json())
                        .then(data=>{
+                           terminalObject = data
                            data.map(item=>{
-                               terminalObject = item
-                               console.log(item)
                                if(item.status===1){
                                    document.querySelector('.show__service').insertAdjacentHTML('beforeend',`
                     <div class="result checked" data-id="${item.id}" id="${item.setTerminalName}">
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                            })
                            document.querySelectorAll('.change__service').forEach(item=>{
                                const data__button = item.getAttribute('data-id');
-                               item.addEventListener('click',()=>{
+                               item.addEventListener('click',(service)=>{
                                    async function changeServiceData(){
                                        const result = document.querySelectorAll('.result')
                                        for(let  item1 of  result){
@@ -183,6 +183,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                            });
                                                        })
                                                    });
+                                               const currentTerminal = terminalObject.find(item=>item.id===Number(service.target.dataset.id))
                                                item1.insertAdjacentHTML('beforeend',`
                                   <div class="row">
                                     <form class="col s12">
@@ -210,19 +211,19 @@ document.addEventListener('DOMContentLoaded',()=>{
                                     <form class="col s12">
                                       <div class="row">
                                         <div class="input-field col s6">
-                                          <input placeholder="Введите название услуги" id="service" type="text" value=${terminalObject.ServiceName}>
+                                          <input placeholder="Введите название услуги" id="service" type="text" value=${currentTerminal.ServiceName}>
                                           <label for="service">Услуга</label>
                                         </div> 
                                         <div class="input-field col s6">
-                                          <input placeholder="Введите описание" id="description" type="text" value="${terminalObject.description}">
+                                          <input placeholder="Введите описание" id="description" type="text" value="${currentTerminal.description}">
                                           <label for="description">Описание</label>
                                         </div>
                                         <div class="input-field col s6">
-                                          <input placeholder="" id="start_time" type="time" value="${terminalObject.start_time}">
+                                          <input placeholder="" id="start_time" type="time" value="${currentTerminal.start_time}">
                                           <label for="description">Начало работы</label>
                                         </div>
                                          <div class="input-field col s6">
-                                          <input placeholder="" id="end_time" type="time" value="${terminalObject.end_time}">
+                                          <input placeholder="" id="end_time" type="time" value="${currentTerminal.end_time}">
                                           <label for="description">Окончание работы</label>
                                         </div>
                                          <button class="btn waves-effect waves-light update-terminal" type="submit" name="action">Обновить данные</button>
@@ -256,7 +257,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                })
                                                const updateTerminal = document.querySelector('.update-terminal');
                                                updateTerminal.addEventListener('click',(event)=>{
-                                                   const {id} = terminalObject
+                                                   const id = event.target.closest('.result').dataset.id
                                                    event.preventDefault()
                                                    const ServiceName = document.querySelector('#service').value;
                                                    const description = document.querySelector('#description').value;
@@ -328,7 +329,6 @@ document.addEventListener('DOMContentLoaded',()=>{
      serviceConfirm.addEventListener('click',(event)=>{
            const serviceInput = document.querySelector('.service__input').value;
            const descriptionInput = document.querySelector('.service__description').value;
-           const numberCabinet = document.querySelector('.service__cabinet').value;
            const object1 = {
                "letter":serviceInput.split('').slice(0,1).join('').toUpperCase(),
                "ServiceName":serviceInput,
@@ -339,7 +339,6 @@ document.addEventListener('DOMContentLoaded',()=>{
                "setTerminalName":selectTerminal.value,
                "start_time":document.querySelector('.service__start').value,
                "end_time":document.querySelector('.service__end').value,
-               "cabinet":numberCabinet
            };
            async function fetchData(){
                await fetch('dashboard/addNewService',{
@@ -355,6 +354,26 @@ document.addEventListener('DOMContentLoaded',()=>{
                    })
            }
            fetchData()
+    })
+    let terminalSelect = document.querySelector('.select-terminal')
+    terminalSelect.addEventListener('change',evt => {
+        const {value} = evt.target
+        const deleteTerminalButton = document.querySelector('.delete-terminal');
+        deleteTerminalDiv.classList.remove('hide')
+        deleteTerminalButton.addEventListener('click',()=>{
+            async function deleteTerminal(){
+                await fetch('dashboard/deleteTerminal',{
+                    method:'POST',
+                    headers:{
+                        'Content-type':'application/json;charset=utf-8'
+                    },
+                    body:JSON.stringify({nameTerminal:value})
+                })
+                    .then(res=>res.json())
+                    .then(data=>M.toast({html:data.message}))
+            }
+            deleteTerminal()
+        })
     })
 });
 const roleButton = document.querySelector('.role__button');
@@ -372,6 +391,10 @@ roleButton.addEventListener('click',()=>{
             },
             body:JSON.stringify({"role":roleInput,"cab":cabInput,"terminalName":terminlInput,"isCab":checkedVal})
         })
+            .then(res=>res.json())
+            .then(data=>{
+                M.toast({html:data.message})
+            })
     }
     addNewRole()
 })

@@ -25,9 +25,6 @@ const Service = sequelize.define('service',{
     setTerminalName:{
         type:DataTypes.TEXT
     },
-    cabinet:{
-        type:DataTypes.TEXT
-    },
     start_time:{
         type:DataTypes.TIME
     },

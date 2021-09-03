@@ -14,7 +14,7 @@ const Roles = sequelize.define('roles',{
         type:DataTypes.INTEGER
     },
     terminalName:{
-        type:DataTypes.INTEGER
+        type:DataTypes.STRING
     },
     cab:{
         type:DataTypes.INTEGER

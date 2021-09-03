@@ -35,15 +35,27 @@
                 <span>Общее количество:<%=JSON.stringify(total)%></span>
             </div>
         </div>
-        <div id="show__service" class="show__service" >
-            <span>Список сервисов</span>
+        <div id="show__service" class="show__service">
             <div class="input-field col s12">
+                <span>Список сервисов</span>
                 <select class="select-service">
                     <option value="" disabled selected>Выберите терминал</option>
                     <%for (let i=0;i<data1.length;i++){%>
                         <option><%=JSON.stringify(data1[i].nameTerminal).replace(/"/g,'')%></option>
                     <%}%>
                 </select>
+            </div>
+            <div class="input-field col s12">
+                <span>Список терминалов</span>
+                <select class="select-terminal">
+                    <option value="" disabled selected>Выберите терминал</option>
+                    <%for (let i=0;i<data1.length;i++){%>
+                    <option><%=JSON.stringify(data1[i].nameTerminal).replace(/"/g,'')%></option>
+                    <%}%>
+                </select>
+                <div class="delete-terminal__button hide">
+                    <button class="btn delete-terminal">Удалить терминал</button>
+                </div>
             </div>
         </div>
         <div  id="actions" class="actions">
@@ -52,7 +64,6 @@
 
                 <input type="text" class="service__input" placeholder="Введите название">
                 <input type="text" class="service__description" placeholder="Введите описание кнопки">
-                <input type="text" class="service__cabinet" placeholder="Номер кабинета">
                 <input type="time" class="service__start" placeholder="Введите начало работы">
                 <input type="time" class="service__end" placeholder="Введите конец работы">
                 <select  class="select__terminal browser-default">

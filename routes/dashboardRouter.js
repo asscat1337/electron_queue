@@ -19,6 +19,7 @@ dashboardRouter.post('/changeUserData',dashboardController.changeUserData);
 dashboardRouter.post('/updateServiceData',dashboardController.updateServiceData)
 dashboardRouter.post('/addNewService',dashboardController.addNewService)
 dashboardRouter.post('/addNewTerminal',dashboardController.AddNewTerminal)
+dashboardRouter.post('/deleteTerminal',dashboardController.deleteTerminal)
 
 // dashboardRouter.post('/disableAcc',async(req,res)=>{
 //     const {id,status} = req.body;

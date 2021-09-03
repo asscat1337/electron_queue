@@ -83,40 +83,49 @@ class dashboardController {
     }
     async addUser(req,res,next){
         const {user,terminal,cabinet,isReg,id} = req.body;
-        console.log(req.body);
-        const service = await Service.findOne({
-            where: {
-                setTerminalName:terminal,
-                id
-            },
-        });
-        const checkUser = await Users.findAll(
-            {
-                where:{
+        try{
+            const service = await Service.findOne({
+                where: {
+                    setTerminalName:terminal,
+                    id
+                },
+            });
+            if(user === "" || cabinet === '' || isReg ==='' ){
+                return res.status(400).json({'message':'Не заполнены поля'})
+            }
+            const checkUser = await Users.findAll(
+                {
+                    where:{
+                        setPrivilege:user,
+                        terminalName:terminal,
+                        cab:cabinet
+                    }
+                })
+            if(checkUser.cab === cabinet || checkUser.setPrivilege === user){
+                return res.status(400).json({'message':'Данные дублируются'})
+            }
+            if(!checkUser.length){
+                await Users.create({
                     setPrivilege:user,
                     terminalName:terminal,
-                    cab:cabinet
-                }
-            })
-        if(!checkUser.length){
-            await Users.create({
-                setPrivilege:user,
-                terminalName:terminal,
-                isActive:1,
-                cab:cabinet,
-                isCab:isReg
-            },{raw:true}).then(async (data)=>{
-                const {dataValues}=data
-                await Roles.create({
-                    services_id:service.id,
-                    users_id:dataValues.role_id,
-                    terminalName:dataValues.terminalName,
-                    cab:dataValues.cab,
-                })
-            }).then(res.json({'message':'Пользователь добавлен'}))
-        }
-        if(checkUser.length){
-            res.json({'message':'Пользователь уже существует'})
+                    isActive:1,
+                    cab:cabinet,
+                    isCab:isReg
+                },{raw:true}).then(async (data)=>{
+                    const {dataValues}=data
+                    await Roles.create({
+                        services_id:service.id,
+                        users_id:dataValues.role_id,
+                        terminalName:dataValues.terminalName,
+                        cab:dataValues.cab,
+                    })
+                }).then(res.json({'message':'Пользователь добавлен'}))
+            }
+            if(checkUser.length){
+                res.json({'message':'Пользователь уже существует'})
+            }
+        }catch (e) {
+            console.log(e)
         }
     }
     async deleteUser(req,res,next){
@@ -147,6 +156,7 @@ class dashboardController {
     }
     async updateServiceData(req,res,next){
         try{
+            console.log(req.body)
             const {ServiceName,description,id,startTime,endTime} = req.body
             await Service.update({
                 "start_time":startTime,
@@ -163,12 +173,12 @@ class dashboardController {
     }
     async addNewService(req,res,next){
         try{
-            const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,cabinet,roles,start_time,end_time} = req.body;
+            const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time} = req.body;
             await Service.create({
-                Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,cabinet,start_time,end_time
+                Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time
             }).then(async(data)=>{
+                const {id} = data.dataValues
                 if(roles.length){
-                    const {id} = data.dataValues
                     roles.map(async(role)=>{
                         await Roles.update({services_id:id},{
                             where:{
@@ -177,6 +187,17 @@ class dashboardController {
                         })
                     })
                 }
+               const findTerminal = await Terminal.findOne({where:{
+                   nameTerminal:setTerminalName
+                   }
+               })
+                const {terminal_id} = findTerminal
+                await Service.update({terminalTerminalId:terminal_id},{
+                    where:{
+                        id
+                    }
+                })
+
             }).then(res.json({'message':'Сервис добавлен'}))
 
         }catch (e) {
@@ -191,7 +212,7 @@ class dashboardController {
                 where:terminalName
             }).then(result=>{
                 if(result){
-                    return res.json({'message':'Данный терминал уже существует'}).status(400)
+                    return res.status(400).json({'message':'Данный терминал уже существует'})
                 }
             })
             await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
@@ -201,6 +222,18 @@ class dashboardController {
     cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
         }catch (e) {
             return res.json({'error':e}).status(400)
+        }
+    }
+    async deleteTerminal(req,res,next){
+        try{
+            const {nameTerminal} = req.body;
+            await Terminal.destroy({
+                where:{
+                    nameTerminal
+                }
+            }).then(res.json({'message':'Терминал удалён'}))
+        }catch (e) {
+
         }
     }
 

@@ -48,9 +48,10 @@ socket.on('disconnect',()=>{
     }, 500);
 });
 socket.on('show result',data=>{
+    console.log(data);
     data.map(item=>{
         tvInfo.insertAdjacentHTML('beforeend',`<div class="ticket">
-                    <div class="number">${item.Letter}${item.pointer}</div> 
+                    <div class="number">${item.number}</div> 
                       <div class="status">Ожидание</div>
             </div>`)
     })
@@ -83,6 +84,7 @@ let arrQueue = []
 document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
 
 async function testFunction(data){
+    console.log(data)
     for(let i = 0;i<data.length;i++){
         const audio = new Audio(data[i])
         await playAudio(audio)
