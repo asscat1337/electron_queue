@@ -31,8 +31,8 @@ class TerminalController {
         try{
             const {number,service,nameTerminal,cabinet,id}=req.body
             console.log(id)
-            const addedData = await sequelize.query(`INSERT into  tvinfo__${nameTerminal} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,:cabinet,:isCalledAgain,:isCall,:service_id,:isComplete)`,{
-                replacements:{tvinfo_id:null,time:moment().format('HH:mm:ss'),date:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,cabinet:cabinet,isCalledAgain:0,isCall:0,service_id:id,isComplete:0},
+            const addedData = await sequelize.query(`INSERT into  tvinfo__${nameTerminal} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,cabinet,:isCalledAgain,:isCall,:service_id,:isComplete)`,{
+                replacements:{tvinfo_id:null,time:moment().format('HH:mm:ss'),date:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,cabinet,isCalledAgain:0,isCall:0,service_id:id,isComplete:0},
                 type:QueryTypes.INSERT
             })
             const addedDataId = addedData[0]

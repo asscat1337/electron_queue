@@ -160,9 +160,9 @@ io.on('connection', async(socket) => {
             })
         })
         socket.on('add data', async (data) => {
-            const {number, terminal,space} = data;
-            await sequelize.query(`UPDATE tvinfo__${terminal} set isComplete = 1 WHERE number = :number`, {
-                replacements: {number},
+            const {number, terminal,space,tvinfo_id} = data;
+            await sequelize.query(`UPDATE tvinfo__${terminal} set isComplete = 1 WHERE number = :number AND tvinfo_id = :tvinfo_id`, {
+                replacements: {number,tvinfo_id},
                 type: QueryTypes.UPDATE
             })
         })

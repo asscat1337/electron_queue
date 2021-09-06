@@ -109,7 +109,7 @@
             </div>
         </div>
 
-            <div class="roles">
+            <div class="roles" id="role__list">
                 <h5>Список пользователей</h5>
                 <%for(let i =0;i<data.length;i++){%>
                 <div class="result__role" data-id="<%=JSON.stringify(data[i].role_id).replace(/"/g,'')%>">
@@ -138,8 +138,7 @@
                     <%}%>
                 <%}%>
             </div>
-        </div>
-</div>
+    </div>
     <script src="public/js/dashboard.js"></script>
 </body>
 </html>
