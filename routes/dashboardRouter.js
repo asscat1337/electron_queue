@@ -21,16 +21,5 @@ dashboardRouter.post('/addNewService',dashboardController.addNewService)
 dashboardRouter.post('/addNewTerminal',dashboardController.AddNewTerminal)
 dashboardRouter.post('/deleteTerminal',dashboardController.deleteTerminal)
 
-// dashboardRouter.post('/disableAcc',async(req,res)=>{
-//     const {id,status} = req.body;
-//     connection.query(`UPDATE role SET isActive=${status} WHERE role_id='${id}'`)
-//         .then(result=>{
-//             if(status===0){
-//                 res.json({'message':'Пользователь отключен'})
-//             }else{
-//                 res.json({'message':'Пользователь активирован'})
-//             }
-//         })
-// })
 
 module.exports = dashboardRouter;

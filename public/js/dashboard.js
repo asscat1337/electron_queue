@@ -33,7 +33,11 @@ document.addEventListener('DOMContentLoaded',()=>{
                           <input type="checkbox" class= "filled-in checked__service" checked="checked">
                      <span></span>
                     </label>
-                    <button class="btn change__service" data-id="${item.id}">Изменить</button>
+                    <div class="result__buttons">
+                      <button class="btn change__service" data-id="${item.id}">Изменить</button>
+                      <button class="btn close__service">Закрыть</button>
+                    </div>
+                    <div class="result__container"></div>
                    </div>`)
                                }
                                if(item.status !==1){
@@ -45,18 +49,27 @@ document.addEventListener('DOMContentLoaded',()=>{
                             <input type="checkbox" class="checked__service filled-in" />
                             <span></span>
                           </label>
-                    <button class="btn change__service" data-id="${item.id}">Изменить</button>
+                          <div class="result__buttons">
+                            <button class="btn change__service" data-id="${item.id}">Изменить</button>
+                            <button class="btn close__service">Закрыть</button>
+                           </div>
+                           <div class="result__container"></div>
                    </div>`)
                                }
                            })
                            document.querySelectorAll('.change__service').forEach(item=>{
                                const data__button = item.getAttribute('data-id');
+                               let isOpened = false
                                item.addEventListener('click',(service)=>{
                                    async function changeServiceData(){
                                        const result = document.querySelectorAll('.result')
                                        for(let  item1 of  result){
                                            const  data__block = item1.getAttribute('data-id');
                                            if(data__block===data__button){
+                                               isOpened = true
+                                               const resultContainer = item1.querySelector('.result__container');
+                                               const closeButton = item1.querySelector('.close__service')
+                                               console.log(item1)
                                                await fetch('dashboard/showUsers',{
                                                    method:'POST',
                                                    headers:{
@@ -69,7 +82,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                        data.forEach(item2=>{
                                                            /// говногод
                                                            if(item2.isActive){
-                                                               item1.insertAdjacentHTML('beforeend',`
+                                                               resultContainer.insertAdjacentHTML('beforeend',`
                                             <div class="user__privilege">
                                                <p>
                                                   <label>
@@ -83,7 +96,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                            </div>`)
                                                            }
                                                            if(!item2.isActive){
-                                                               item1.insertAdjacentHTML('beforeend',`
+                                                               resultContainer.insertAdjacentHTML('beforeend',`
                                             <div class="user__privilege">
                                                <p>
                                                   <label>
@@ -97,7 +110,6 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                            document.querySelectorAll('.change-users').forEach(button=>{
                                                                button.addEventListener('click',(event)=>{
                                                                    const findIdButton = event.target.parentNode
-                                                                   console.log(item2.role_id,findIdButton.dataset.user)
                                                                    if(item2.role_id === Number(findIdButton.dataset.user)){
                                                                        document.querySelector('.user__privilege').insertAdjacentHTML(`beforeend`,
                                                                            `
@@ -184,7 +196,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                        })
                                                    });
                                                const currentTerminal = terminalObject.find(item=>item.id===Number(service.target.dataset.id))
-                                               item1.insertAdjacentHTML('beforeend',`
+                                               resultContainer.insertAdjacentHTML('beforeend',`
                                   <div class="row">
                                     <form class="col s12">
                                       <div class="row">
@@ -214,17 +226,22 @@ document.addEventListener('DOMContentLoaded',()=>{
                                           <input placeholder="Введите название услуги" id="service" type="text" value=${currentTerminal.ServiceName}>
                                           <label for="service">Услуга</label>
                                         </div> 
+                                         <div class="input-field col s6">
+                                          <input placeholder="" id="letter" type="text" value="${currentTerminal.Letter}">
+                                          <label for="letter">Обозначение буквы на талоне</label>
+                                        </div>
                                         <div class="input-field col s6">
                                           <input placeholder="Введите описание" id="description" type="text" value="${currentTerminal.description}">
                                           <label for="description">Описание</label>
                                         </div>
                                         <div class="input-field col s6">
                                           <input placeholder="" id="start_time" type="time" value="${currentTerminal.start_time}">
-                                          <label for="description">Начало работы</label>
+                                          <label for="start_time">Начало работы</label>
                                         </div>
+              
                                          <div class="input-field col s6">
                                           <input placeholder="" id="end_time" type="time" value="${currentTerminal.end_time}">
-                                          <label for="description">Окончание работы</label>
+                                          <label for="end_time">Окончание работы</label>
                                         </div>
                                          <button class="btn waves-effect waves-light update-terminal" type="submit" name="action">Обновить данные</button>
                                       </div>
@@ -233,6 +250,15 @@ document.addEventListener('DOMContentLoaded',()=>{
                                       
                                       
                                     `)
+                                               closeButton.addEventListener('click',event=>{
+                                                   const getAllFromResultContainer = document.querySelectorAll('.result__container')
+                                                   getAllFromResultContainer.forEach(item=>{
+                                                       const {children} = item
+                                                       Array.from(children).forEach(elem=>{
+                                                           elem.remove()
+                                                       })
+                                                   })
+                                               })
                                                const addUser = document.querySelector('.add-user')
                                                addUser.addEventListener('click',(event)=>{
                                                    const findElParent = event.target.closest('.result').dataset.id
@@ -263,6 +289,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                    const description = document.querySelector('#description').value;
                                                    const startTime = document.querySelector('#start_time').value;
                                                    const endTime = document.querySelector('#end_time').value;
+                                                   const letter = document.querySelector('#letter').value;
 
                                                    async function fetchUpdateTerminal(){
                                                        await fetch('dashboard/updateServiceData',{
@@ -270,7 +297,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                            headers:{
                                                                'Content-type':'application/json;charset=utf-8'
                                                            },
-                                                           body:JSON.stringify({ServiceName,description,id,startTime,endTime})
+                                                           body:JSON.stringify({ServiceName,description,id,startTime,endTime,letter})
                                                        })
                                                            .then(res=>res.json())
                                                            .then(data=>{

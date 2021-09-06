@@ -20,7 +20,7 @@ const Service = sequelize.define('service',{
         type:DataTypes.INTEGER
     },
     status:{
-        type:DataTypes.TEXT
+        type:DataTypes.BOOLEAN
     },
     setTerminalName:{
         type:DataTypes.TEXT

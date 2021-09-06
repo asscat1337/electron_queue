@@ -237,10 +237,10 @@ io.on('connection', async(socket) => {
             const {number:ticket,service} = findTicket[0]
             const user = await User.findOne({where:{terminalName:terminal,cab}})
             const {cab:cabinet,isCab} = user
+            const result = Object.assign({cabinet,isCab},{ticket})
             soundData(ticket,cabinet,isCab)
-                .then((files)=>socket.to(terminal).emit('repeat ticket',files))
+                .then((files)=>socket.to(terminal).emit('message',[{'data':result},{...files}]))
                 .catch(err=>console.log(err))
-            await socket.broadcast.to(terminal).emit('message',Array(result))
         })
         function toType(file){
             return `${file}.wav`
@@ -271,7 +271,7 @@ io.on('connection', async(socket) => {
                                 if(item===toType(cabinet)){
                                     cabinetClient = item
                                 }
-                                isCab ? toStatus = 'public/sound/tocabinet.wav':toStatus = 'public/sound/towindow.wav';
+                                isCab ? toStatus = 'public/sound/towindow.wav':toStatus = 'public/sound/tocabinet.wav';
                             })
                             fs.readFile('public/sound/russia_letters.json',(error,data)=>{
                                 const filesData =JSON.parse(data);

@@ -106,23 +106,23 @@ async function playAudio(sound){
 
 document.addEventListener('DOMContentLoaded',async()=>{
     await socket.on('message',data=>{
+        console.log(data)
         if(data===undefined) return;
         let ticketArr = []
         document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
-     data.map(item=>{
+        const {cabinet,isCab,ticket} = data[0].data
          ticketArr.find(el=>{
-             if(el===item.ticket){
+             if(el===ticket){
                  document.querySelectorAll('.number').forEach(block=>{
                      if(block.textContent === el){
-                         item.isCab !==true ? block.parentNode.querySelector('.status').textContent = `Стол ${item.cabinet}`
-                             :block.parentNode.querySelector('.status').textContent = `Кабинет ${item.cabinet}`
+                         isCab ? block.parentNode.querySelector('.status').textContent = `Окно ${cabinet}`
+                             :block.parentNode.querySelector('.status').textContent = `Кабинет ${cabinet}`
                          block.parentNode.classList.add('active')
                      }
                  })
              }
          })
-         testFunction(data)
-        });
+         testFunction(Object.values(data[1]).map(item=>item))
         });
         await socket.on('repeat ticket',data=> {
             testFunction(data)

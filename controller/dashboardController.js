@@ -157,10 +157,11 @@ class dashboardController {
     async updateServiceData(req,res,next){
         try{
             console.log(req.body)
-            const {ServiceName,description,id,startTime,endTime} = req.body
+            const {ServiceName,description,id,startTime,endTime,letter} = req.body;
             await Service.update({
                 "start_time":startTime,
                 "end_time":endTime,
+                "Letter":letter,
                 ServiceName,description},{
                 where:{
                     id:id
