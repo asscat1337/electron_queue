@@ -89,35 +89,45 @@ take__ticket.forEach((item)=> {
                         };
                         const fetchData = async () => {
                             try {
-                                const response = await fetch('ts/setStateTicket', {
+                                 await fetch('ts/setStateTicket', {
                                     method: 'POST',
                                     headers: {
                                         "Content-type": "application/json;charset=utf-8"
                                     },
                                     body: JSON.stringify(object)
                                 })
-                                const data = await response.json();
-                                 socket.emit('update queue', data);
-                                 socket.emit('show tv', data);
+                                    .then(res=>res.json())
+                                    .then(data=>{
+                                        socket.emit('update queue', data);
+                                        socket.emit('show tv', data);
+                                        let ticket = document.querySelector('.ticket');
+                                        const delay = ms => new Promise(((resolve, reject) => setTimeout(resolve,ms)))
+                                        if(ticket){
+                                            delay(2000).then(()=>{
+                                                window.print()
+                                                delay(1000).then(()=>{
+                                                    document.location.reload()
+                                                })
+                                            })
+                                        }
+                                        // if (ticket) {
+                                        //     setTimeout(() => {
+                                        //         window.print();
+                                        //         setTimeout(() => {
+                                        //             document.location.reload()
+                                        //         }, 500)
+                                        //     }, 1000)
+                                        // }
+                                    })
 
                             } catch (e) {
                                 console.log(`Произошла ошибка:${e}`);
                             }
                         };
-
                         fetchData();
                     }
 
                 });
-                let ticket = document.querySelector('.ticket');
-                if (ticket) {
-                    setTimeout(() => {
-                        window.print()
-                        setTimeout(() => {
-                            document.location.reload()
-                        }, 500)
-                    }, 1000)
-                }
             })
     });
 });

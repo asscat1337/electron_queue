@@ -84,16 +84,17 @@ let arrQueue = []
 document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
 
 async function testFunction(data){
-    console.log(data)
     for(let i = 0;i<data.length;i++){
         const audio = new Audio(data[i])
-        await playAudio(audio)
+        if(i===data.length-1){
+            socket.emit('queue sound',true)
+        }
+            await playAudio(audio)
     }
 }
 
 async function playAudio(sound){
     sound.play()
-
     await new Promise((resolve,reject)=>{
         sound.addEventListener('ended',()=>{
             resolve()
@@ -106,7 +107,6 @@ async function playAudio(sound){
 
 document.addEventListener('DOMContentLoaded',async()=>{
     await socket.on('message',data=>{
-        console.log(data)
         if(data===undefined) return;
         let ticketArr = []
         document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))

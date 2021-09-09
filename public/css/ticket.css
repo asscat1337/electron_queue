@@ -9,7 +9,7 @@
     }
 
 .modal__ticket {
-    position: relative !important;
+    position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     height: 100%;

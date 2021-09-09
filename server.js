@@ -245,6 +245,7 @@ io.on('connection', async(socket) => {
         function toType(file){
             return `${file}.wav`
         }
+        let isQueue = true
         function soundData(ticket,cabinet,isCab) {
             return new Promise((resolve,reject)=>{
                 fs.readdir('public/sound',(err,files)=>{
@@ -280,22 +281,31 @@ io.on('connection', async(socket) => {
                                         letterTicket = value
                                     }
                                 })
+                                    function toSound(arr){
+                                        return arr.map(item=>`public/sound/${item}`)
+                                    }
                                     sound = ['public/sound/client.wav',`${letterTicket}`,
-                                    `public/sound/${numberCabinet}`,toStatus,`public/sound/${cabinetClient}`]
+                                    toSound(arr),toStatus,`public/sound/${cabinetClient}`]
                                     .reduce((acc,val)=>acc.concat(val),[])
-                                resolve(sound)
+                                setTimeout(()=>{
+                                    resolve(sound)
+                                },6000)
                             })
                     }
                 })
             })
         }
          socket.on('repeat data',async(data)=>{
+             console.log(isQueue)
              const {terminal,tvinfo_id,ticket} = data
              const {cab:cabinet,isCab} = socket.handshake.session.userdata;
              const repeatData = Object.assign({cabinet,isCab},data)
             soundData(ticket,cabinet,isCab)
-                 .then((files)=>socket.to(terminal).emit('repeat ticket',files))
+                 .then((files)=> {
+                     socket.to(terminal).emit('repeat ticket',files)
+                 })
                  .catch(err=>console.log(err))
+
 
         })
         socket.on('show tv',async(data)=>{
