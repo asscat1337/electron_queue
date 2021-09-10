@@ -20,6 +20,6 @@ dashboardRouter.post('/updateServiceData',dashboardController.updateServiceData)
 dashboardRouter.post('/addNewService',dashboardController.addNewService)
 dashboardRouter.post('/addNewTerminal',dashboardController.AddNewTerminal)
 dashboardRouter.post('/deleteTerminal',dashboardController.deleteTerminal)
-
+dashboardRouter.post('/deleteService',dashboardController.deleteService)
 
 module.exports = dashboardRouter;

@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                     <div class="result__buttons">
                       <button class="btn change__service" data-id="${item.id}">Изменить</button>
                       <button class="btn close__service">Закрыть</button>
+                      <button class="btn delete__service">Удалить</button>
                     </div>
                     <div class="result__container"></div>
                    </div>`)
@@ -52,10 +53,32 @@ document.addEventListener('DOMContentLoaded',()=>{
                           <div class="result__buttons">
                             <button class="btn change__service" data-id="${item.id}">Изменить</button>
                             <button class="btn close__service">Закрыть</button>
+                            <button class="btn delete__service">Удалить</button>
                            </div>
                            <div class="result__container"></div>
                    </div>`)
                                }
+                           })
+                           document.querySelectorAll('.delete__service').forEach((item)=>{
+                               item.addEventListener('click',(event)=>{
+                                   const deleteId = event.target.closest('.result').dataset.id
+                                   const currentBlock = event.target.closest('.result')
+                                   async function fetchDelete(){
+                                       await fetch('dashboard/deleteService',{
+                                           method:'POST',
+                                           headers:{
+                                               'Content-type':'application/json;charset=utf-8'
+                                           },
+                                           body:JSON.stringify({id:deleteId})
+                                       })
+                                           .then(res=>res.json())
+                                           .then(data=>{
+                                               M.toast({html:data.message})
+                                               currentBlock.remove()
+                                           })
+                                   }
+                                   fetchDelete()
+                               })
                            })
                            document.querySelectorAll('.change__service').forEach(item=>{
                                const data__button = item.getAttribute('data-id');
@@ -69,7 +92,6 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                isOpened = true
                                                const resultContainer = item1.querySelector('.result__container');
                                                const closeButton = item1.querySelector('.close__service')
-                                               console.log(item1)
                                                await fetch('dashboard/showUsers',{
                                                    method:'POST',
                                                    headers:{

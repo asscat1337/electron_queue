@@ -2,7 +2,7 @@ const Users = require('../models/model__test/User');
 const Terminal = require('../models/model__test/Terminal');
 const Service = require('../models/model__test/Service');
 const Roles = require('../models/model__test/Roles');
-const {Op}= require('sequelize')
+const {Op,QueryTypes}= require('sequelize')
 const sequelize = require('../core/config1')
 class dashboardController {
     async renderDashboard(req,res,next){
@@ -209,19 +209,23 @@ class dashboardController {
     async AddNewTerminal(req,res,next){
         try{
             const {terminalName,descriptionText}= req.body;
-            await Terminal.findAll({
-                where:terminalName
-            }).then(result=>{
-                if(result){
-                    return res.status(400).json({'message':'Данный терминал уже существует'})
+            const findTerminal = await Terminal.findAll({
+                where:{
+                    nameTerminal:terminalName
                 }
             })
-            await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
-                .then(res.json({'message':'success'}))
-            await sequelize.query(`CREATE TABLE tvinfo__${terminalName} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
-    date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-    cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
+            if(findTerminal.length){
+                return res.status(400).json({'message':'Данный терминал уже существует'})
+            }else{
+                        await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
+                            .then(async ()=>{
+                                await sequelize.query(`CREATE TABLE tvinfo__${terminalName} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
+                date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
+                cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
+                            }).then(res.json({'message':'Терминал добавлен'}))
+            }
         }catch (e) {
+            console.log(e)
             return res.json({'error':e}).status(400)
         }
     }
@@ -232,9 +236,26 @@ class dashboardController {
                 where:{
                     nameTerminal
                 }
-            }).then(res.json({'message':'Терминал удалён'}))
+            }).then(async ()=>{
+                await sequelize.query(`DROP TABLE tvinfo__${nameTerminal}`,{
+                    type:QueryTypes.DELETE
+                })
+            }).then(res.json({'message':'Терминал удален'}))
         }catch (e) {
-
+        console.log(e)
+        }
+    }
+    async deleteService(req,res,next){
+        try{
+            const {id} = req.body
+            console.log(id)
+            await Service.destroy({
+                where:{
+                    id
+                }
+            }).then(res.json({'message':'Услуга удалена'}))
+        }catch (e) {
+            console.log(e)
         }
     }
 
