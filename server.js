@@ -160,13 +160,14 @@ io.on('connection', async(socket) => {
             })
         })
         socket.on('add data', async (data) => {
-            const {number, terminal,space,tvinfo_id} = data;
-            await sequelize.query(`UPDATE tvinfo__${terminal} set isComplete = 1 WHERE number = :number AND tvinfo_id = :tvinfo_id`, {
+            const {number,tvinfo_id,user} = data;
+            await sequelize.query(`UPDATE tvinfo__${user.service} set isComplete = 1 WHERE number = :number AND tvinfo_id = :tvinfo_id`, {
                 replacements: {number,tvinfo_id},
                 type: QueryTypes.UPDATE
             })
         })
         socket.on('connect data', async (data) => {
+            /// подумать как сделать правильно
             const {userdata} = socket.handshake.session
             const findUser = await User.findAll({
                 include:{
@@ -180,18 +181,26 @@ io.on('connection', async(socket) => {
                 raw:false
             })
             const {dataValues:userData} = findUser[0] //костыль
-            const {dataValues:rolesData} = userData.roles[0] //костыль
-                const result = await sequelize.query(`SELECT * from tvinfo__${userData.terminalName} WHERE isComplete = :isComplete AND isCall = :isCall AND services_id = :services_id AND date = date_format(now(),"%Y-%m-%d")`, {
-                    replacements: {isComplete: 0,isCall:0,services_id: rolesData.services_id},
-                    type: QueryTypes.SELECT
-                })
-                socket.emit('show data', result)
+            const arrTest = []
+            for await (const item of userData.roles){
+                const {dataValues} = item
+                const result = await sequelize.query(`SELECT * from tvinfo__${dataValues.terminalName} WHERE isComplete = :isComplete AND isCall = :isCall AND services_id = :services_id AND date = date_format(now(),"%Y-%m-%d")`, {
+                            replacements: {isComplete: 0,isCall:0,services_id: dataValues.services_id},
+                            type: QueryTypes.SELECT
+                        })
+              arrTest.push(...result)
+            }
+            //     const result = await sequelize.query(`SELECT * from tvinfo__${userData.terminalName} WHERE isComplete = :isComplete AND isCall = :isCall AND services_id = :services_id AND date = date_format(now(),"%Y-%m-%d")`, {
+            //         replacements: {isComplete: 0,isCall:0,services_id: rolesData.services_id},
+            //         type: QueryTypes.SELECT
+            //     })
+                socket.emit('show data', arrTest)
         })
         /// переделать
         socket.on('transfer ticket', async (data) => {
-            const {cabinet, number, terminal, service} = data;
+            const {cabinet, number, user} = data;
             const findStateUser = await Roles.findOne({where:{cab:cabinet},raw:true})
-            await sequelize.query(`UPDATE tvinfo__${terminal} SET cabinet = :cabinet,isCall = :isCall,services_id = :services_id WHERE number = :number ORDER BY tvinfo_id DESC LIMIT 1`, {
+            await sequelize.query(`UPDATE tvinfo__${user.service} SET cabinet = :cabinet,isCall = :isCall,services_id = :services_id WHERE number = :number ORDER BY tvinfo_id DESC LIMIT 1`, {
                 replacements: {isCall: 0,cabinet,number,services_id:findStateUser.services_id},
                 type:QueryTypes.UPDATE
              })
@@ -199,7 +208,7 @@ io.on('connection', async(socket) => {
                 socket.to(received).broadcast.emit('await queue', {
                     number,
                     cabinet,
-                    service
+                    "service":user.service
                 })
         });
         ///
@@ -208,15 +217,12 @@ io.on('connection', async(socket) => {
             socket.broadcast.emit('updates queue', number)
         })
         socket.on('test data', async (data) => {
-            const {userdata} = socket.handshake.session
             const {received} = data
-            const rolesData = await Roles.findOne({
-                where:{
-                    users_id:userdata.role_id
-                }
-            })
-            await sequelize.query(`SELECT * from tvinfo__${userdata.terminalName} WHERE isComplete = :isComplete AND isCall = :isCall AND services_id = :services_id ORDER BY tvinfo_id ASC LIMIT 1`, {
-                replacements: {isComplete:0,isCall:0,services_id:rolesData.services_id},
+            const {userdata} = socket.handshake.session
+            await sequelize.query(`SELECT * from tvinfo__${userdata.terminalName} INNER JOIN roles
+                WHERE tvinfo__${userdata.terminalName}.services_id = roles.services_id AND isCall = :isCall 
+                AND isComplete = :isComplete AND users_id = :users_id ORDER BY tvinfo_id ASC LIMIT 1`, {
+                replacements: {isComplete:0,isCall:0,users_id:userdata.role_id},
                 type: QueryTypes.SELECT
             })
                 .then(async(data)=>{
@@ -224,22 +230,23 @@ io.on('connection', async(socket) => {
              })
         })
         socket.on('clicked',async(data)=>{
-            const {number,cab,terminal,space,tvinfo_id} = data
-            const findTicket = await sequelize.query(`SELECT * from tvinfo__${terminal} WHERE number = :number  AND isComplete = :isComplete AND tvinfo_id = :tvinfo_id`,{
+            const {userdata} = socket.handshake.session
+            const {number,tvinfo_id,user} = data
+            const findTicket = await sequelize.query(`SELECT * from tvinfo__${userdata.terminalName} WHERE number = :number  AND isComplete = :isComplete AND tvinfo_id = :tvinfo_id`,{
                 replacements:{number,isComplete:0,tvinfo_id},
                 type:QueryTypes.SELECT
             })
 
-            await sequelize.query(`UPDATE tvinfo__${terminal} SET isCall = :isCall WHERE number = :number and tvinfo_id = :tvinfo_id`,{
+            await sequelize.query(`UPDATE tvinfo__${userdata.terminalName} SET isCall = :isCall WHERE number = :number and tvinfo_id = :tvinfo_id`,{
                 replacements:{isCall:1,number,tvinfo_id},
                 type:QueryTypes.UPDATE
             })
             const {number:ticket,service} = findTicket[0]
-            const user = await User.findOne({where:{terminalName:terminal,cab}})
-            const {cab:cabinet,isCab} = user
+            const findUser = await User.findByPk(userdata.role_id)
+            const {cab:cabinet,isCab} = findUser
             const result = Object.assign({cabinet,isCab},{ticket})
             soundData(ticket,cabinet,isCab)
-                .then((files)=>socket.to(terminal).emit('message',[{'data':result},{...files}]))
+                .then((files)=>socket.to(userdata.terminalName).emit('message',[{'data':result},{...files}]))
                 .catch(err=>console.log(err))
         })
         function toType(file){
@@ -275,7 +282,7 @@ io.on('connection', async(socket) => {
                                 isCab ? toStatus = 'public/sound/towindow.wav':toStatus = 'public/sound/tocabinet.wav';
                             })
                             fs.readFile('public/sound/russia_letters.json',(error,data)=>{
-                                const filesData =JSON.parse(data);
+                                const filesData=JSON.parse(data);
                                 Object.entries(filesData).find(([key,value])=>{
                                     if(key===letter){
                                         letterTicket = value
@@ -296,11 +303,10 @@ io.on('connection', async(socket) => {
             })
         }
          socket.on('repeat data',async(data)=>{
-             console.log(isQueue)
+             const {userdata} = socket.handshake.session
              const {terminal,tvinfo_id,ticket} = data
-             const {cab:cabinet,isCab} = socket.handshake.session.userdata;
-             const repeatData = Object.assign({cabinet,isCab},data)
-            soundData(ticket,cabinet,isCab)
+             const findUser = await User.findByPk(userdata.role_id)
+            soundData(ticket,findUser.cab,findUser.isCab)
                  .then((files)=> {
                      socket.to(terminal).emit('repeat ticket',files)
                  })
@@ -317,7 +323,9 @@ io.on('connection', async(socket) => {
             socket.broadcast.to(terminal).emit('completed',data)
         })
          socket.on('transfer tv',async(data)=>{
-            const rolesFind = await Roles.findOne({where:{cab:data[0].cab,terminalName:data[0].setTerminalName},raw:true})
+             const {userdata} = socket.handshake.session
+             const {cab} = data
+            const rolesFind = await Roles.findOne({where:{cab:cab,terminalName:userdata.terminalName},raw:true})
             await socket.broadcast.to(`${rolesFind.terminalName}`).emit('show result',data)
         })
         socket.on('end', data => {

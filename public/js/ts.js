@@ -27,7 +27,9 @@ socket.on('connect',()=>{
     socket.emit('room',Object.values(getQueryStringParams(window.location.search)).join(''))
 })
 take__ticket.forEach((item)=> {
-    item.addEventListener('click', async () => {
+    item.addEventListener('click', async (event) => {
+        event.target.parentNode.classList.add('disable')
+        document.body.classList.add('active')
         await fetch('/ts/getTicket', {
             method: 'POST',
             headers: {

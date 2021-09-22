@@ -16,8 +16,6 @@ const service___text = document.querySelector('.service__text');
 
 let number,service,terminal = '';
 let numberSocket,roomId;
-const socketId = document.querySelector('.terminalVal').value;
-const cabId = document.querySelector('.cabinetVal').value;
 const btnComplete = document.querySelector('.next__complete');
 
 const getQueryStringParams = query => {
@@ -50,14 +48,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
     socket.on('connect',()=>{
         socket.emit('room',Object.values(getQueryStringParams(`${window.location.search}`)).join(''))
+        socket.emit('connect data',getStringParams(`${Object.values(window.location.search).join('')}`))
     })
-    // socket.on('connect',()=>{
-    //     socket.emit('room',Object.values(getQueryStringParams(`${window.location.search}`)).join(''))
-    // })
     window.addEventListener('unload',()=>{
         socket.emit('end')
     })
-    socket.emit('connect data',{'terminal':socketId,'user':localStorage.getItem('user')})
     socket.on('await queue',data=>{
         console.log(data)
         document.querySelector('.op__list h5').insertAdjacentHTML('afterend',`
@@ -128,8 +123,7 @@ socket.on('show test',data=>{
             }
         }
         socket.emit('test',{number:ticket__text.textContent})
-        socket.emit('clicked',{"number":ticket__text.textContent,"cab":cabId,
-            "terminal":socketId,tvinfo_id:data.tvinfo_id});
+        socket.emit('clicked',{"number":ticket__text.textContent,"tvinfo_id":data.tvinfo_id});
 })
 btnComplete.addEventListener('click',()=>{
     const data = getStringParams(`${Object.values(window.location.search).join('')}`)
@@ -140,8 +134,7 @@ btnComplete.addEventListener('click',()=>{
         }
     })
     socket.emit('complete data',{"number":ticket__text.textContent, "terminal":data.service})
-    socket.emit('add data',{"number":ticket__text.textContent,'terminal':socketId,
-        "tvinfo_id":dataTicket.tvinfo_id});
+    socket.emit('add data',{"number":ticket__text.textContent,"tvinfo_id":dataTicket.tvinfo_id,user:getStringParams(`${Object.values(window.location.search).join('')}`)});
     ticket__text.textContent = "";
     service___text.textContent = "";
    Array.from(buttonMain).slice(1).forEach(item=>{
@@ -195,10 +188,8 @@ transferButton.addEventListener('click',()=>{
         const pointer = Array.from(ticket__text.textContent).splice(1).join('')
         const letter = Array.from(ticket__text.textContent).splice(0,1).join()
         socket.emit('transfer ticket',{
-            "cabinet":optionVal,"number": document.querySelector('.ticket__text').textContent,
-            "terminal":socketId,"service":document.querySelector('.service__text').textContent})
-        socket.emit('check ticket',{"number":ticket__text.textContent,'terminal':Object.values(getQueryStringParams(`${window.location.search}`)).join('')})
-        socket.emit('transfer tv',[{"number":ticket__text.textContent,'setTerminalName':socketId,"cab":optionVal,
+            "cabinet":optionVal,"number": document.querySelector('.ticket__text').textContent})
+        socket.emit('transfer tv',[{"number":ticket__text.textContent,"cab":optionVal,
             "Letter":letter,"pointer":pointer}])
         for (let i=1;i<buttonMain.length;i++) {
             if (ticketText.textContent) {

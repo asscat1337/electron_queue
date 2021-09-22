@@ -175,31 +175,27 @@ class dashboardController {
     async addNewService(req,res,next){
         try{
             const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time} = req.body;
-            await Service.create({
-                Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time
-            }).then(async(data)=>{
-                const {id} = data.dataValues
-                if(roles.length){
-                    roles.map(async(role)=>{
-                        await Roles.update({services_id:id},{
-                            where:{
-                                users_id:role
-                            }
-                        })
-                    })
-                }
+             await Service.create({
+                 Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time
+             }).then(async(data)=>{
+                 const {id} = data.dataValues
+                 if(roles.length){
+                     roles.map(async(role)=>{
+                         await Roles.create({services_id:id,users_id:role,terminalName:setTerminalName})
+                     })
+                 }
                const findTerminal = await Terminal.findOne({where:{
-                   nameTerminal:setTerminalName
-                   }
-               })
-                const {terminal_id} = findTerminal
-                await Service.update({terminalTerminalId:terminal_id},{
-                    where:{
-                        id
+                    nameTerminal:setTerminalName
                     }
                 })
+                 const {terminal_id} = findTerminal
+                 await Service.update({terminalTerminalId:terminal_id},{
+                     where:{
+                         id
+                     }
+                 })
 
-            }).then(res.json({'message':'Сервис добавлен'}))
+             }).then(res.json({'message':'Сервис добавлен'}))
 
         }catch (e) {
             console.log(e)

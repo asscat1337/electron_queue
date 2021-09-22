@@ -3,13 +3,10 @@ const Roles = require('../models/model__test/Roles')
 class opController{
     async renderOp(req,res,next){
         try{
-            res.render('op',{
-                userId:req.session.userdata.role_id,
-                sessionTer:req.session.userdata.terminalName,
-                sessionCab:req.session.userdata.cab
-            })
+            res.render('op')
         }catch (e) {
-            if(!req.session.userdata) return res.redirect(`/login`)
+            console.log(e)
+            // if(!req.session.userdata) return res.redirect(`/login`)
         }
     }
     async getCabinet(req,res,next){
