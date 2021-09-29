@@ -1,11 +1,4 @@
-const socket = io('localhost:5000',{
-    transport: ['websocket'],
-    credentials: true
-});
-// const socket1 = io('localhost:3003',{
-//     transport:['websocket'],
-//     credentials:true
-// });
+const socket = io('localhost:5000');
 const ticketText =document.querySelector('.ticket__text');
 const nextButton = document.querySelector('.next__button');
 const repeatButton = document.querySelector('.repeat__button');
@@ -17,6 +10,22 @@ const service___text = document.querySelector('.service__text');
 let number,service,terminal = '';
 let numberSocket,roomId;
 const btnComplete = document.querySelector('.next__complete');
+
+socket.on('disconnect',()=>{
+    document.body.insertAdjacentHTML(`beforebegin`,`
+ <div class="preloader">
+  <svg class="preloader__image" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+    <path fill="currentColor"
+      d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z">
+    </path>
+  </svg>
+</div>
+ `)
+    window.setTimeout(function () {
+        document.body.classList.add('loaded');
+    }, 500);
+});
+
 
 const getQueryStringParams = query => {
     return query
@@ -49,6 +58,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     socket.on('connect',()=>{
         socket.emit('room',Object.values(getQueryStringParams(`${window.location.search}`)).join(''))
         socket.emit('connect data',getStringParams(`${Object.values(window.location.search).join('')}`))
+        if(document.querySelectorAll('.preloader')){
+            document.querySelectorAll('.preloader').forEach(item=>item.remove())
+            document.body.classList.remove('loaded')
+        }
     })
     window.addEventListener('unload',()=>{
         socket.emit('end')
@@ -101,19 +114,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 let dataTicket
 socket.on('show test',data=>{
+        console.log(data)
         dataTicket = data
         ticket__text.innerHTML = data.number;
         service___text.innerHTML = data.service;
         terminal = data.terminalName;
-        let object = {
-            "cabinet": data.cabinet,
-            "date": moment().format('L'),
-            "time": moment().format('LTS'),
-            "Privilege": data.Privilege,
-            "number": data.number,
-            "terminalName": data.terminalName,
-            "service": data.service
-        }
         numberSocket=data.number
         roomId=data.terminalName
         for (let i=1;i<buttonMain.length;i++) {
@@ -123,7 +128,7 @@ socket.on('show test',data=>{
             }
         }
         socket.emit('test',{number:ticket__text.textContent})
-        socket.emit('clicked',{"number":ticket__text.textContent,"tvinfo_id":data.tvinfo_id});
+        socket.emit('clicked',{"number":ticket__text.textContent,"tvinfo_id":data.tvinfo_id,date:Date.now()});
 })
 btnComplete.addEventListener('click',()=>{
     const data = getStringParams(`${Object.values(window.location.search).join('')}`)
@@ -143,9 +148,8 @@ btnComplete.addEventListener('click',()=>{
 })
 repeatButton.addEventListener('click',()=>{
     const data = getStringParams(`${Object.values(window.location.search).join('')}`)
-    console.log(dataTicket.tvinfo_id)
     socket.emit('repeat data',{"ticket":document.querySelector('.ticket__text').textContent,
-        "terminal":data.service,'tvinfo_id':dataTicket.tvinfo_id})
+        "terminal":data.service,'tvinfo_id':dataTicket.tvinfo_id,date:Date.now()})
 })
 transferButton.addEventListener('click',()=>{
     document.querySelector('.modal-content').insertAdjacentHTML('afterbegin',

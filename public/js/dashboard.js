@@ -378,6 +378,7 @@ document.addEventListener('DOMContentLoaded',()=>{
      serviceConfirm.addEventListener('click',(event)=>{
            const serviceInput = document.querySelector('.service__input').value;
            const descriptionInput = document.querySelector('.service__description').value;
+           const isRegService = document.querySelector('.isRegService');
            const object1 = {
                "letter":serviceInput.split('').slice(0,1).join('').toUpperCase(),
                "ServiceName":serviceInput,
@@ -388,6 +389,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                "setTerminalName":selectTerminal.value,
                "start_time":document.querySelector('.service__start').value,
                "end_time":document.querySelector('.service__end').value,
+               "type":isRegService.checked
            };
            async function fetchData(){
                await fetch('dashboard/addNewService',{
@@ -402,7 +404,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                        M.toast({html:data.message})
                    })
            }
-           fetchData()
+          // fetchData()
     })
     let terminalSelect = document.querySelector('.select-terminal')
     terminalSelect.addEventListener('change',evt => {

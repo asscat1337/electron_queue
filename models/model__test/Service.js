@@ -31,6 +31,9 @@ const Service = sequelize.define('service',{
     end_time:{
         type:DataTypes.TIME
     },
+    type:{
+        type:DataTypes.INTEGER
+    }
 },{
     timestamps: false,
     freezeTableName: true,

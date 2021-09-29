@@ -3,6 +3,7 @@ const Roles = require('../models/model__test/Roles')
 class opController{
     async renderOp(req,res,next){
         try{
+            console.log(req.session)
             if(req.session.userdata.role_id !==Number(req.query.id)){
                 res.status(401).json({'error':'Произошла ошибка'})
             }else{

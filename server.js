@@ -7,9 +7,8 @@ const express = require('express'),
  bodyParser = require('body-parser'),
  io = socket(http,{
      cors:{
-         origin:'*',
+         origin:'http://localhost:5000',
          methods:['GET','POST'],
-         withCredentials: true
      }
  });
  cors = require('cors'),
@@ -24,7 +23,7 @@ const express = require('express'),
  sharedSession = require('express-socket.io-session');
 
 const fs = require('fs');
-const moment =  require('moment')();
+const moment =  require('moment');
 // const  amqp = require('amqplib/callback_api')
  const {Sequelize,QueryTypes,Op} = require('sequelize')
 const User = require('./models/model__test/User')
@@ -32,26 +31,6 @@ const Ticket = require('./models/model__test/Ticket')
 const Terminal = require('./models/model__test/Terminal')
 const Service = require('./models/model__test/Service')
 const Roles = require('./models/model__test/Roles')
-//
-// amqp.connect('amqp://localhost',(err,connection)=>{
-//     if(err) throw err
-//
-//     connection.createChannel((err1,channel)=>{
-//         if(err1) throw  err1
-//         const queue = 'hello'
-//         const msg = 'hello'
-//         channel.assertQueue(queue,{
-//             durable:false
-//         })
-//         channel.sendToQueue(queue,Buffer.from(msg))
-//         console.log(`sent ${msg}`)
-//
-//     })
-//     setTimeout(()=>{
-//         connection.close()
-//         process.exit(0)
-//     },500)
-// })
 
 const user = require('./midlleware/user');
 const terminalRouter = require('./routes/terminalRouter.js');
@@ -64,9 +43,6 @@ const sequelize = require('./core/config1');
 
 events.EventEmitter.prototype._maxListeners = Infinity;
 
-
-
-const connection = mysql.createConnection(config).promise();
 app.use(cookieParser());
 const sessionMiddleWare = session({
     secret:"keyboard cat",
@@ -106,12 +82,13 @@ app.use('/videos',videoRouter);
 const delay = (ms)=>new Promise(resolve => setTimeout(resolve,ms))
 async function init(){
     try{
+        const nextDate = moment.add('days',1)
         await Terminal.findAll().then(async (service)=>{
             service.map(async (terminal)=>{
                 const {nameTerminal} = terminal
-                await sequelize.query(`CREATE TABLE tvinfo__${nameTerminal}${moment.format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
+                await sequelize.query(`CREATE TABLE tvinfo__${nameTerminal}${moment(nextDate._d).format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
         date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-        cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
+        cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),type INTEGER(11) NULL,PRIMARY KEY (tvinfo_id))`)
                 await delay(5000)
             })
         })
@@ -169,32 +146,13 @@ io.on('connection', async(socket) => {
         socket.on('connect data', async (data) => {
             /// подумать как сделать правильно
             const {userdata} = socket.handshake.session
-            const findUser = await User.findAll({
-                include:{
-                    model:Roles,
-                    as:'roles',
-                    required:true,
-                    where:{
-                        users_id:userdata.role_id
-                    }
-                },
-                raw:false
-            })
-            const {dataValues:userData} = findUser[0] //костыль
-            const arrTest = []
-            for await (const item of userData.roles){
-                const {dataValues} = item
-                const result = await sequelize.query(`SELECT * from tvinfo__${dataValues.terminalName} WHERE isComplete = :isComplete AND isCall = :isCall AND services_id = :services_id AND date = date_format(now(),"%Y-%m-%d")`, {
-                            replacements: {isComplete: 0,isCall:0,services_id: dataValues.services_id},
+            const {role_id,setPrivilege,terminalName} = userdata
+                const result = await sequelize.query(`SELECT * from tvinfo__${terminalName} INNER JOIN roles 
+                WHERE  tvinfo__${terminalName}.services_id = roles.services_id AND users_id = :users_id AND isComplete = :isComplete AND isCall = :isCall `, {
+                            replacements: {isComplete: 0,isCall:0,users_id: role_id},
                             type: QueryTypes.SELECT
                         })
-              arrTest.push(...result)
-            }
-            //     const result = await sequelize.query(`SELECT * from tvinfo__${userData.terminalName} WHERE isComplete = :isComplete AND isCall = :isCall AND services_id = :services_id AND date = date_format(now(),"%Y-%m-%d")`, {
-            //         replacements: {isComplete: 0,isCall:0,services_id: rolesData.services_id},
-            //         type: QueryTypes.SELECT
-            //     })
-                socket.emit('show data', arrTest)
+                socket.emit('show data',result)
         })
         /// переделать
         socket.on('transfer ticket', async (data) => {
@@ -231,14 +189,16 @@ io.on('connection', async(socket) => {
         })
         socket.on('clicked',async(data)=>{
             const {userdata} = socket.handshake.session
-            const {number,tvinfo_id,user} = data
+            console.log(userdata)
+            const {number,tvinfo_id,user,date} = data
+            console.log(data)
             const findTicket = await sequelize.query(`SELECT * from tvinfo__${userdata.terminalName} WHERE number = :number  AND isComplete = :isComplete AND tvinfo_id = :tvinfo_id`,{
                 replacements:{number,isComplete:0,tvinfo_id},
                 type:QueryTypes.SELECT
             })
 
-            await sequelize.query(`UPDATE tvinfo__${userdata.terminalName} SET isCall = :isCall WHERE number = :number and tvinfo_id = :tvinfo_id`,{
-                replacements:{isCall:1,number,tvinfo_id},
+            await sequelize.query(`UPDATE tvinfo__${userdata.terminalName} SET isCall = :isCall,cabinet = :cabinet WHERE number = :number and tvinfo_id = :tvinfo_id`,{
+                replacements:{isCall:1,number,tvinfo_id,cabinet:userdata.cab},
                 type:QueryTypes.UPDATE
             })
             const {number:ticket,service} = findTicket[0]
@@ -246,13 +206,16 @@ io.on('connection', async(socket) => {
             const {cab:cabinet,isCab} = findUser
             const result = Object.assign({cabinet,isCab},{ticket})
             soundData(ticket,cabinet,isCab)
-                .then((files)=>socket.to(userdata.terminalName).emit('message',[{'data':result},{...files}]))
+                .then((files)=>{
+                 setTimeout(()=>{
+                     socket.to(userdata.terminalName).emit('message',[{'data':result},{...files}])
+                 },Date.now() - date + 15000)
+                })
                 .catch(err=>console.log(err))
         })
         function toType(file){
             return `${file}.wav`
         }
-        let isQueue = true
         function soundData(ticket,cabinet,isCab) {
             return new Promise((resolve,reject)=>{
                 fs.readdir('public/sound',(err,files)=>{
@@ -294,9 +257,7 @@ io.on('connection', async(socket) => {
                                     sound = ['public/sound/client.wav',`${letterTicket}`,
                                     toSound(arr),toStatus,`public/sound/${cabinetClient}`]
                                     .reduce((acc,val)=>acc.concat(val),[])
-                                setTimeout(()=>{
                                     resolve(sound)
-                                },6000)
                             })
                     }
                 })
@@ -304,11 +265,13 @@ io.on('connection', async(socket) => {
         }
          socket.on('repeat data',async(data)=>{
              const {userdata} = socket.handshake.session
-             const {terminal,tvinfo_id,ticket} = data
+             const {terminal,tvinfo_id,ticket,date} = data
              const findUser = await User.findByPk(userdata.role_id)
             soundData(ticket,findUser.cab,findUser.isCab)
                  .then((files)=> {
-                     socket.to(terminal).emit('repeat ticket',files)
+                         setTimeout(()=>{
+                             socket.to(terminal).emit('repeat ticket',files)
+                         },Date.now() - date + 10000)
                  })
                  .catch(err=>console.log(err))
 

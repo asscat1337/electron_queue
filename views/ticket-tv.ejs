@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>ТВ-панель</title>
     <link rel="stylesheet" href="../public/css/style.css">
 </head>
 <body>
@@ -14,9 +14,9 @@
 </div>
 <section>
     <div class="left">
-                  <%for(let i=0;i<template1.length;i++){%>
-                  <div class="title"><%=JSON.stringify(template1[i].description).replace(/"/g,'')%></div>
-                  <%}%>
+        <%for(let i=0;i<template1.length;i++){%>
+        <div class="title"><%=JSON.stringify(template1[i].description).replace(/"/g,'')%></div>
+        <%}%>
         <div class="logo">ГБУЗ РБ ГКБ №13 г. Уфа</div>
         <div class="time">
             <span class="clock"><%=clock%></span>
@@ -30,10 +30,9 @@
 
                 <div class="columns__item ticket">
                     <div class="number"><%=JSON.stringify(template[i].number).replace(/"/g,'')%></div>
-                    <!--        					 <svg class="arrow-right-4" viewBox="0 0 100 100">-->
-                    <!--          <polygon points="58.263,0.056 100,41.85 58.263,83.641 30.662,83.641 62.438,51.866 0,51.866 0,31.611 62.213,31.611 30.605,0 58.263,0.056" />-->
-                    <!--        </svg>-->
-                    <div class="status">Ожидание</div>
+                    <div class="status">
+                        <%=template[i].type ? `Кабинет ${template[i].cabinet}`: `Окно ${template[i].cabinet}`%>
+                    </div>
                 </div>
                 <%}%>
             </div>
@@ -42,10 +41,10 @@
     </div>
 </section>
 <footer>
-<script src="node_modules/socket.io-client/dist/socket.io.min.js"></script>
-<script src="node_modules/moment/moment.js"></script>
-<script src="node_modules/moment/locale/ru.js"></script>
-<script src="public/js/tv.js"></script>
+    <script src="node_modules/socket.io-client/dist/socket.io.min.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/moment/locale/ru.js"></script>
+    <script src="public/js/tv.js"></script>
 </footer>
 </body>
 </html>

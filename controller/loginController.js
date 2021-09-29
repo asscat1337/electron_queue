@@ -21,6 +21,7 @@ class LoginController{
             const user = await User.findOne({where:{setPrivilege,terminalName:terminalVal},raw:true})
             const roles = await Roles.findOne({where:{users_id:user.role_id}})
             if(user){
+                req.session.userdata = user
                  return res.redirect(302,`/op?service=${user.terminalName}&id=${user.role_id}`)
             }
         }

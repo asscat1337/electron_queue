@@ -66,20 +66,18 @@
                 <input type="text" class="service__description" placeholder="Введите описание кнопки">
                 <input type="time" class="service__start" placeholder="Введите начало работы">
                 <input type="time" class="service__end" placeholder="Введите конец работы">
+                <p>
+                    <label>
+                        <input type="checkbox" class="filled-in isRegService">
+                        <span>Относится к регистратуре</span>
+                    </label>
+                </p>
                 <select  class="select__terminal browser-default">
                     <option disabled selected>Выберите значение</option>
                     <%for (let j=0;j<data1.length;j++){%>
                     <option><%=JSON.stringify(data1[j].nameTerminal).replace(/"/g,'')%></option>
                     <%}%>
                 </select>
-<!--                <p>-->
-<!--                    <%for(let i=0;i<data.length;i++){%>-->
-<!--                        <label>-->
-<!--                            <input type="checkbox" class="filled-in service__user" data-id=<%=JSON.stringify(data[i].role_id)%>>-->
-<!--                            <span><%=JSON.stringify(data[i].setPrivilege).replace(/"/g,'')%></span>-->
-<!--                        </label>-->
-<!--                    <%}%>-->
-<!--                </p>-->
                 <button class="btn service__confirm">Добавить сервис</button>
             </div>
             <div  class="card-panel  add__role">

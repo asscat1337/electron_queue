@@ -21,8 +21,9 @@ const getQueryStringParams = query => {
             )
         : {}
 };
+const getRoomId = getQueryStringParams(`${window.location.search}`)
 socket.on('connect',()=>{
-    socket.emit('room',Object.values(getQueryStringParams(`${window.location.search}`)).join(''))
+    socket.emit('room',getRoomId.id)
     if(document.querySelectorAll('.preloader')){
         document.querySelectorAll('.preloader').forEach(item=>item.remove())
         document.body.classList.remove('loaded')
@@ -32,6 +33,7 @@ socket.on('connect',()=>{
 window.addEventListener('unload',()=>{
     socket.emit('end')
 })
+document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
 
 socket.on('disconnect',()=>{
  document.body.insertAdjacentHTML(`beforebegin`,`
@@ -47,31 +49,38 @@ socket.on('disconnect',()=>{
         document.body.classList.add('loaded');
     }, 500);
 });
-socket.on('show result',data=>{
-    console.log(data);
-    data.map(item=>{
-        tvInfo.insertAdjacentHTML('beforeend',`<div class="ticket">
+if(getRoomId.status === "0"){
+    socket.on('show result',data=>{
+        data.map(item=>{
+            tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket">
                     <div class="number">${item.number}</div> 
                       <div class="status">Ожидание</div>
             </div>`)
+        })
+        let score = 0
+        const testtest = document.querySelectorAll('.ticket:not(.hide)')
+        if(testtest.length >= 20){
+            score = testtest.length
+            testtest[score-1].classList.add('hide')
+        }
+        setInterval(()=>{
+            document.querySelectorAll('.left-ticket').forEach(item=>item.remove())
+        },15000)
     })
-    if(document.querySelectorAll('.ticket').length>20){
-        tvInfo.lastChild.classList.add('hide')
-    }
-    setInterval(()=>{
-        document.querySelectorAll('.left-ticket').forEach(item=>item.remove())
-    },15000)
-})
+}
 let test;
 socket.on('completed',data=>{
-    console.log(data)
     let ticketArr = []
     document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
     ticketArr.find(el=>{
         if(el===data.number){
             document.querySelectorAll('.number').forEach(block=>{
                 if(block.textContent === el){
-                    block.parentNode.remove()
+                    if(getRoomId.status === "1"){
+                        block.parentNode.classList.remove('active')
+                    }else{
+                        block.parentNode.remove()
+                    }
                 }
             })
         }
@@ -80,15 +89,11 @@ socket.on('completed',data=>{
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
     }
 })
-let arrQueue = []
-document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
+// document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
 
 async function testFunction(data){
     for(let i = 0;i<data.length;i++){
         const audio = new Audio(data[i])
-        if(i===data.length-1){
-            socket.emit('queue sound',true)
-        }
             await playAudio(audio)
     }
 }
@@ -111,6 +116,17 @@ document.addEventListener('DOMContentLoaded',async()=>{
         let ticketArr = []
         document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
         const {cabinet,isCab,ticket} = data[0].data
+        if(getRoomId.status === "1"){
+            tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket active">
+                    <div class="number">${ticket}</div> 
+                      <div class="status">
+                        ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }                      
+                      </div>
+            </div>`)
+            if(document.querySelectorAll('.ticket').length>=20){
+                tvInfo.lastChild.remove()
+            }
+        }
          ticketArr.find(el=>{
              if(el===ticket){
                  document.querySelectorAll('.number').forEach(block=>{
@@ -125,6 +141,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
          testFunction(Object.values(data[1]).map(item=>item))
         });
         await socket.on('repeat ticket',data=> {
+            console.log(socket)
             testFunction(data)
         });
     });

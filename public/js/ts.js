@@ -4,10 +4,6 @@ const time =  moment().format('HH:mm:ss');
 const socket = io('localhost:5000',{
     transport:['websocket']
 });
-// const socket1 = io('localhost:3003',{
-//     transport:['websocket'],
-//     credentials:true
-// });
 window.addEventListener('unload',()=>{
 socket.emit('end')
 })
@@ -39,6 +35,7 @@ take__ticket.forEach((item)=> {
         })
             .then(res => res.json())
             .then(data => {
+                console.log(data)
                 let res = data;
                 res.forEach(item => {
                     if (time >= item.end_time || time <= item.start_time) {
@@ -87,7 +84,8 @@ take__ticket.forEach((item)=> {
                             "service": `${item.ServiceName}`,
                             "Privilege": `${item.setService}`,
                             "nameTerminal": `${item.setTerminalName}`,
-                            "cabinet": `${item.cabinet}`
+                            "cabinet": `${item.cabinet}`,
+                            "type":item.type
                         };
                         const fetchData = async () => {
                             try {
@@ -112,14 +110,6 @@ take__ticket.forEach((item)=> {
                                                 })
                                             })
                                         }
-                                        // if (ticket) {
-                                        //     setTimeout(() => {
-                                        //         window.print();
-                                        //         setTimeout(() => {
-                                        //             document.location.reload()
-                                        //         }, 500)
-                                        //     }, 1000)
-                                        // }
                                     })
 
                             } catch (e) {
