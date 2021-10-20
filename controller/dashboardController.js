@@ -91,7 +91,7 @@ class dashboardController {
             isActive:1,
             terminalName,
             isCab
-        }).then(res.json({'message':'������������ ��������'}))
+        }).then(res.json({'message':'Пользователь зарегистрирован'}))
     }
     async addUser(req,res,next){
         const {user,terminal,cabinet,isReg} = req.body;
