@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                <p>
                                                   <label>
                                                     <input type="checkbox" class="filled-in checked__user" checked="checked" />
-                                                    <span>${item2.setPrivilege}</span>
+                                                    <span class="service-login">${item2.setPrivilege}</span>
                                                   </label>
                                                 </p>
                                                 <div class="change_user-data" data-user=${item2.role_id}>
@@ -122,8 +122,8 @@ document.addEventListener('DOMContentLoaded',()=>{
                                             <div class="user__privilege">
                                                <p>
                                                   <label>
-                                                    <input type="checkbox" class="filled-in" />
-                                                    <span>${item2.setPrivilege}</span>
+                                                    <input type="checkbox" class="filled-in checked__user" />
+                                                    <span class="service-login">${item2.setPrivilege}</span>
                                                   </label>
                                                 </p>
                                            </div>`)
@@ -187,33 +187,22 @@ document.addEventListener('DOMContentLoaded',()=>{
                                                        })
                                                        document.querySelectorAll('.checked__user').forEach(item=>{
                                                            item.addEventListener('change',(event)=>{
-                                                               async function disabledUser(){
-                                                                   await fetch('dashboard/disabledUserService',{
+                                                               const getUser = item.parentNode.querySelector('.service-login').textContent;
+                                                               console.log(getUser)
+                                                               async function toggleUserService(){
+                                                                   await fetch('dashboard/toggleUserService',{
                                                                        method:'POST',
                                                                        headers:{
                                                                            "Content-type":"application/json;charset=utf-8"
                                                                        },
-                                                                       body:JSON.stringify({"user":item.textContent.trim()})
+                                                                       body:JSON.stringify({"user":getUser,"status":event.target.checked})
                                                                    })
                                                                        .then(res=>res.json())
                                                                        .then(data=>{
                                                                            M.toast({html:data.message})
                                                                        })
                                                                }
-                                                               async function enableUser() {
-                                                                   await fetch('dashboard/enableUserService',{
-                                                                       method:'POST',
-                                                                       headers:{
-                                                                           'Content-type':'application/json;charset=utf-8'
-                                                                       },
-                                                                       body:JSON.stringify({"user":item.textContent.trim()})
-                                                                   })
-                                                                       .then(res=>res.json())
-                                                                       .then(data=>{
-                                                                           M.toast({html: data.message})
-                                                                       })
-                                                               }
-                                                               event.target.checked ? enableUser():disabledUser()
+                                                               toggleUserService()
                                                            });
                                                        })
                                                    });
@@ -389,7 +378,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                "setTerminalName":selectTerminal.value,
                "start_time":document.querySelector('.service__start').value,
                "end_time":document.querySelector('.service__end').value,
-               "type":isRegService.checked
+               "type":isRegService.checked || "0"
            };
            async function fetchData(){
                await fetch('dashboard/addNewService',{
@@ -404,7 +393,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                        M.toast({html:data.message})
                    })
            }
-          // fetchData()
+           fetchData()
     })
     let terminalSelect = document.querySelector('.select-terminal')
     terminalSelect.addEventListener('change',evt => {
@@ -435,7 +424,7 @@ roleButton.addEventListener('click',()=>{
     const terminlInput = document.querySelector('.role_terminal').value;
     const checkedVal = isReg.checked ? "1":"0";
     async function addNewRole(){
-        await fetch('/addNewRole',{
+        await fetch('dashboard/registerUser',{
             method:'POST',
             headers:{
                 "Content-type":"application/json;charset=utf-8"

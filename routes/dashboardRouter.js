@@ -10,7 +10,7 @@ dashboardRouter.post('/disabledUserService',dashboardController.deleteUserServic
 dashboardRouter.post('/showService',dashboardController.showService)
 dashboardRouter.post('/showUsers',dashboardController.showUsers)
 dashboardRouter.post('/showFreeUsers',dashboardController.showFreeUsers)
-dashboardRouter.post('/enableUserService',dashboardController.enableUser)
+dashboardRouter.post('/toggleUserService',dashboardController.enableUser)
 dashboardRouter.post('/showTerminalUsers',dashboardController.showTerminalUser)
 dashboardRouter.post('/addUser',dashboardController.addUser)
 dashboardRouter.delete('/deleteUser',dashboardController.deleteUser)
@@ -21,5 +21,6 @@ dashboardRouter.post('/addNewService',dashboardController.addNewService)
 dashboardRouter.post('/addNewTerminal',dashboardController.AddNewTerminal)
 dashboardRouter.post('/deleteTerminal',dashboardController.deleteTerminal)
 dashboardRouter.post('/deleteService',dashboardController.deleteService)
+dashboardRouter.post('/registerUser',dashboardController.registerUser)
 
 module.exports = dashboardRouter;

@@ -250,3 +250,17 @@ color:red;
 .loaded .preloader {
     display: none;
 }
+.notice-block{
+    position: relative;
+    margin: 10px;
+    height: 90vh;
+    width: 70vh;
+    border-radius: 5px;
+    border: 1px solid black;
+    z-index: 9999;
+    overflow: hidden;
+}
+.result-notice{
+    font-size: 22px;
+    border-bottom: 1px solid #bf0a8e;
+}

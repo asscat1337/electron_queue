@@ -33,6 +33,9 @@ const Service = sequelize.define('service',{
     },
     type:{
         type:DataTypes.INTEGER
+    },
+    isNotice:{
+        type:DataTypes.BOOLEAN
     }
 },{
     timestamps: false,

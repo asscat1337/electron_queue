@@ -1,5 +1,4 @@
-const socket = io('localhost:5000',{
-    credentials:true,
+const socket = io.connect('http://localhost:5000',{
     transport:['pooling']
 });
 const tvInfo = document.querySelector('.columns__container');
@@ -52,7 +51,7 @@ socket.on('disconnect',()=>{
 if(getRoomId.status === "0"){
     socket.on('show result',data=>{
         data.map(item=>{
-            tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket">
+            tvInfo.insertAdjacentHTML('beforeend',`<div class="ticket">
                     <div class="number">${item.number}</div> 
                       <div class="status">Ожидание</div>
             </div>`)
@@ -89,7 +88,6 @@ socket.on('completed',data=>{
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
     }
 })
-// document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
 
 async function testFunction(data){
     for(let i = 0;i<data.length;i++){
@@ -126,6 +124,21 @@ document.addEventListener('DOMContentLoaded',async()=>{
             if(document.querySelectorAll('.ticket').length>=20){
                 tvInfo.lastChild.remove()
             }
+	document.querySelector('.left-ticket__container').insertAdjacentHTML('afterbegin',
+	`
+	   <div class="ticket-call">
+	    <span>${ticket}</span>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="arrow_down" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+<g>
+	<path d="M256,512l256-256H352V0.001L160,0v256H0L256,512z"/>
+</g>
+</svg>
+            <span>${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }</span>
+           </div>
+	`)
+	setTimeout(()=>{
+		document.querySelector('.ticket-call').remove()
+	},10000)
         }
          ticketArr.find(el=>{
              if(el===ticket){

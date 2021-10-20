@@ -4,6 +4,7 @@ const Roles = require('../models/model__test/Roles')
 class LoginController{
     async renderLogin(req,res,next){
         try{
+            console.log(req.session,'123')
             const findUser = await User.findAll({where:{terminalName:req.query.uch,isActive:1},raw:true})
             res.render('login',{
                 result:Array.from(findUser)

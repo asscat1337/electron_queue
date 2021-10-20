@@ -1,7 +1,7 @@
 const wrapper = document.querySelector('.wrapper');
 const take__ticket = document.querySelectorAll('.btn__ticket');
 const time =  moment().format('HH:mm:ss');
-const socket = io('localhost:5000',{
+const socket = io('http://localhost:5000',{
     transport:['websocket']
 });
 window.addEventListener('unload',()=>{
@@ -24,7 +24,7 @@ socket.on('connect',()=>{
 })
 take__ticket.forEach((item)=> {
     item.addEventListener('click', async (event) => {
-        event.target.parentNode.classList.add('disable')
+        event.target.closest('.take__ticket').classList.add('disable')
         document.body.classList.add('active')
         await fetch('/ts/getTicket', {
             method: 'POST',
@@ -55,9 +55,16 @@ take__ticket.forEach((item)=> {
                         wrapper.insertAdjacentHTML('afterend', `<div class="modal__ticket">
 <div class="wrapper-ticket">
         <div class="ticket">
-                <div class="tick__logo"><img src="/public/img/logo-tick.png" /></div>
+                <div class="tick__logo"><img src="/public/img/logo-tick.png"/></div>
                 <div class="org_name">ГБУЗ РБ ГКБ №13 г. Уфа</div>
-                <div class="tick__numb">${item.Letter}${item.pointer}</div>
+                <div class="tick__numb">
+		  <span class="tick__number-letter">${item.Letter.toUpperCase()}</span>
+		  <span class="tick__numb-pointer">${item.pointer}</span>
+		</div>
+		<div class="tick__service">
+			<p class="service-name">Название услуги:</p>
+			<span>${item.ServiceName}</span>
+		</div>
                 <div class="tick__date">${moment().format('L')}</div>
         </div>
 </div>

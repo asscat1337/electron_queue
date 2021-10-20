@@ -1,11 +1,11 @@
 @import 'ticket.css';
 
 :root {
-  --grid-height: 100vh;
-  --grid-width: 100%;
-  --eq-width: 38%;
-  --content-width: 62%;
-  --head-height: 150px;
+    --grid-height: 100vh;
+    --grid-width: 100%;
+    --eq-width: 38%;
+    --content-width: 62%;
+    --head-height: 150px;
 }
 
 /*@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap');*/
@@ -20,8 +20,8 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     font-weight: 800;
     line-height: 1em;
     color: #729700;
-  }
-  .header span {display: block; font-size: 30px; color: #425602}
+}
+.header span {display: block; font-size: 30px; color: #425602}
 .time{
     color:#ffff;
     font-size: 32px;
@@ -31,15 +31,7 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
 .take__ticket {
     display: flex;
     flex-flow: row wrap;
-    justify-content: space-around;
-    margin: 150px 0;
-    }
-.take__ticket span {
-    text-align: center;
-    margin: 35px auto;
-    color: #ffff;
-    font-size: 70px;
-    font-weight: 800;}
+    justify-content: space-around;    }
 .modal__ticket {
     position: fixed;
     top: 20px;
@@ -54,7 +46,7 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
 .ticket{
     position: relative;
     margin: 0 auto;
-    height:300px;
+    height:315px;
     width: 300px;
     outline: 5px solid black;
     outline-offset: -6px;
@@ -62,16 +54,18 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     opacity: 1;
 }
 
-    .ticket div {width: 100%; text-align: center;}
-    .org_name {font-size: 14px; font-weight: 800; padding: 30px 0 0;}
-    .tick__date {font-size: 20px; font-weight: 800;}
-    .tick__numb {font-size: 80px; font-weight: 800; padding: 30px 0;}
-    .tick__logo {
+.ticket div {width: 100%; text-align: center;}
+.org_name {font-size: 14px; font-weight: 800; padding: 30px 0 0;}
+.tick__date {font-size: 20px; font-weight: 800;}
+.tick__numb {font-size: 80px; font-weight: 800;}
+.tick__service {font-size:20px;font-weight: 500;}
+.service-name {margin:0;}
+.tick__logo {
     height: 45px;
     /* width: 130px !important; */
     /* margin: 20px auto 0; */
     padding: 5px 0 0 0;}
-    .tick__logo img {-o-object-fit: cover;
+.tick__logo img {-o-object-fit: cover;
     object-fit: cover;
     object-position: center; width: 120px;}
 
@@ -81,18 +75,25 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     border-radius: 10px;
     height: 250px;
     width: 900px;
-    /* border-bottom: 10px solid; */
-    outline: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     box-shadow: 0px 13px 0 0 #425602;
-    line-height: 250px;
-    text-align: center;
     border-bottom: 1px solid #92c000;
-  }
+    margin:10px;
+}
+.btn__ticket span {
+    text-align: center;
+    margin: 35px auto;
+    color: #ffff;
+}
 
-.btn__ticket:active {
-    margin: 13px auto 0;
-    box-shadow: none}
 
+//.btn__ticket:active {
+  //    margin: 13px auto 0;
+  //    box-shadow: none
+  //}
 
 .op__main{
     position: relative;
@@ -128,7 +129,7 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     font-size: 30pt;
 }
 .service span{
- text-align: center;
+    text-align: center;
 }
 .arrow-right-4{
     height: 80px;
@@ -147,7 +148,7 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
 
 }
 .added{
-color:red;
+    color:red;
 }
 .tv__end{
     margin: 50px 0;

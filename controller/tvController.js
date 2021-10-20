@@ -5,7 +5,7 @@ const moment = require('moment')
 
 class tvController{
     async renderTv(req,res,next){
-        await sequelize.query(`SELECT * from tvinfo__${req.query.id} WHERE terminalName = :terminalName 
+        await sequelize.query(`SELECT * from tvinfo__${req.query.id}${moment().format('DMMYYYY')} WHERE terminalName = :terminalName 
         AND isComplete = :isComplete AND isCall = :isCall AND date = date_format(now(),"%Y-%m-%d") ORDER BY tvinfo_id DESC LIMIT 20`,{
             replacements:{terminalName:req.query.id,
                 isComplete: req.query.status === "0" ? 0 : 1 ,isCall: req.query.status === "0" ? 0 : 1},
@@ -20,7 +20,7 @@ class tvController{
                     switch (req.query.status) {
                         case '0' : /// для пунктов забора
                             res.render('status-tv',{
-                                template:data,
+                                template:data.reverse(),
                                 template1:data1,
                                 isRegistry:req.query.id.toString().includes('reg'),
                                 clock:moment().format('HH:mm:ss'),

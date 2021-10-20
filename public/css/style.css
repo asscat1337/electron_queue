@@ -51,7 +51,7 @@ overflow: hidden; padding: 10px;}
 .active .status {border-left: 1px solid #95ce00;}
 
 .ticket {
-    font-size: 60px;
+    font-size: 37px;
     font-weight: 600;
     /* display: flex; */
     justify-content: center;
@@ -80,10 +80,10 @@ border-right: 1px solid #3f3f3f;
     .hide{
         display: none;
     }
-.status, .cab {    width: 65%;
-    float: left;
-    height: 100%;
-    padding: 0 30px;
+.status, .cab {
+    /*float: left;*/
+    /*height: 100%;*/
+    /*padding: 0 30px;*/
     line-height: 2em;
     text-align: center;
     box-sizing: border-box;}
@@ -132,4 +132,36 @@ border-right: 1px solid #3f3f3f;
 .loaded .preloader {
     display: none;
 }
-
+@media screen and (max-width: 1366px) and (max-height: 768px) {
+  /*body{*/
+  /*     background: #15bf05;*/
+  /* }*/
+    .title{
+        font-size: 48px;
+        font-weight: 900;
+        line-height: 1em;
+        font-family: 'Exo 2', sans-serif;
+    }
+    .logo{
+        height: 80px;
+        width: 220px;
+    }
+    .columns{
+        padding: 0;
+    }
+    .ticket{
+        font-size: 40px;
+        font-weight: 600;
+        /* display: flex; */
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        border: 1px solid #919191;
+        box-sizing: border-box;
+         height: 79px;
+        width: 388px;
+        float: left;
+        margin: 15px 20px;
+        transition: all 0.3s;
+    }
+}

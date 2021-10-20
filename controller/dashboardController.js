@@ -4,6 +4,7 @@ const Service = require('../models/model__test/Service');
 const Roles = require('../models/model__test/Roles');
 const {Op,QueryTypes}= require('sequelize')
 const sequelize = require('../core/config1')
+const moment = require('moment')
 class dashboardController {
     async renderDashboard(req,res,next){
         const users = await Users.findAll({raw:true})
@@ -66,12 +67,13 @@ class dashboardController {
         }).then(res.json({'message':'Пользователь активирован'}))
     }
     async enableUser(req,res,next){
-        const {user} = req.body
-        await Users.update({isActive:1},{
+        const {user,status} = req.body
+        const messageData = status ? 'Пользователь активирован' : 'Пользователь отключен'
+        await Users.update({isActive:status},{
             where:{
                 setPrivilege:user
             }
-        }).then(res.json({'message':'Пользователь активирован'}))
+        }).then(res.json({'message':messageData}))
     }
     async showTerminalUser(req,res,next){
         const {data} = req.body
@@ -81,14 +83,24 @@ class dashboardController {
            }
         }).then(data=>res.json(data))
     }
+    async registerUser(req,res,next) {
+        const {role, cab,terminalName,isCab} = req.body
+        await Users.create({
+            setPrivilege:role,
+            cab,
+            isActive:1,
+            terminalName,
+            isCab
+        }).then(res.json({'message':'������������ ��������'}))
+    }
     async addUser(req,res,next){
-        const {user,terminal,cabinet,isReg,id} = req.body;
+        const {user,terminal,cabinet,isReg} = req.body;
+	console.log(req.body)
         try{
             const service = await Service.findOne({
                 where: {
-                    setTerminalName:terminal,
-                    id
-                },
+		    id:id,setTerminalName:terminal
+      },
             });
             if(user === "" || cabinet === '' || isReg ==='' ){
                 return res.status(400).json({'message':'Не заполнены поля'})
@@ -174,9 +186,9 @@ class dashboardController {
     }
     async addNewService(req,res,next){
         try{
-            const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time} = req.body;
+            const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time,type} = req.body;
              await Service.create({
-                 Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time
+                 Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time,type
              }).then(async(data)=>{
                  const {id} = data.dataValues
                  if(roles.length){
@@ -215,9 +227,9 @@ class dashboardController {
             }else{
                         await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
                             .then(async ()=>{
-                                await sequelize.query(`CREATE TABLE tvinfo__${terminalName} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
+                                await sequelize.query(`CREATE TABLE tvinfo__${terminalName}${moment().format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
                 date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-                cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),PRIMARY KEY (tvinfo_id))`)
+                cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),isComplete INTEGER(11) NULL,type INTEGER(11) NULL,PRIMARY KEY (tvinfo_id))`)
                             }).then(res.json({'message':'Терминал добавлен'}))
             }
         }catch (e) {
@@ -233,7 +245,7 @@ class dashboardController {
                     nameTerminal
                 }
             }).then(async ()=>{
-                await sequelize.query(`DROP TABLE tvinfo__${nameTerminal}`,{
+                await sequelize.query(`DROP TABLE tvinfo__${nameTerminal}${moment().format('DMMYYYY')}`,{
                     type:QueryTypes.DELETE
                 })
             }).then(res.json({'message':'Терминал удален'}))

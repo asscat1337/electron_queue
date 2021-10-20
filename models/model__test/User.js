@@ -23,6 +23,12 @@ const User =  sequelize.define('role',{
     isCab:{
         type:DataTypes.BOOLEAN
     },
+    isNotice:{
+        type:DataTypes.BOOLEAN
+    },
+    sendNotice:{
+        type:DataTypes.BOOLEAN
+    }
 },{
     createdAt: false,
     updatedAt:false,
