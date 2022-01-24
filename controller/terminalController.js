@@ -1,19 +1,17 @@
 const Service = require('../models/model__test/Service');
 const Terminal = require('../models/model__test/Terminal')
-const Ticket = require('../models/model__test/Ticket')
+const TicketService = require('../databases/ticket-service')
 const {QueryTypes,Sequelize} = require('sequelize')
 const moment = require('moment')
 const sequelize = require('../core/config1')
 class TerminalController {
     async renderTerminal(req,res,next){
         try{
-        //    const checkTable =  await sequelize.query(`select 1 from tvinfo__${req.query.id}${moment().format('DDMMYYYY')} limit 1`)
-        //    if(!checkTable){
-        //        await sequelize.query(`CREATE TABLE tvinfo__${req.query.id}${moment().format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
-        // date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-        // cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45) NULL,isComplete INTEGER(11) NULL,type INTEGER(11) NULL,PRIMARY KEY (tvinfo_id)) CHARACTER SET utf8 COLLATE utf8_general_ci`)
-        //    }
-        //    else{
+           const {id} = req.query
+            const checkTicket = await TicketService.checkTable(id)
+            if(!checkTicket.length){
+                await TicketService.createTable('ackt')
+            }
                const service = await Service.findAll({where:{setTerminalName:req.query.id,status:1}})
                const terminal = await Terminal.findOne({where:{nameTerminal:req.query.id}})
                res.render('ts',{
@@ -37,9 +35,13 @@ class TerminalController {
     }
     async setStateTicket(req,res,next){
         try{
-            const {number,service,nameTerminal,cabinet,id,type}=req.body
-            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,:Privilege,cabinet,:isCalledAgain,:isCall,:service_id,:isComplete,:type,:notice)`,{
-                replacements:{tvinfo_id:null,time:moment().format('HH:mm:ss'),date:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,Privilege:"",cabinet,isCalledAgain:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
+             const {number,service,nameTerminal,cabinet,id,type}=req.body
+            // const time = moment().format('YYYY-MM-DD')
+            // const mappedArray = ['NULL',`'${time}'`,`'${service}'`,`'${number}'`,`'${nameTerminal}'`,`'${cabinet}'`,0,id,0,type,``].join(',')
+            // const [metadata,result] = await TicketService.insertTable(nameTerminal,mappedArray)
+            // console.log(result)
+            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:time,:service,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
+                replacements:{tvinfo_id:null,time:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
                 type:QueryTypes.INSERT
             })
             const addedDataId = addedData[0]

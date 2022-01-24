@@ -1,4 +1,4 @@
-const socket = io.connect('http://localhost:5000',{
+const socket = io.connect('http://localhost:8000',{
 	withCredentials:true,
 	extraHeaders:{
 	'my-custom-headers':'abcd'
@@ -284,6 +284,9 @@ transferButton.addEventListener('click',()=>{
         })
         ticket__text.textContent = '';
         service___text.textContent = '';
+        if(inputNotice){
+            inputNotice.value = ''
+        }
         isDisabled = true
     });
     document.querySelector('.modal-close').addEventListener('click',()=>{

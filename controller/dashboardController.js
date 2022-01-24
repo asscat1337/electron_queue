@@ -84,14 +84,21 @@ class dashboardController {
         }).then(data=>res.json(data))
     }
     async registerUser(req,res,next) {
-        const {role, cab,terminalName,isCab} = req.body
-        await Users.create({
-            setPrivilege:role,
-            cab,
-            isActive:1,
-            terminalName,
-            isCab
-        }).then(res.json({'message':'Пользователь зарегистрирован'}))
+        console.log(req.body)
+        try{
+            const {role, cab,terminalName,isCab,isNotice,sendNotice} = req.body
+            await Users.create({
+                setPrivilege:role,
+                cab,
+                isActive:1,
+                terminalName,
+                isCab,
+                isNotice,
+                sendNotice
+            }).then(res.json({'message':'Пользователь зарегистрирован'}))
+        }catch (e) {
+            console.log(e)
+        }
     }
     async addUser(req,res,next){
         const {user,terminal,cabinet,isReg} = req.body;
@@ -141,16 +148,26 @@ class dashboardController {
         }
     }
     async deleteUser(req,res,next){
-        const {role} = req.body
-        await Users.destroy({
-            where:{
-                setPrivilege:role
-            }
-        }).then(res.json({'message':'Пользователь удален'}))
+        try{
+            const {id} = req.body
+            await Users.destroy({
+                where:{
+                    role_id:id
+                }
+            }).then(async ()=>{
+                await Roles.destroy({
+                    where:{
+                        users_id:id
+                    }
+                })
+            }).then(res.json({'message':'Пользователь удален'}))
+        }catch (e) {
+            console.log(e)
+        }
     }
     async disableUser(req,res,next){
         const {id,status} = req.body
-        console.log(req.body);
+        console.log(req.body)
         await Users.update({isActive:status},{
             where:{
                 role_id:id
@@ -158,11 +175,12 @@ class dashboardController {
         }).then(status ? res.json({'message':'Пользователь активирован'}):res.json({'message':'Пользователь отключен'}))
     }
     async changeUserData(req,res,next){
-        const {user,cabinet,terminal} = req.body
-        await Users.update({setPrivilege:user,cab:cabinet},
+        const {user,cabinet,terminal,isNotice,sendNotice} = req.body
+        await Users.update({setPrivilege:user,cab:cabinet,isNotice,sendNotice},
             {
                 where:{
-                    terminalName:terminal
+                    terminalName:terminal,
+                    setPrivilege:user
                 }
             }).then(res.json({'message':'Данные о пользователе обновились'}))
     }
@@ -264,6 +282,40 @@ class dashboardController {
             }).then(res.json({'message':'Услуга удалена'}))
         }catch (e) {
             console.log(e)
+        }
+    }
+    async selectUserTerminal(req,res,next){
+        try{
+            const {terminalName} = req.body
+            await Users.findAll({
+                where:{
+                    terminalName
+                }
+            }).then(data=>res.json(data))
+        }catch(e){
+            console.log(e)
+        }
+    }
+    async showCurrentUser(req,res,next){
+        try{
+            const {id} = req.params
+            await Users.findByPk(id)
+                .then(data=>res.json(data))
+        }catch (e) {
+            console.log(e)
+        }
+    }
+    async editUser(req,res,next){
+        try{
+            const {role_id,setPrivilege,cab,isCab,isNotice,sendNotice} = req.body
+            await Users.update({setPrivilege,cab,isCab,isNotice,sendNotice},{
+                where:{
+                    role_id
+                }
+            }).then(res.json({'message':'Данные о пользователе обновились'}))
+        }
+        catch (e) {
+
         }
     }
 

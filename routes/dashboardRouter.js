@@ -22,5 +22,8 @@ dashboardRouter.post('/addNewTerminal',dashboardController.AddNewTerminal)
 dashboardRouter.post('/deleteTerminal',dashboardController.deleteTerminal)
 dashboardRouter.post('/deleteService',dashboardController.deleteService)
 dashboardRouter.post('/registerUser',dashboardController.registerUser)
+dashboardRouter.post('/selectUserTerminal',dashboardController.selectUserTerminal)
+dashboardRouter.get('/showCurrentUser/:id',dashboardController.showCurrentUser)
+dashboardRouter.post('/editUser',dashboardController.editUser)
 
 module.exports = dashboardRouter;

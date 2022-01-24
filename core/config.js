@@ -4,6 +4,5 @@
         password:process.env.DB_PASS,
         database:process.env.DB,
         port:process.env.DB_PORT,
-        //insecureAuth:true
     };
 module.exports = connection

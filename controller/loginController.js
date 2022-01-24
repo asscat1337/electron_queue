@@ -4,7 +4,6 @@ const Roles = require('../models/model__test/Roles')
 class LoginController{
     async renderLogin(req,res,next){
         try{
-            console.log(req.session,'123')
             const findUser = await User.findAll({where:{terminalName:req.query.uch,isActive:1},raw:true})
             res.render('login',{
                 result:Array.from(findUser)
@@ -33,21 +32,4 @@ class LoginController{
     }
 }
 
-
-// exports.login = (req,res)=>{
-//     const query = req.query.uch;
-//                 connection.query(`SELECT distinct role.role_id,role.setPrivilege,role.terminalName from role inner JOIN roles ON roles.users_id = role.role_id WHERE role.terminalName= '${query}'`)
-//                     .then(data=>{
-//                         if(data[0].length){
-//                             res.render('login',{
-//                                 result:data[0],
-//                             });
-//                         }
-//                         else{
-//                             res.status(500).render('template/error',{
-//                                 error:'Не найдено пользователей'
-//                             })
-//                         }
-//                     })
-// };
 module.exports = new LoginController()

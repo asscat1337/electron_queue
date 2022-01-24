@@ -1,7 +1,7 @@
 const wrapper = document.querySelector('.wrapper');
 const take__ticket = document.querySelectorAll('.btn__ticket');
 const time =  moment().format('HH:mm:ss');
-const socket = io('http://localhost:5000',{
+const socket = io('http://localhost:8000',{
     transport:['websocket']
 });
 window.addEventListener('unload',()=>{

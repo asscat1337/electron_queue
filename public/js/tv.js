@@ -1,4 +1,4 @@
-const socket = io.connect('http://localhost:5000',{
+const socket = io.connect('http://localhost:8000',{
     transport:['pooling']
 });
 const tvInfo = document.querySelector('.columns__container');
@@ -154,7 +154,6 @@ document.addEventListener('DOMContentLoaded',async()=>{
          testFunction(Object.values(data[1]).map(item=>item))
         });
         await socket.on('repeat ticket',data=> {
-            console.log(socket)
             testFunction(data)
         });
     });

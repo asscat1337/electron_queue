@@ -3,20 +3,19 @@ const express = require('express'),
  app = express(),
  socket =  require('socket.io'),
  http = require('http').createServer(app),
- mysql = require('mysql2'),
  bodyParser = require('body-parser'),
  io = socket(http,{
      cors:{
          origin:'http://localhost',
          methods:['GET','POST'],
-	allowHeaders:['my-custom-header'],
-	credentials:true
+        allowHeaders:['my-custom-header'],
+        credentials:true
      }
  });
  cors = require('cors'),
  events = require('events'),
  cron = require('cron').CronJob,
- port = process.env.port || 5000,
+ port = process.env.port || 8000,
  session = require('express-session'),
  sessionStorage = require('express-mysql-session'),
  cookieParser = require('cookie-parser');
@@ -26,12 +25,9 @@ const express = require('express'),
 
 const fs = require('fs');
 const moment =  require('moment');
-// const  amqp = require('amqplib/callback_api')
  const {Sequelize,QueryTypes,Op} = require('sequelize')
 const User = require('./models/model__test/User')
-const Ticket = require('./models/model__test/Ticket')
 const Terminal = require('./models/model__test/Terminal')
-const Service = require('./models/model__test/Service')
 const Roles = require('./models/model__test/Roles')
 
 const user = require('./midlleware/user');
@@ -43,7 +39,6 @@ const loginRouter = require('./routes/loginRouter');
 const videoRouter = require('./routes/videosRouter');
 const sequelize = require('./core/config1');
 
-events.EventEmitter.prototype._maxListeners = Infinity;
 
 app.use(cookieParser());
 const sessionMiddleWare = session({
@@ -91,7 +86,7 @@ async function init(){
         await Terminal.findAll().then(async (service)=>{
             service.map(async (terminal)=>{
                 const {nameTerminal,isNotice} = terminal
-                await sequelize.query(`CREATE TABLE tvinfo__${nameTerminal}${moment(nextDate._d).format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
+                await sequelize.query(`CREATE TABLE tvinfo__${nameTerminal}${moment().format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
         date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
         cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45) NULL,isComplete INTEGER(11) NULL,type INTEGER(11) NULL,${isNotice || 'notice VARCHAR(45) NULL'},PRIMARY KEY (tvinfo_id)) CHARACTER SET utf8 COLLATE utf8_general_ci`)
                 await delay(5000)
@@ -102,9 +97,9 @@ async function init(){
     }
 }
 
-const job = new cron('00 16 * * 0-6',async()=>{
+const job = new cron('08 10 * * 0-6',async()=>{
     try{
-        await sequelize.query(`UPDATE service SET pointer = 1`)
+        await sequelize.query(`UPDATE service SET pointer = 1`,{type:QueryTypes.UPDATE})
 	init()
     }catch (e) {
         console.log(`Произошла ошибка ${e}`)
@@ -132,10 +127,10 @@ io.on('connection', async(socket) => {
             })
         })
         socket.on('add data', async (data) => {
-            const {number,tvinfo_id,user} = data;
+            const {number,user} = data;
 	    const {userdata} = socket.handshake.session
             await sequelize.query(`UPDATE tvinfo__${userdata.terminalName}${moment().format('DMMYYYY')} set isComplete = 1 WHERE number = :number AND tvinfo_id = :tvinfo_id`, {
-                replacements: {number,tvinfo_id},
+                replacements: {number,tvinfo_id:user.id},
                 type: QueryTypes.UPDATE
             })
         })
@@ -222,7 +217,7 @@ io.on('connection', async(socket) => {
         })
         socket.on('clicked',async(data)=>{
             const {userdata} = socket.handshake.session
-            const {number,tvinfo_id,user,date,received} = data
+            const {number,tvinfo_id,time,received} = data
             const findTicket = await sequelize.query(`SELECT * from tvinfo__${userdata.terminalName}${moment().format('DMMYYYY')} WHERE number = :number  AND isComplete = :isComplete AND tvinfo_id = :tvinfo_id`,{
                 replacements:{number,isComplete:0,tvinfo_id},
                 type:QueryTypes.SELECT
@@ -241,7 +236,7 @@ io.on('connection', async(socket) => {
                  setTimeout(()=>{
                      socket.to(userdata.terminalName).emit('message',[{'data':result},{...files}])
 		     io.sockets.to(received).emit('complete sound',{isDisabled:false})
-                 },Date.now() - date + 15000)
+                 },Date.now() - time + 15000)
                 })
                 .catch(err=>console.log(err))
         })
@@ -307,21 +302,21 @@ io.on('connection', async(socket) => {
         }
          socket.on('repeat data',async(data)=>{
              const {userdata} = socket.handshake.session
-             const {terminal,tvinfo_id,ticket,date} = data
+             const {terminal,ticket,time} = data
              const findUser = await User.findByPk(userdata.role_id)
             soundData(ticket,findUser.cab,findUser.isCab)
                  .then((files)=> {
                          setTimeout(()=>{
                              socket.to(terminal).emit('repeat ticket',files)
-                         },Date.now() - date + 10000)
+                         },Date.now() - time + 10000)
                  })
                  .catch(err=>console.log(err))
 
 
         })
-        socket.on('show tv',async(data)=>{
+        socket.on('show tv',(data)=>{
             const {terminalName} = data[0]
-            await socket.broadcast.to(`${terminalName}`).emit('show result',data)
+            socket.broadcast.to(`${terminalName}`).emit('show result', data)
         })
         socket.on('complete data',(data)=>{
 	    const {userdata} = socket.handshake.session

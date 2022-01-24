@@ -97,6 +97,18 @@
                         <span>Относится к регистратуре</span>
                     </label>
                 </p>
+                <p>
+                    <label>
+                        <input type="checkbox" class="filled-in isNotice">
+                        <span>Оставлять заметки</span>
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <input type="checkbox" class="filled-in sendNotice">
+                        <span>Показывать фио</span>
+                    </label>
+                </p>
                 <button class="btn role__button">Добавить</button>
             </div>
             <div class="card-panel add__terminal">
@@ -109,32 +121,19 @@
 
             <div class="roles" id="role__list">
                 <h5>Список пользователей</h5>
-                <%for(let i =0;i<data.length;i++){%>
-                <div class="result__role" data-id="<%=JSON.stringify(data[i].role_id).replace(/"/g,'')%>">
-                    <span class="role__text"><%=JSON.stringify(data[i].setPrivilege).replace(/"/g,'')%></span>
-                    <button class="btn delete__role" data-id="<%=JSON.stringify(data[i].role_id).replace(/"/g,'')%>">Удалить пользователя</button>
-                    <%if(data[i].isActive===1){%>
-                        <div class="switch">
-                            <label>
-                                Off
-                                <input type="checkbox" checked="checked" class="deactive__user filled-in"/>
-                                <span class="lever"></span>
-                                On
-                            </label>
-                        </div>
-                </div>
-                    <%}else{%>
-                    <div class="switch">
-                        <label>
-                            Off
-                            <input type="checkbox" class="deactive__user filled-in"/>
-                            <span class="lever"></span>
-                            On
-                        </label>
-                    </div>
-            </div>
+                <select  class="user_terminal browser-default">
+                    <option disabled selected>Выберите значение</option>
+                    <%for (let i=0;i<data1.length;i++){%>
+                    <option><%=JSON.stringify(data1[i].nameTerminal).replace(/"/g,'')%></option>
                     <%}%>
-                <%}%>
+                </select>
+                <div id="modal1" class="modal">
+                    <div class="modal-content">
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+                    </div>
+                </div>
             </div>
     </div>
     <script src="public/js/dashboard.js"></script>
