@@ -20,7 +20,6 @@ class opController{
     async getCabinet(req,res,next){
         try{
 	    const {cab} = req.session.userdata
-            console.log(cab)
             const {service,id} = req.body
             await User.findAll({
                 attributes:['cab'],

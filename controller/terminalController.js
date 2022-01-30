@@ -10,7 +10,7 @@ class TerminalController {
            const {id} = req.query
             const checkTicket = await TicketService.checkTable(id)
             if(!checkTicket.length){
-                await TicketService.createTable('ackt')
+                await TicketService.createTable(id)
             }
                const service = await Service.findAll({where:{setTerminalName:req.query.id,status:1}})
                const terminal = await Terminal.findOne({where:{nameTerminal:req.query.id}})

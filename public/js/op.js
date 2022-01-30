@@ -156,7 +156,7 @@ socket.on('show test',data=>{
         socket.emit('clicked',{"number":ticket__text.textContent,"tvinfo_id":data.tvinfo_id,date:Date.now(),received:socket.id});
 })
 socket.on('await notice',data=>{
-    dataTicket = data
+    dataTicket = data[0]
     data.map(item=>{
         document.querySelector('.notice-block h5').insertAdjacentHTML('afterend',`
             <div class="result-notice">
@@ -204,6 +204,7 @@ btnComplete.addEventListener('click',()=>{
         }
     })
     socket.emit('complete data',{"number":ticket__text.textContent})
+    console.log(dataTicket)
     socket.emit('add data',{"number":ticket__text.textContent,"tvinfo_id":dataTicket.tvinfo_id,user:getStringParams(`${Object.values(window.location.search).join('')}`)});
     ticket__text.textContent = "";
     service___text.textContent = "";
@@ -255,6 +256,8 @@ transferButton.addEventListener('click',()=>{
     });
     let acceptButton = document.querySelector('.accept__transfer');
     acceptButton.addEventListener('click',()=>{
+        console.log(dataTicket)
+
         const pointer = Array.from(ticket__text.textContent).splice(1).join('')
         const letter = Array.from(ticket__text.textContent).splice(0,1).join()
         const noticeText = document.querySelector('.result__notice');

@@ -101,7 +101,7 @@ class dashboardController {
         }
     }
     async addUser(req,res,next){
-        const {user,terminal,cabinet,isReg} = req.body;
+        const {user,terminal,cabinet,isReg,id} = req.body;
 	console.log(req.body)
         try{
             const service = await Service.findOne({
