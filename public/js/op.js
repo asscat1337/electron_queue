@@ -16,7 +16,6 @@ const inputNotice = document.querySelector('.input-notice')
 let number,service,terminal = '';
 let numberSocket,roomId;
 const btnComplete = document.querySelector('.next__complete');
-let isDisabled = true
 socket.on('disconnect',()=>{
     document.body.insertAdjacentHTML(`beforebegin`,`
  <div class="preloader">
@@ -88,7 +87,6 @@ document.addEventListener('DOMContentLoaded',()=>{
         });
             })
     nextButton.addEventListener('click',(event)=>{
-        isDisabled = true
         socket.emit('test data',{'received':socket.id})
     });
     socket.on('show data',data=>{
@@ -131,7 +129,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     })
     socket.on('updates queue',data=>{
             document.querySelectorAll('.result').forEach(item=>{
-                console.log(item.querySelector('.result__ticket').textContent)
                 if(item.querySelector('.result__ticket').textContent===data){
                     item.remove()
                 }
@@ -152,10 +149,12 @@ socket.on('show test',data=>{
                 nextButton.disabled = true
             }
         }
+
         socket.emit('test',{number:ticket__text.textContent})
         socket.emit('clicked',{"number":ticket__text.textContent,"tvinfo_id":data.tvinfo_id,date:Date.now(),received:socket.id});
 })
 socket.on('await notice',data=>{
+
     dataTicket = data[0]
     data.map(item=>{
         document.querySelector('.notice-block h5').insertAdjacentHTML('afterend',`
@@ -171,7 +170,6 @@ socket.on('await notice',data=>{
     if(noticeButtons){
         noticeButtons.forEach(button=>{
             button.addEventListener('click',(e)=>{
-                console.log(data[0].tvinfo_id)
                 const {parentNode} = e.target
                 const ticket = parentNode.querySelector('.result__ticket')
                 const service = parentNode.querySelector('.result__service')
@@ -191,7 +189,6 @@ socket.on('await notice',data=>{
     }
     })
 btnComplete.addEventListener('click',()=>{
-    isDisabled = true
     nextButton.disabled = false;
     document.querySelectorAll('.result').forEach(item=>{
         if(ticketText.textContent === item.querySelector('.result__ticket').textContent){
@@ -204,8 +201,11 @@ btnComplete.addEventListener('click',()=>{
         }
     })
     socket.emit('complete data',{"number":ticket__text.textContent})
-    console.log(dataTicket)
-    socket.emit('add data',{"number":ticket__text.textContent,"tvinfo_id":dataTicket.tvinfo_id,user:getStringParams(`${Object.values(window.location.search).join('')}`)});
+    socket.emit('add data', {
+            "number":ticket__text.textContent,
+            "tvinfo_id":dataTicket.tvinfo_id,
+            user:getStringParams(`${Object.values(window.location.search).join('')}`)
+        });
     ticket__text.textContent = "";
     service___text.textContent = "";
    Array.from(buttonMain).slice(1).forEach(item=>{
@@ -217,9 +217,6 @@ repeatButton.addEventListener('click',()=>{
     socket.emit('repeat data',{"ticket":document.querySelector('.ticket__text').textContent,
         "terminal":data.service,'tvinfo_id':dataTicket.tvinfo_id,date:Date.now()})
 })
-socket.on('complete sound',(data)=>{
-   isDisabled = data.isDisabled
- })
 transferButton.addEventListener('click',()=>{
     document.querySelector('.modal-content').insertAdjacentHTML('afterbegin',
         `
@@ -228,7 +225,7 @@ transferButton.addEventListener('click',()=>{
             <select name="" class="option__transfer browser-default">
             <option disabled selected>Выберите кабинет</option>
             </select>
-            <button class="btn accept__transfer" ${isDisabled ? "disabled" : ""}>Перевести</button>
+            <button class="btn accept__transfer">Перевести</button>
             </div>`);
     let transferBlock = document.querySelector('.option__transfer');
     async function fetchGetCab(){
@@ -256,7 +253,6 @@ transferButton.addEventListener('click',()=>{
     });
     let acceptButton = document.querySelector('.accept__transfer');
     acceptButton.addEventListener('click',()=>{
-        console.log(dataTicket)
 
         const pointer = Array.from(ticket__text.textContent).splice(1).join('')
         const letter = Array.from(ticket__text.textContent).splice(0,1).join()
@@ -290,7 +286,6 @@ transferButton.addEventListener('click',()=>{
         if(inputNotice){
             inputNotice.value = ''
         }
-        isDisabled = true
     });
     document.querySelector('.modal-close').addEventListener('click',()=>{
         if(document.querySelector('.transfer__block')){

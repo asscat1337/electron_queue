@@ -2,10 +2,16 @@ body {margin: 0; padding:0; background: #000; color: #fff; font-family: arial; b
 
 section {display: flex; height: 100%}
 
-div.left {width: 30%; height: 100%; padding: 50px;}
+div.left {
+    width: 38%;
+    height: 100%;
+    padding: 50px;
+}
 /*div.right {display:flex; justify-content:space-around; flex-wrap: wrap;}*/
 .right{
-    width: 64%; height: 100vh; overflow:hidden
+    /*width: 64%; */
+    height: 100vh;
+    overflow:hidden
 }
 /*.wrapper-right{
     display:flex; justify-content:space-between; flex-wrap: wrap;*/
@@ -59,8 +65,8 @@ overflow: hidden; padding: 10px;}
     border-radius: 10px;
     border: 1px solid #919191;
     box-sizing: border-box;
-    height: 122px;
-    width: 560px;
+    height: 80px;
+    width: 300px;
     float: left;
     margin: 15px 20px; transition: all 0.3s}
 

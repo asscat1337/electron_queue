@@ -8,19 +8,31 @@
     --head-height: 150px;
 }
 
-/*@import url('https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap');*/
-
-body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial, sans-serif; height: var(--grid-height); width: var(--grid-width); font-size: 60px; overflow: hidden;}
+body{
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    height: var(--grid-height);
+    width: var(--grid-width);
+    font-size: 53px;
+    overflow: hidden;
+}
 
 .header {
-    /* height: 100px; */
     width: 100%;
-    /* background: #15bf05; */
     text-align: center;
     font-weight: 800;
     line-height: 1em;
     color: #729700;
 }
+/*.wrapper{*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    flex-direction: column;*/
+/*    align-items: center;*/
+/*}*/
 .header span {display: block; font-size: 30px; color: #425602}
 .time{
     color:#ffff;
@@ -30,8 +42,12 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
 }
 .take__ticket {
     display: flex;
-    flex-flow: row wrap;
-    justify-content: space-around;    }
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    max-width: 1200px;
+    flex-direction: row;
+}
 .modal__ticket {
     position: fixed;
     top: 20px;
@@ -39,9 +55,7 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     height: 100%;
     width: 100%;
     z-index: 3;
-    /* background: black; */
-    /* opacity: 0.9; */
-    /* overflow: auto;*/}
+}
 
 .ticket{
     position: relative;
@@ -73,8 +87,7 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     background: rgb(127,168,0);
     background: linear-gradient(351deg, rgba(127,168,0,1) 0%, rgba(168,208,1,1) 100%);
     border-radius: 10px;
-    height: 250px;
-    width: 900px;
+    width: 700px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -82,123 +95,15 @@ body{margin: 0; padding: 100px 0 0 0; box-sizing: border-box; font-family: Arial
     box-shadow: 0px 13px 0 0 #425602;
     border-bottom: 1px solid #92c000;
     margin:10px;
+    flex: 1;
 }
 .btn__ticket span {
     text-align: center;
-    margin: 35px auto;
+    margin: 25px auto;
     color: #ffff;
 }
 
-
-//.btn__ticket:active {
-  //    margin: 13px auto 0;
-  //    box-shadow: none
-  //}
-
-.op__main{
-    position: relative;
-    margin: 10px;
-    height: 90vh;
-    width: 50vh;
-    border-radius: 5px;
-    border: 1px solid black;
-}
-.ticket__content{
-    height: 45%;
-    width: 100%;
-    border: 1px solid silver;
-}
-.ticket__block{
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-}
-.ticket__text{
-    font-size: 60pt;
-    letter-spacing: 20px;
-}
-/*.ticket__text-blocks{*/
-/*    letter-spacing: 20px;*/
-/*    font-size: 24px;*/
-/*}*/
-.service{
-    display: flex;
-    flex-direction: column;
-}
-.service__text{
-    font-size: 30pt;
-}
-.service span{
-    text-align: center;
-}
-.arrow-right-4{
-    height: 80px;
-    width: 80px;
-}
-
-
-
-.result{
-    margin: 10px;
-    display: flex;
-    justify-content: space-around;
-}
-.result span{
-    font-size: 48px;
-
-}
-.added{
-    color:red;
-}
-.tv__end{
-    margin: 50px 0;
-    flex-shrink: 0;
-    flex-grow: 0;
-    width: 600px;
-    max-width: 100%;
-    background: #fff;
-    transition: transform 0.15s ease 0s,opacity 0.15s ease 0s;
-    transform: scale(1);
-    text-align: center;
-    border-radius:10px;
-
-}
-.modal{
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    overflow: hidden;
-    display: flex;
-    flex-flow: nowrap column;
-    justify-content: center;
-    align-items: center;
-    z-index: 30;
-    padding: 30px 0;
-    background: rgba(0,0,0,0.9);
-}
-.modal__wrap{
-    flex-shrink: 0;
-    flex-grow: 0;
-    width: 100%;
-    min-height: 100%;
-    margin: auto;
-    display: flex;
-    flex-flow: nowrap column;
-    align-items: center;
-    justify-content: center;
-}
-.active{
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-color: #dddddd;
-    z-index:9999;
-}
-.disable{
-    pointer-events: none;
-    opacity: 0.4;
-}
+/*.btn__ticket:active {*/
+/*    margin: 13px auto 0;*/
+/*    box-shadow: none*/
+/* }*/

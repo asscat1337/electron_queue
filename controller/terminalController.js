@@ -36,12 +36,8 @@ class TerminalController {
     async setStateTicket(req,res,next){
         try{
              const {number,service,nameTerminal,cabinet,id,type}=req.body
-            // const time = moment().format('YYYY-MM-DD')
-            // const mappedArray = ['NULL',`'${time}'`,`'${service}'`,`'${number}'`,`'${nameTerminal}'`,`'${cabinet}'`,0,id,0,type,``].join(',')
-            // const [metadata,result] = await TicketService.insertTable(nameTerminal,mappedArray)
-            // console.log(result)
-            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:time,:service,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
-                replacements:{tvinfo_id:null,time:moment().format('YYYY-MM-DD'),service:service,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
+            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
+                replacements:{tvinfo_id:null,time:moment().format('YYYY-MM-DD'),date:moment().format('HH:mm:ss'),service:service,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
                 type:QueryTypes.INSERT
             })
             const addedDataId = addedData[0]

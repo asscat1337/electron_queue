@@ -5,10 +5,11 @@ const moment = require('moment')
 
 class tvController{
     async renderTv(req,res,next){
+        console.log(moment().format('YYYY-MM-DD'))
         await sequelize.query(`SELECT * from tvinfo__${req.query.id}${moment().format('DMMYYYY')} WHERE terminalName = :terminalName 
-        AND isComplete = :isComplete AND isCall = :isCall AND time = date_format(now(),"%Y-%m-%d") ORDER BY tvinfo_id DESC LIMIT 20`,{
+        AND isComplete = :isComplete AND isCall = :isCall AND date = :date ORDER BY tvinfo_id DESC LIMIT 20`,{
             replacements:{terminalName:req.query.id,
-                isComplete: req.query.status === "0" ? 0 : 1 ,isCall: req.query.status === "0" ? 0 : 1},
+                isComplete: req.query.status === "0" ? 0 : 1 ,isCall: req.query.status === "0" ? 0 : 1,date:moment().format('YYYY-MM-DD')},
             type:QueryTypes.SELECT
         })
             .then(async(data)=>{
@@ -24,7 +25,7 @@ class tvController{
                                 template1:data1,
                                 isRegistry:req.query.id.toString().includes('reg'),
                                 clock:moment().format('HH:mm:ss'),
-                                date:moment().format('D/MM/YYYY')
+                                date:moment().format('DD/MM/YYYY')
                             })
                             break;
                         case '1' : /// для регистратуры и прочее
@@ -33,7 +34,7 @@ class tvController{
                                 template1:data1,
                                 isRegistry:req.query.id.toString().includes('reg'),
                                 clock:moment().format('HH:mm:ss'),
-                                date:moment().format('D/MM/YYYY')
+                                date:moment().format('DD/MM/YYYY')
                             })
                             break;
                         default :
@@ -42,6 +43,13 @@ class tvController{
                     }
                 })
             })
+    }
+    async generateSound(req,res,next){
+        try{
+            return res.status(200).send('ушло')
+        }catch(e){
+            console.log(e)
+        }
     }
 }
 module.exports = new tvController()

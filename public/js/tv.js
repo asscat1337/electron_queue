@@ -1,10 +1,12 @@
 const socket = io.connect('http://localhost:8000',{
-    transport:['pooling']
+    transport:['pooling'],
+    withCredentials:true
 });
 const tvInfo = document.querySelector('.columns__container');
 
 setInterval(()=>{
     document.querySelector('.clock').textContent = moment().format('HH:mm:ss')
+    document.querySelector('.date').textContent = moment().format('DD/MM/YYYY')
 },1000)
 
 
@@ -69,91 +71,179 @@ if(getRoomId.status === "0"){
 }
 let test;
 socket.on('completed',data=>{
-    let ticketArr = []
-    document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
-    ticketArr.find(el=>{
-        if(el===data.number){
-            document.querySelectorAll('.number').forEach(block=>{
-                if(block.textContent === el){
-                    if(getRoomId.status === "1"){
-                        block.parentNode.classList.remove('active')
-                    }else{
-                        block.parentNode.remove()
-                    }
-                }
-            })
-        }
-    })
+   const numbers = Array.from(document.querySelectorAll('.number'));
+   numbers.forEach(number=>{
+       if(number.textContent === data.number){
+               if(getRoomId.status === "1"){
+                   number.parentNode.classList.remove('active')
+               }
+               if(getRoomId.status === "0"){
+                   number.parentNode.remove()
+               }
+       }
+   })
     if(document.querySelectorAll('.ticket').length<20){
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
     }
 })
-
 async function testFunction(data){
-    for(let i = 0;i<data.length;i++){
-        const audio = new Audio(data[i])
-            await playAudio(audio)
+    const sound = data.sound
+    let index = 0;
+
+
+    function recursive_play(){
+        if(index+1 === sound.length){
+            playAudio(new Audio(sound[index]),null)
+            socket.emit('delete sound',data.ticket)
+        }else{
+            playAudio(new Audio(sound[index]),()=>{
+                index++;
+                recursive_play()
+            })
+        }
     }
-}
 
-async function playAudio(sound){
+    recursive_play()
+}
+async function playAudio(sound,callback){
     sound.play()
-    await new Promise((resolve,reject)=>{
-        sound.addEventListener('ended',()=>{
-            resolve()
-        })
-        sound.addEventListener('error',()=>{
-            reject()
-        })
-    })
+    if(callback){
+        sound.addEventListener('ended',callback)
+    }
+    // await new Promise((resolve,reject)=>{
+    //     sound.addEventListener('ended',()=>{
+    //         prev+=sound.duration
+    //         resolve()
+    //     })
+    //     sound.addEventListener('error',()=>{
+    //         reject()
+    //     })
+    // })
+
 }
 
-document.addEventListener('DOMContentLoaded',async()=>{
-    await socket.on('message',data=>{
-        if(data===undefined) return;
-        let ticketArr = []
-        document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
-        const {cabinet,isCab,ticket} = data[0].data
-        if(getRoomId.status === "1"){
-            tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket active">
+function play_all(data){
+    testFunction(data)
+}
+
+setInterval(()=>{
+    const start = Date.now();
+    socket.volatile.emit('ping',getRoomId.id,(data)=>{
+        if(data===null) return;
+        // const latency = Date.now() - start
+        const dataSound = JSON.parse(data)
+        play_all(dataSound)
+        if(dataSound.hasOwnProperty('data')){
+            const {cabinet,isCab,ticket} = dataSound?.data
+             // if(getRoomId.status === "1"){
+
+            if(getRoomId.status === "0"){
+                const tickets = document.querySelectorAll('.ticket')
+
+                tickets.forEach(ticketBlock=>{
+                    const number = ticketBlock.querySelector('.number');
+                    const status = ticketBlock.querySelector('.status')
+
+                    if(number.textContent === ticket){
+                        ticketBlock.classList.add('active')
+                        if(isCab) {
+                            status.textContent = `Окно ${cabinet}`
+                        }
+                        if(!isCab){
+                            status.textContent = `Кабинет ${cabinet}`
+                        }
+                    }
+                })
+            }else{
+                tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket active">
                     <div class="number">${ticket}</div> 
                       <div class="status">
                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }                      
                       </div>
             </div>`)
-            if(document.querySelectorAll('.ticket').length>=20){
-                tvInfo.lastChild.remove()
             }
-	document.querySelector('.left-ticket__container').insertAdjacentHTML('afterbegin',
-	`
-	   <div class="ticket-call">
-	    <span>${ticket}</span>
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="arrow_down" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" style="enable-background:new 0 0 256 256;" xml:space="preserve">
-<g>
-	<path d="M256,512l256-256H352V0.001L160,0v256H0L256,512z"/>
-</g>
-</svg>
-            <span>${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }</span>
-           </div>
-	`)
-	setTimeout(()=>{
-		document.querySelector('.ticket-call').remove()
-	},10000)
+                if(document.querySelectorAll('.ticket').length>=20){
+                    tvInfo.lastChild.remove()
+                }
+//                 document.querySelector('.left-ticket__container').insertAdjacentHTML('afterbegin',
+//                     `
+// 	   <div class="ticket-call">
+// 	    <span>${ticket}</span>
+// <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="arrow_down" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+// <g>
+// 	<path d="M256,512l256-256H352V0.001L160,0v256H0L256,512z"/>
+// </g>
+// </svg>
+//             <span>${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }</span>
+//            </div>
+// 	`)
+//                 setTimeout(()=>{
+//                     document.querySelector('.ticket-call').remove()
+//                 },10000)
+           // }
+            play_all(dataSound,ticket)
         }
-         ticketArr.find(el=>{
-             if(el===ticket){
-                 document.querySelectorAll('.number').forEach(block=>{
-                     if(block.textContent === el){
-                         isCab ? block.parentNode.querySelector('.status').textContent = `Окно ${cabinet}`
-                             :block.parentNode.querySelector('.status').textContent = `Кабинет ${cabinet}`
-                         block.parentNode.classList.add('active')
-                     }
-                 })
-             }
-         })
-         testFunction(Object.values(data[1]).map(item=>item))
+        socket.on('repeat ticket',data=> {
+            console.log(data)
+            // play_all(data?.sound)
         });
-        await socket.on('repeat ticket',data=> {
-            testFunction(data)
-        });
-    });
+
+
+    })
+
+},10000)
+
+socket.on('message',data=>{
+    console.log(data)
+})
+// document.addEventListener('DOMContentLoaded',async()=>{
+//      socket.on('message',data=>{
+//         console.log(socket.volatile)
+//         if(data===undefined) return;
+//         let ticketArr = []
+//         document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
+//         const {cabinet,isCab,ticket} = data.data
+//         if(getRoomId.status === "1"){
+//             tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket active">
+//                     <div class="number">${ticket}</div>
+//                       <div class="status">
+//                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }
+//                       </div>
+//             </div>`)
+//             if(document.querySelectorAll('.ticket').length>=20){
+//                 tvInfo.lastChild.remove()
+//             }
+// 	document.querySelector('.left-ticket__container').insertAdjacentHTML('afterbegin',
+// 	`
+// 	   <div class="ticket-call">
+// 	    <span>${ticket}</span>
+// <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="arrow_down" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" style="enable-background:new 0 0 256 256;" xml:space="preserve">
+// <g>
+// 	<path d="M256,512l256-256H352V0.001L160,0v256H0L256,512z"/>
+// </g>
+// </svg>
+//             <span>${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }</span>
+//            </div>
+// 	`)
+// 	setTimeout(()=>{
+// 		document.querySelector('.ticket-call').remove()
+// 	},10000)
+//         }
+//          ticketArr.find(el=>{
+//              if(el===ticket){
+//                  document.querySelectorAll('.number').forEach(block=>{
+//                      if(block.textContent === el){
+//                          isCab ? block.parentNode.querySelector('.status').textContent = `Окно ${cabinet}`
+//                              :block.parentNode.querySelector('.status').textContent = `Кабинет ${cabinet}`
+//                          block.parentNode.classList.add('active')
+//                      }
+//                  })
+//              }
+//          })
+//          play_all(Object.values(data.sound).map(item=>item),ticket)
+//          socket.emit('start queue',true)
+//         });
+//         socket.on('repeat ticket',data=> {
+//             play_all(data.sound)
+//         });
+//     });

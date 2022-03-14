@@ -6,7 +6,7 @@ class TicketService {
     async createTable(service){
         try{
             await sequelize.query(`CREATE TABLE IF NOT EXISTS tvinfo__${service}${moment.format('DMMYYYY')} 
-                (tvinfo_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL ,time DATE NOT NULL,service TEXT NOT NULL,number TEXT NOT NULL,terminalName TEXT NOT NULL,cabinet INTEGER NOT NULL,
+                (tvinfo_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL ,date DATE NOT NULL,time TIME NOT NULL,service TEXT NOT NULL,number TEXT NOT NULL,terminalName TEXT NOT NULL,cabinet INTEGER NOT NULL,
                 isCall BOOLEAN NOT NULL,services_id INTEGER NOT NULL,
                 isComplete BOOLEAN NOT NULL,
                 type INTEGER NOT NULL, notice TEXT NOT NULL)`)

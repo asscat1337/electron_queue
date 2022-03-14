@@ -245,9 +245,11 @@ class dashboardController {
             }else{
                         await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
                             .then(async ()=>{
-                                await sequelize.query(`CREATE TABLE tvinfo__${terminalName}${moment().format('DMMYYYY')} (tvinfo_id INT NOT NULL AUTO_INCREMENT,time VARCHAR(45) NULL,
-                date VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,Privilege VARCHAR(45) NULL,
-                cabinet VARCHAR(45) NULL,isCalledAgain TINYINT(4) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45),isComplete INTEGER(11) NULL,type INTEGER(11) NULL,PRIMARY KEY (tvinfo_id))`)
+                                await sequelize.query(`CREATE TABLE IF NOT EXISTS tvinfo__${terminalName}${moment().format('DMMYYYY')} 
+                (tvinfo_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL ,date DATE NOT NULL,time TIME NOT NULL,service TEXT NOT NULL,number TEXT NOT NULL,terminalName TEXT NOT NULL,cabinet INTEGER NOT NULL,
+                isCall BOOLEAN NOT NULL,services_id INTEGER NOT NULL,
+                isComplete BOOLEAN NOT NULL,
+                type INTEGER NOT NULL, notice TEXT NOT NULL)`)
                             }).then(res.json({'message':'Терминал добавлен'}))
             }
         }catch (e) {
