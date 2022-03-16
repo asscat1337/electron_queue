@@ -89,42 +89,47 @@ socket.on('completed',data=>{
 async function testFunction(data){
     const sound = data.sound
     let index = 0;
-
-
-    function recursive_play(){
-        if(index+1 === sound.length){
-            playAudio(new Audio(sound[index]),null)
-            console.log(123)
+    for(let i=0;i<sound.length;i++){
+        const audio = new Audio(sound[i])
+        await playAudio(audio)
+        if(i+1 === sound.length){
             socket.emit('delete sound',data.ticket)
-        }else{
-            playAudio(new Audio(sound[index]),()=>{
-                index++;
-                recursive_play()
-            })
         }
     }
-
-    recursive_play()
+    //
+    //
+    // function recursive_play(){
+    //     if(index+1 === sound.length){
+    //         playAudio(new Audio(sound[index]),null)
+    //         socket.emit('delete sound',data.ticket)
+    //     }else{
+    //         playAudio(new Audio(sound[index]),()=>{
+    //             index++;
+    //             recursive_play()
+    //         })
+    //     }
+    // }
+    //
+    // recursive_play()
 }
 async function playAudio(sound,callback){
     sound.play()
-    if(callback){
-        sound.addEventListener('ended',callback)
-    }
-    // await new Promise((resolve,reject)=>{
-    //     sound.addEventListener('ended',()=>{
-    //         prev+=sound.duration
-    //         resolve()
-    //     })
-    //     sound.addEventListener('error',()=>{
-    //         reject()
-    //     })
-    // })
+    // if(callback){
+    //     sound.addEventListener('ended',callback)
+    // }
+    await new Promise((resolve,reject)=>{
+        sound.addEventListener('ended',()=>{
+            resolve()
+        })
+        sound.addEventListener('error',()=>{
+            reject()
+        })
+    })
 
 }
 
-function play_all(data){
-    testFunction(data)
+async function play_all(data){
+   await testFunction(data)
 }
 
 setInterval(()=>{
