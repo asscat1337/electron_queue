@@ -94,6 +94,7 @@ async function testFunction(data){
     function recursive_play(){
         if(index+1 === sound.length){
             playAudio(new Audio(sound[index]),null)
+            console.log(123)
             socket.emit('delete sound',data.ticket)
         }else{
             playAudio(new Audio(sound[index]),()=>{

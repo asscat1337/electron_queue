@@ -20,19 +20,58 @@ body{
     overflow: hidden;
 }
 
+
+.modal{
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow: hidden;
+    display: flex;
+    flex-flow: nowrap column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 30px 0;
+    background: rgba(0,0,0,0.9);
+}
+.modal__wrap{
+    flex-shrink: 0;
+    flex-grow: 0;
+    width: 100%;
+    min-height: 100%;
+    margin: auto;
+    display: flex;
+    flex-flow: nowrap column;
+    align-items: center;
+    justify-content: center;
+}
+.tv__end{
+    margin: 50px 0;
+    flex-shrink: 0;
+    flex-grow: 0;
+    width: 600px;
+    max-width: 100%;
+    background: #fff;
+    transition: transform 0.15s ease 0s,opacity 0.15s ease 0s;
+    transform: scale(1);
+    text-align: center;
+    border-radius:10px;
+
+}
+
 .header {
     width: 100%;
     text-align: center;
     font-weight: 800;
-    line-height: 1em;
     color: #729700;
+    display: flex;
+    justify-content: center;
 }
-/*.wrapper{*/
-/*    display: flex;*/
-/*    justify-content: center;*/
-/*    flex-direction: column;*/
-/*    align-items: center;*/
-/*}*/
+.header p{
+    width:800px;
+}
 .header span {display: block; font-size: 30px; color: #425602}
 .time{
     color:#ffff;
@@ -40,14 +79,34 @@ body{
     font-family:"Arial";
     font-weight: bold;
 }
-.take__ticket {
+/*.take__ticket {*/
+/*    width:80%;*/
+/*    display: inline-block;*/
+/*}*/
+.ticket__wrapper{
     display: flex;
     flex-wrap: wrap;
     align-content: center;
     justify-content: center;
-    max-width: 1200px;
-    flex-direction: row;
 }
+
+.small{
+    width:700px;
+    height: 133px;
+}
+.btn__ticket.small{
+    height: 133px;
+}
+.centered.btn__col{
+    width: 100%;
+}
+
+.btn__col{
+    width: calc(50% - 20px);
+    margin: 10px;
+    /*height: 80px;*/
+}
+
 .modal__ticket {
     position: fixed;
     top: 20px;
@@ -84,26 +143,22 @@ body{
     object-position: center; width: 120px;}
 
 .btn__ticket {
+    height: calc(100% - 65px);
+    position: relative;
     background: rgb(127,168,0);
     background: linear-gradient(351deg, rgba(127,168,0,1) 0%, rgba(168,208,1,1) 100%);
     border-radius: 10px;
-    width: 700px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    padding-bottom: 10%;
     align-items: center;
     box-shadow: 0px 13px 0 0 #425602;
     border-bottom: 1px solid #92c000;
-    margin:10px;
-    flex: 1;
+    /*margin: 10px;*/
 }
 .btn__ticket span {
     text-align: center;
-    margin: 25px auto;
+    font-size: 48px;
     color: #ffff;
+    display: flex;
+    justify-content: center;
 }
 
-/*.btn__ticket:active {*/
-/*    margin: 13px auto 0;*/
-/*    box-shadow: none*/
-/* }*/
