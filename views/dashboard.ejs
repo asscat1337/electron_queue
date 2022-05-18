@@ -25,15 +25,14 @@
     <div class="wrapper">
         <div id="stats">
             <h5>Статистика</h5>
-            <%for(let i=0;i<stats.length;i++){%>
-            <div class="stats__service">
-                <span><%=JSON.stringify(stats[i].ServiceName).replace(/"/g,'')%></span>
-                <span>Количество талонов:<%=JSON.stringify(stats[i].pointer).replace(/"/g,'')%></span>
-            </div>
-            <%}%>
-            <div class="stats__count">
-                <span>Общее количество:<%=JSON.stringify(total)%></span>
-            </div>
+            <span>Выберите терминал</span>
+            <select class="terminal__stats">
+                <option value="" disabled selected>Выберите терминал</option>
+                <%for(let i=0;i<data1.length;i++){%>
+                    <option><%=JSON.stringify(data1[i].nameTerminal).replace(/"/g,'')%></option>
+                <%}%>
+            </select>
+            <div class="stats__container"></div>
         </div>
         <div id="show__service" class="show__service">
             <div class="input-field col s12">
@@ -128,8 +127,7 @@
                     <%}%>
                 </select>
                 <div id="modal1" class="modal">
-                    <div class="modal-content">
-                    </div>
+                    <div class="modal-content"></div>
                     <div class="modal-footer">
                         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
                     </div>

@@ -22,6 +22,10 @@ const getQueryStringParams = query => {
 socket.on('connect',()=>{
     socket.emit('room',Object.values(getQueryStringParams(window.location.search)).join(''))
 })
+
+const url = new URL(window.location.href);
+const terminalId = url.searchParams.get('id')
+
 take__ticket.forEach((item)=> {
     item.addEventListener('click', async (event) => {
         event.target.closest('.take__ticket').classList.add('disable')
@@ -31,12 +35,12 @@ take__ticket.forEach((item)=> {
             headers: {
                 'Content-type': 'application/json;charset=utf-8'
             },
-            body: JSON.stringify({'data': item.getAttribute('data-id')})
+            body: JSON.stringify({'data': item.getAttribute('data-id'),terminalId})
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
                 let res = data;
+                console.log(data)
                 res.forEach(item => {
                     if (time >= item.end_time || time <= item.start_time) {
                         document.body.insertAdjacentHTML('beforeend', `
@@ -58,12 +62,12 @@ take__ticket.forEach((item)=> {
                 <div class="tick__logo"><img src="/public/img/logo-tick.png"/></div>
                 <div class="org_name">ГБУЗ РБ ГКБ №13 г. Уфа</div>
                 <div class="tick__numb">
-		  <span class="tick__number-letter">${item.Letter.toUpperCase()}</span>
+		  <span class="tick__number-letter">${item.letter.toUpperCase()}</span>
 		  <span class="tick__numb-pointer">${item.pointer}</span>
 		</div>
 		<div class="tick__service">
 			<p class="service-name">Название услуги:</p>
-			<span>${item.ServiceName}</span>
+			<span>${item.name}</span>
 		</div>
                 <div class="tick__date">${moment().format('L')}</div>
         </div>
@@ -86,13 +90,13 @@ take__ticket.forEach((item)=> {
                             fetchReset()
                         }
                         let object = {
-                            "id": `${item.id}`,
-                            "number": `${item.Letter}${item.pointer}`,
-                            "service": `${item.ServiceName}`,
-                            "Privilege": `${item.setService}`,
-                            "nameTerminal": `${item.setTerminalName}`,
+                            "id": `${item.service_id}`,
+                            "number": `${item.letter}${item.pointer}`,
+                            "service": `${item.name}`,
+                            "nameTerminal": `${terminalId}`,
                             "cabinet": `${item.cabinet}`,
-                            "type":item.type
+                            "type":item.type,
+                            "pointer":item.pointer
                         };
                         const fetchData = async () => {
                             try {
@@ -113,7 +117,7 @@ take__ticket.forEach((item)=> {
                                             delay(2000).then(()=>{
                                                 window.print()
                                                 delay(1000).then(()=>{
-                                                    document.location.reload()
+                                                    document.querySelector('.modal__ticket').remove()
                                                 })
                                             })
                                         }

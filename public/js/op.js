@@ -88,6 +88,9 @@ document.addEventListener('DOMContentLoaded',()=>{
             })
     nextButton.addEventListener('click',(event)=>{
         socket.emit('test data',{'received':socket.id})
+        setTimeout(()=>{
+            socket.emit('show active',dataTicket)
+        },3000)
     });
     socket.on('show data',data=>{
         data.map(item=>{
@@ -228,6 +231,7 @@ transferButton.addEventListener('click',()=>{
             <button class="btn accept__transfer">Перевести</button>
             </div>`);
     let transferBlock = document.querySelector('.option__transfer');
+    let usersCabinet
     async function fetchGetCab(){
         const data = getStringParams(Object.values(window.location.search).join(''))
         await fetch('/op/getCabinet',{
@@ -239,6 +243,7 @@ transferButton.addEventListener('click',()=>{
         })
             .then(res=>res.json())
             .then(data=>{
+                usersCabinet = data
                 data.map(num=>{
                     let option = document.createElement('option')
                     transferBlock.appendChild(option)
@@ -261,11 +266,13 @@ transferButton.addEventListener('click',()=>{
         if (noticeText){
             getTextNoticeNode = noticeText.textContent
         }
+        const getData = usersCabinet.find(item=>item.cab === +optionVal)
         socket.emit('transfer ticket',{
-            "cabinet":optionVal,
+            "receive":getData,
             "number": document.querySelector('.ticket__text').textContent,
             "tvinfo_id":dataTicket.tvinfo_id,
-            service:service___text.textContent,notice:inputNotice ? inputNotice.value:getTextNoticeNode
+            service:service___text.textContent,
+            notice:inputNotice ? inputNotice.value:getTextNoticeNode
         })
         socket.emit('transfer tv',[{"number":ticket__text.textContent,"cab":optionVal,
             "Letter":letter,"pointer":pointer}])

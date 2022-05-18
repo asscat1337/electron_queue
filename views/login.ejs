@@ -17,7 +17,7 @@
             <div class="input-field col s12">
                 <select class="selectedVal">
                     <%for(let i=0;i<result.length;i++){%>
-                    <option><%=JSON.stringify(result[i].setPrivilege).replace(/"/g,'')%></option>
+                    <option><%=JSON.stringify(result[i].name).replace(/"/g,'')%></option>
                     <%}%>
                 </select>
                 <label>Выберите значение</label>

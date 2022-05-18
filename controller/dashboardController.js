@@ -4,18 +4,30 @@ const Service = require('../models/model__test/Service');
 const Roles = require('../models/model__test/Roles');
 const {Op,QueryTypes}= require('sequelize')
 const sequelize = require('../core/config1')
+const createService = require('../models/model__test/Service/create')
+const createUser = require('../models/model__test/User/create')
+const InsertUser = require('../models/model__test/User/insert')
+const createRoles = require('../models/model__test/Roles/create')
+const insertService = require('../models/model__test/Service/insert')
+const insertRoles = require('../models/model__test/Roles/insert')
+const selectService = require('../models/model__test/Service/select')
+const selectUser = require('../models/model__test/User/select')
+const updateService = require('../models/model__test/Service/update')
+const deleteService = require('../models/model__test/Service/delete')
+const selectRoles = require('../models/model__test/Roles/select')
+
 const moment = require('moment')
 class dashboardController {
     async renderDashboard(req,res,next){
-        const users = await Users.findAll({raw:true})
+        // const users = await Users.findAll({raw:true})
         const terminal = await Terminal.findAll({raw:true});
-        const services = await Service.findAll({raw:true})
-        let sum = services.reduce((acc,current)=>acc+current.pointer,0)
+        // const services = await Service.findAll({raw:true})
+        // let sum = services.reduce((acc,current)=>acc+current.pointer,0)
         res.render('dashboard',{
-            data:users,
+            // data:users,
             data1:terminal,
-            stats:services,
-            total:sum
+            // stats:services,
+            // total:sum
         })
     }
     async deleteUserService(req,res,next){
@@ -32,29 +44,14 @@ class dashboardController {
             .then(data=>res.json(data))
     }
     async showService(req,res,next){
-        const {terminal}=req.body
-         await Service.findAll({where:{setTerminalName:terminal}})
-             .then(data=>res.json(data))
-    }
-    async showUsers(req,res,next){
         try{
-            ///говнокод,педередать позже,возможно мутации
-            const {id} = req.body
-            let arr = []
-            await Roles.findAll({where:{services_id:id}})
-                .then(data=>{
-                    console.log(data)
-                    data.map(item=>arr.push({role_id:item.users_id}))
-                }).then(async()=>{
-                    await Users.findAll({
-                        where:{
-                            [Op.or]:arr
-                        }
-                    }).then(query=>res.json(query))
-                })
-                ///
+            const {terminal}=req.body
+
+            const data = await selectService.selectAll(terminal)
+
+            return res.status(200).json(data)
         }catch (e) {
-            res.status(500).json(e)
+            return res.status(500).json(e)
         }
     }
     async updateUserTerminal(req,res,next){
@@ -77,25 +74,20 @@ class dashboardController {
     }
     async showTerminalUser(req,res,next){
         const {data} = req.body
-        await Users.findAll({
-            where: {
-                terminalName:data
-           }
-        }).then(data=>res.json(data))
+        const allUsers = await selectUser.selectAll(data)
+        return res.status(200).json(allUsers)
+        // await Users.findAll({
+        //     where: {
+        //         terminalName:data
+        //    }
+        // }).then(data=>res.json(data))
     }
     async registerUser(req,res,next) {
-        console.log(req.body)
         try{
-            const {role, cab,terminalName,isCab,isNotice,sendNotice} = req.body
-            await Users.create({
-                setPrivilege:role,
-                cab,
-                isActive:1,
-                terminalName,
-                isCab,
-                isNotice,
-                sendNotice
-            }).then(res.json({'message':'Пользователь зарегистрирован'}))
+            const {name, cab,terminalName,isCab,isNotice,sendNotice} = req.body
+            const newUser = await InsertUser.up(terminalName,req.body)
+
+            return res.status(200).json({'message':'Пользователь зарегистрирован',newUser})
         }catch (e) {
             console.log(e)
         }
@@ -186,46 +178,53 @@ class dashboardController {
     }
     async updateServiceData(req,res,next){
         try{
-            console.log(req.body)
-            const {ServiceName,description,id,startTime,endTime,letter} = req.body;
-            await Service.update({
-                "start_time":startTime,
-                "end_time":endTime,
-                "Letter":letter,
-                ServiceName,description},{
-                where:{
-                    id:id
-                }
-            })
-                .then(res.json({'message':'Данные о терминале обновились'}))
+           const {terminalName} = req.body
+
+            const data = await updateService.updateCurrentService(terminalName,req.body)
+            console.log(data)
+           return  res.status(200).json({'message':'Данные о терминале обновились'})
         }catch (e) {
+            console.log(e)
             res.status(500).json(e)
         }
     }
     async addNewService(req,res,next){
         try{
-            const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time,type} = req.body;
-             await Service.create({
-                 Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time,type
-             }).then(async(data)=>{
-                 const {id} = data.dataValues
-                 if(roles.length){
-                     roles.map(async(role)=>{
-                         await Roles.create({services_id:id,users_id:role,terminalName:setTerminalName})
-                     })
-                 }
-               const findTerminal = await Terminal.findOne({where:{
-                    nameTerminal:setTerminalName
-                    }
-                })
-                 const {terminal_id} = findTerminal
-                 await Service.update({terminalTerminalId:terminal_id},{
-                     where:{
-                         id
-                     }
-                 })
+            console.log(req.body)
+            const {setTerminalName,roles} = req.body
 
-             }).then(res.json({'message':'Сервис добавлен'}))
+            const createService = await insertService.up(setTerminalName,req.body)
+
+            if(roles.length){
+                roles.map(async(role)=>{
+                    await insertRoles.up(setTerminalName,{user_id:role,service_id:createService})
+                })
+            }
+
+            return res.status(200).json({message:'услуга добавлена'})
+
+            // const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time,type} = req.body;
+            //  await Service.create({
+            //      Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time,type
+            //  }).then(async(data)=>{
+            //      const {id} = data.dataValues
+            //      if(roles.length){
+            //          roles.map(async(role)=>{
+            //              await Roles.create({services_id:id,users_id:role,terminalName:setTerminalName})
+            //          })
+            //      }
+            //    const findTerminal = await Terminal.findOne({where:{
+            //         nameTerminal:setTerminalName
+            //         }
+            //     })
+            //      const {terminal_id} = findTerminal
+            //      await Service.update({terminalTerminalId:terminal_id},{
+            //          where:{
+            //              id
+            //          }
+            //      })
+            //
+            //  }).then(res.json({'message':'Сервис добавлен'}))
 
         }catch (e) {
             console.log(e)
@@ -242,16 +241,14 @@ class dashboardController {
             })
             if(findTerminal.length){
                 return res.status(400).json({'message':'Данный терминал уже существует'})
-            }else{
-                        await Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText})
-                            .then(async ()=>{
-                                await sequelize.query(`CREATE TABLE IF NOT EXISTS tvinfo__${terminalName}${moment().format('DMMYYYY')} 
-                (tvinfo_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL ,date DATE NOT NULL,time TIME NOT NULL,service TEXT NOT NULL,number TEXT NOT NULL,terminalName TEXT NOT NULL,cabinet INTEGER NOT NULL,
-                isCall BOOLEAN NOT NULL,services_id INTEGER NOT NULL,
-                isComplete BOOLEAN NOT NULL,
-                type INTEGER NOT NULL, notice TEXT NOT NULL)`)
-                            }).then(res.json({'message':'Терминал добавлен'}))
             }
+            await Promise.all([
+                Terminal.create({nameTerminal:terminalName,isActive:1,description:descriptionText}),
+                createRoles.up(terminalName),
+                createService.up(terminalName),
+                createUser.up(terminalName)
+            ])
+                .then(res.status(200).json({message:'Терминал добавлен'}))
         }catch (e) {
             console.log(e)
             return res.json({'error':e}).status(400)
@@ -275,13 +272,11 @@ class dashboardController {
     }
     async deleteService(req,res,next){
         try{
-            const {id} = req.body
-            console.log(id)
-            await Service.destroy({
-                where:{
-                    id
-                }
-            }).then(res.json({'message':'Услуга удалена'}))
+            const {id,terminalName} = req.body
+
+            await deleteService.deleteService(terminalName,id)
+
+            return res.status(200).json({'message':'Услуга удалена'})
         }catch (e) {
             console.log(e)
         }
@@ -289,20 +284,28 @@ class dashboardController {
     async selectUserTerminal(req,res,next){
         try{
             const {terminalName} = req.body
-            await Users.findAll({
-                where:{
-                    terminalName
-                }
-            }).then(data=>res.json(data))
+            const data = await selectUser.selectAll(terminalName)
+
+            return res.status(200).json(data)
         }catch(e){
             console.log(e)
         }
     }
     async showCurrentUser(req,res,next){
         try{
-            const {id} = req.params
-            await Users.findByPk(id)
-                .then(data=>res.json(data))
+            const {userId,terminal} = req.query
+            const userData = await selectUser.select(terminal,userId)
+            const currentRoles = await selectRoles.selectCurrent(terminal,userId)
+
+            const selectAll= await selectService.selectAll(terminal)
+            const serviceUser = currentRoles.map(item=>item.service_id)
+            const filterServices = selectAll.filter(item=>{
+                return !serviceUser.includes(item.service_id)
+            })
+
+
+            return res.status(200).json({user:userData,services:currentRoles ? filterServices : selectAll})
+
         }catch (e) {
             console.log(e)
         }
@@ -318,6 +321,26 @@ class dashboardController {
         }
         catch (e) {
 
+        }
+    }
+
+    async updateServiceUser(req,res,next){
+        try{
+           const {user_id,service_id,terminal} = req.body
+            const data = await insertRoles.up(terminal,{user_id,service_id})
+
+            return res.status(200).json(data)
+        }catch (e) {
+            return res.status(500).json(e)
+        }
+    }
+    async getStat(req,res,next){
+        try{
+           const {terminal} = req.query
+            const getData = await selectService.selectAll(terminal)
+            return res.status(200).json(getData)
+        }catch (e) {
+            return res.status(500).json(e)
         }
     }
 

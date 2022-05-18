@@ -70,7 +70,9 @@ if(getRoomId.status === "0"){
     })
 }
 let test;
+let prepareActive = {}
 socket.on('completed',data=>{
+    console.log(data)
    const numbers = Array.from(document.querySelectorAll('.number'));
    numbers.forEach(number=>{
        if(number.textContent === data.number){
@@ -86,37 +88,20 @@ socket.on('completed',data=>{
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
     }
 })
+let index = 12000;
 async function testFunction(data){
     const sound = data.sound
-    let index = 0;
     for(let i=0;i<sound.length;i++){
         const audio = new Audio(sound[i])
         await playAudio(audio)
         if(i+1 === sound.length){
+            prepareActive = {}
             socket.emit('delete sound',data.ticket)
         }
     }
-    //
-    //
-    // function recursive_play(){
-    //     if(index+1 === sound.length){
-    //         playAudio(new Audio(sound[index]),null)
-    //         socket.emit('delete sound',data.ticket)
-    //     }else{
-    //         playAudio(new Audio(sound[index]),()=>{
-    //             index++;
-    //             recursive_play()
-    //         })
-    //     }
-    // }
-    //
-    // recursive_play()
 }
-async function playAudio(sound,callback){
+async function playAudio(sound){
     sound.play()
-    // if(callback){
-    //     sound.addEventListener('ended',callback)
-    // }
     await new Promise((resolve,reject)=>{
         sound.addEventListener('ended',()=>{
             resolve()
@@ -132,16 +117,24 @@ async function play_all(data){
    await testFunction(data)
 }
 
+socket.on('prepare active',data=>{
+    prepareActive = data
+})
+
 setInterval(()=>{
     const start = Date.now();
     socket.volatile.emit('ping',getRoomId.id,(data)=>{
+        console.log(prepareActive,'test')
         if(data===null) return;
-        // const latency = Date.now() - start
         const dataSound = JSON.parse(data)
+        console.log(dataSound)
         play_all(dataSound)
+
+
         if(dataSound.hasOwnProperty('data')){
             const {cabinet,isCab,ticket} = dataSound?.data
-             // if(getRoomId.status === "1"){
+            const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
+
 
             if(getRoomId.status === "0"){
                 const tickets = document.querySelectorAll('.ticket')
@@ -161,7 +154,7 @@ setInterval(()=>{
                     }
                 })
             }else{
-                tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket active">
+                tvInfo.insertAdjacentHTML('afterbegin',`<div class="${setActive}">
                     <div class="number">${ticket}</div> 
                       <div class="status">
                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }                      
@@ -171,85 +164,18 @@ setInterval(()=>{
                 if(document.querySelectorAll('.ticket').length>=20){
                     tvInfo.lastChild.remove()
                 }
-//                 document.querySelector('.left-ticket__container').insertAdjacentHTML('afterbegin',
-//                     `
-// 	   <div class="ticket-call">
-// 	    <span>${ticket}</span>
-// <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="arrow_down" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" style="enable-background:new 0 0 256 256;" xml:space="preserve">
-// <g>
-// 	<path d="M256,512l256-256H352V0.001L160,0v256H0L256,512z"/>
-// </g>
-// </svg>
-//             <span>${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }</span>
-//            </div>
-// 	`)
-//                 setTimeout(()=>{
-//                     document.querySelector('.ticket-call').remove()
-//                 },10000)
-           // }
-            play_all(dataSound,ticket)
+            //play_all(dataSound,ticket)
         }
         socket.on('repeat ticket',data=> {
             console.log(data)
-            // play_all(data?.sound)
+            play_all(data)
         });
 
 
     })
 
-},10000)
+},index)
 
 socket.on('message',data=>{
     console.log(data)
 })
-// document.addEventListener('DOMContentLoaded',async()=>{
-//      socket.on('message',data=>{
-//         console.log(socket.volatile)
-//         if(data===undefined) return;
-//         let ticketArr = []
-//         document.querySelectorAll('.number').forEach(item=>ticketArr.push(item.textContent))
-//         const {cabinet,isCab,ticket} = data.data
-//         if(getRoomId.status === "1"){
-//             tvInfo.insertAdjacentHTML('afterbegin',`<div class="ticket active">
-//                     <div class="number">${ticket}</div>
-//                       <div class="status">
-//                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }
-//                       </div>
-//             </div>`)
-//             if(document.querySelectorAll('.ticket').length>=20){
-//                 tvInfo.lastChild.remove()
-//             }
-// 	document.querySelector('.left-ticket__container').insertAdjacentHTML('afterbegin',
-// 	`
-// 	   <div class="ticket-call">
-// 	    <span>${ticket}</span>
-// <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="arrow_down" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" style="enable-background:new 0 0 256 256;" xml:space="preserve">
-// <g>
-// 	<path d="M256,512l256-256H352V0.001L160,0v256H0L256,512z"/>
-// </g>
-// </svg>
-//             <span>${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }</span>
-//            </div>
-// 	`)
-// 	setTimeout(()=>{
-// 		document.querySelector('.ticket-call').remove()
-// 	},10000)
-//         }
-//          ticketArr.find(el=>{
-//              if(el===ticket){
-//                  document.querySelectorAll('.number').forEach(block=>{
-//                      if(block.textContent === el){
-//                          isCab ? block.parentNode.querySelector('.status').textContent = `Окно ${cabinet}`
-//                              :block.parentNode.querySelector('.status').textContent = `Кабинет ${cabinet}`
-//                          block.parentNode.classList.add('active')
-//                      }
-//                  })
-//              }
-//          })
-//          play_all(Object.values(data.sound).map(item=>item),ticket)
-//          socket.emit('start queue',true)
-//         });
-//         socket.on('repeat ticket',data=> {
-//             play_all(data.sound)
-//         });
-//     });
