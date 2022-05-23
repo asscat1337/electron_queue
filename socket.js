@@ -3,16 +3,23 @@ const sequelize = require("./core/config1");
 const moment = require("moment");
 const {QueryTypes} = require("sequelize");
 const ticketAction = require("./databases/ticket-service");
-const client = require("./core/redis");
+const {pubClient,subClient}= require("./core/redis");
 const fs = require("fs").promises;
 
 const connections = new Set()
 
+const mapConnect = new Map()
+
+
 async function socket(socket){
     connections.add(socket)
-    socket.on('room', data1 => {
-        console.log(data1,'test')
+    socket.on('room', async (data1) => {
         socket.join(data1);
+        mapConnect.set(data1,new Map([['queue',[]]]))
+        // await subClient.subscribe('test',(error,channel)=>{
+        //     if(error) console.log(error)
+        //     console.log(`Подписан на канала %${channel}`)
+        // })
         socket.on('update queue', async (data) => {
             data.map(async (item) => {
                 const findUserAll = await RolesSelectAll.selectAll(item.terminalName)
@@ -85,10 +92,10 @@ async function socket(socket){
             }
         });
         ///
-        socket.on('test',(data)=> {
-            const {number} = data
-            socket.broadcast.emit('updates queue', number)
-        })
+        // socket.on('test',(data)=> {
+        //     const {number} = data
+        //     socket.broadcast.emit('updates queue', number)
+        // })
         ////
         socket.on('test data', async (data,cb) => {
             const {received} = data
@@ -102,21 +109,24 @@ async function socket(socket){
             socket.emit('prepare active',data)
         })
         socket.on('ping',async(rooms,cb)=>{
+            console.log(mapConnect.get(rooms).get('queue'))
             if(typeof cb === 'function'){
-                const keys = await client.sendCommand(['keys','*'])
-                const sortedData = keys.sort()
-                const data = await client.get(sortedData[0])
-                console.log(data)
-                const toObject = JSON.parse(data)
-                if(toObject?.rooms === rooms){
-                    cb(data)
-                }
+                // const keys = await client.sendCommand(['keys','*'])
+                // const sortedData = keys.sort()
+                // const data = await client.get(sortedData[0])
+                // console.log(data)
+                // const toObject = JSON.parse(data)
+                // if(toObject?.rooms === rooms){
+                //     cb(data)
+                // }
+                const data = mapConnect.get(rooms).get('queue')[0]
+                cb(data)
 
             }
         })
 
         socket.on('delete sound',async(data)=>{
-            await client.del(data)
+            await mapConnect.get(data.rooms).get('queue').shift()
         })
 
         socket.on('clicked',async(data)=>{
@@ -144,7 +154,10 @@ async function socket(socket){
                         ticket,
                         rooms:userdata.terminal
                     }
-                    await client.set(ticket,JSON.stringify(objects))
+                    mapConnect.get(userdata.terminal).get('queue').push(objects)
+
+                   // await pubClient.publish(userdata.terminal,objects)
+                    // await client.set(ticket,JSON.stringify(objects))
 
                 })
                 .catch(err=>console.log(err))

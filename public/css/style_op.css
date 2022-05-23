@@ -200,7 +200,7 @@ color:red;
     width: 70vh;
     border-radius: 5px;
     border: 1px solid black;
-    z-index: 9999;
+    /*z-index: 9999;*/
     overflow-x: scroll;
 }
 .op__patients{
@@ -210,7 +210,7 @@ color:red;
     width: 70vh;
     border-radius: 5px;
     border: 1px solid black;
-    z-index: 9999;
+    /*z-index: 9999;*/
     overflow-x: scroll;
 }
 .op__list h5,.op__patients h5 {
@@ -261,7 +261,7 @@ color:red;
     width: 70vh;
     border-radius: 5px;
     border: 1px solid black;
-    z-index: 9999;
+    /*z-index: 9999;*/
     overflow: hidden;
 }
 .result-notice{

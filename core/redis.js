@@ -1,20 +1,17 @@
 const redis = require('redis');
-const client = redis.createClient({
+const {createAdapter} = require('@socket.io/redis-adapter')
+const pubClient = redis.createClient({
     host:'localhost',
     port:6379,
 
 })
+const subClient = pubClient.duplicate()
 
 
-async function init(){
-    try{
-        await client.connect()
-        console.log('connected to redis')
-    }catch (e) {
-        console.log(e)
-    }
+const adapter = createAdapter(pubClient,subClient)
+
+module.exports = {
+    adapter,
+    pubClient,
+    subClient
 }
-
-init()
-
-module.exports = client

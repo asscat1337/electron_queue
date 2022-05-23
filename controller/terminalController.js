@@ -17,8 +17,6 @@ class TerminalController {
             }
             const service = await selectService.selectAll(id)
             const terminal = await Terminal.findOne({where:{nameTerminal:req.query.id}})
-            console.log(service)
-               // const service = await Service.findAll({where:{setTerminalName:req.query.id,status:1}})
                res.render('ts',{
                    data:service,
                    data1:terminal
@@ -40,7 +38,6 @@ class TerminalController {
     }
     async setStateTicket(req,res,next){
         try{
-            console.log(req.body)
               const {number,service,nameTerminal,cabinet,id,type,pointer}=req.body
             const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:time,:date,:service,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
                 replacements:{tvinfo_id:null,time:moment().format('YYYY-MM-DD'),date:moment().format('HH:mm:ss'),service:service,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},

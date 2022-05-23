@@ -11,7 +11,8 @@ async function up(tableName,data){
         status:data.status,
         start_time:data.start_time,
         end_time:data.end_time,
-        isNotice:data.isNotice || 0
+        isNotice:data.isNotice || 0,
+        type:data.type || 0
     }])
 }
 

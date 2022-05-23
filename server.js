@@ -37,6 +37,7 @@ const dashboardRouter = require('./routes/dashboardRouter');
 const loginRouter = require('./routes/loginRouter');
 const videoRouter = require('./routes/videosRouter');
 const sequelize = require('./core/config1');
+const adapter = require('./core/redis')
 const socket1 = require('./socket')
 
 
@@ -57,7 +58,6 @@ io.use(sharedSession(sessionMiddleWare,{
 }))
 
 app.set(__dirname,'ejs');
-// app.set('socketio',io)
 app.set('view engine','ejs');
 app.use(express.static(__dirname+'/'));
 app.use(cors());
@@ -109,7 +109,7 @@ const job = new cron('49 12 * * 0-6',async()=>{
 },null,true,'Asia/Yekaterinburg')
 job.start()
 
-
+// io.adapter(adapter.adapter)
 io.on('connection',socket1)
 
     http.listen(port, () => {

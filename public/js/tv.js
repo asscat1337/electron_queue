@@ -96,7 +96,7 @@ async function testFunction(data){
         await playAudio(audio)
         if(i+1 === sound.length){
             prepareActive = {}
-            socket.emit('delete sound',data.ticket)
+            socket.emit('delete sound',data)
         }
     }
 }
@@ -124,15 +124,14 @@ socket.on('prepare active',data=>{
 setInterval(()=>{
     const start = Date.now();
     socket.volatile.emit('ping',getRoomId.id,(data)=>{
-        console.log(prepareActive,'test')
         if(data===null) return;
-        const dataSound = JSON.parse(data)
-        console.log(dataSound)
-        play_all(dataSound)
+        // const dataSound = JSON.parse(data)
+        console.log(data)
+        play_all(data)
 
 
-        if(dataSound.hasOwnProperty('data')){
-            const {cabinet,isCab,ticket} = dataSound?.data
+        if(data.hasOwnProperty('data')){
+            const {cabinet,isCab,ticket} = data?.data
             const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
 
 

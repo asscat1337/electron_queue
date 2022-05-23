@@ -76,15 +76,10 @@ class dashboardController {
         const {data} = req.body
         const allUsers = await selectUser.selectAll(data)
         return res.status(200).json(allUsers)
-        // await Users.findAll({
-        //     where: {
-        //         terminalName:data
-        //    }
-        // }).then(data=>res.json(data))
     }
     async registerUser(req,res,next) {
         try{
-            const {name, cab,terminalName,isCab,isNotice,sendNotice} = req.body
+            const {terminalName} = req.body
             const newUser = await InsertUser.up(terminalName,req.body)
 
             return res.status(200).json({'message':'Пользователь зарегистрирован',newUser})
