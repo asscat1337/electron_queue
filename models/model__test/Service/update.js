@@ -21,10 +21,16 @@ async function updateCurrentService(tableName,data){
         service_id:data.id
     })
 }
+async function resetPointer(tableName){
+    return await queryInterface.bulkUpdate(`service__${tableName}`,{
+        pointer:1
+    })
+}
 
 
 
 module.exports = {
     updatePointer,
-    updateCurrentService
+    updateCurrentService,
+    resetPointer
 }

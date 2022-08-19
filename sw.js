@@ -287,7 +287,6 @@ self.addEventListener('install',(event)=>{
     )
 })
 // self.addEventListener('activate',(event)=>{
-//     console.log('Активирован')
 // })
 // self.addEventListener('fetch',(event)=>{
 //    event.respondWith(fromCache(event.request));

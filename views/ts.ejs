@@ -22,7 +22,9 @@
             <%for(let i=0;i<data.length;i++){%>
             <div class="btn__col <%=data.length===1 ? "centered":""%>">
                 <div class="btn__ticket <%=data.length === 1 ? "small": ""%>" data-id="<%=JSON.stringify(data[i].service_id)%>">
-                    <span><%=JSON.stringify(data[i].name).replace(/"/g,'')%></span>
+                    <div class="btn__text">
+                        <span><%=JSON.stringify(data[i].description).replace(/"/g,'')%></span>
+                    </div>
                 </div>
             </div>
             <%}%>

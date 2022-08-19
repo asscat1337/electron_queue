@@ -37,7 +37,8 @@ const dashboardRouter = require('./routes/dashboardRouter');
 const loginRouter = require('./routes/loginRouter');
 const videoRouter = require('./routes/videosRouter');
 const sequelize = require('./core/config1');
-const adapter = require('./core/redis')
+const createTableTicket = require('./models/model__test/Tickets/create')
+const {resetPointer} = require('./models/model__test/Service/update')
 const socket1 = require('./socket')
 
 
@@ -82,14 +83,13 @@ app.use('/videos',videoRouter);
 const delay = (ms)=>new Promise(resolve => setTimeout(resolve,ms))
 async function init(){
     try{
-        const nextDate = moment().add('days',1).format('DMMYYYY')
+        const nextDate = moment().add(1,'days').format('DMMYYYY')
         await Terminal.findAll().then(async (service)=>{
             service.map(async (terminal)=>{
                 const {nameTerminal,isNotice,isActive} = terminal
                 if(isActive){
-                    await sequelize.query(`CREATE TABLE tvinfo__${nameTerminal}${nextDate} (tvinfo_id INT NOT NULL AUTO_INCREMENT,date VARCHAR(45) NULL,
-        time VARCHAR(45) NULL,service VARCHAR(45) NULL,number VARCHAR(45) NULL,terminalName VARCHAR(45) NULL,
-        cabinet VARCHAR(45) NULL,isCall TINYINT(4) NULL,services_id VARCHAR(45) NULL,isComplete INTEGER(11) NULL,type INTEGER(11) NULL,${isNotice || 'notice VARCHAR(45) NULL'},PRIMARY KEY (tvinfo_id)) CHARACTER SET utf8 COLLATE utf8_general_ci`)
+                    await createTableTicket(nameTerminal,nextDate)
+                    await resetPointer(nameTerminal)
                     await delay(5000)
                 }
             })
@@ -99,7 +99,7 @@ async function init(){
     }
 }
 
-const job = new cron('49 12 * * 0-6',async()=>{
+const job = new cron('45 11 * * 0-6',async()=>{
     try{
         await sequelize.query(`UPDATE service SET pointer = 1`,{type:QueryTypes.UPDATE})
 	    await init()

@@ -6,6 +6,7 @@ const queryInterface = sequelize.getQueryInterface()
 async function up(tableName,data){
     return await queryInterface.bulkInsert(`service__${tableName}`,[{
         name:data.setTerminalName,
+        description:data.description,
         letter:data.letter,
         pointer:data.pointer,
         status:data.status,

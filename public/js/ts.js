@@ -40,7 +40,6 @@ take__ticket.forEach((item)=> {
             .then(res => res.json())
             .then(data => {
                 let res = data;
-                console.log(data)
                 res.forEach(item => {
                     if (time >= item.end_time || time <= item.start_time) {
                         document.body.insertAdjacentHTML('beforeend', `
@@ -67,7 +66,7 @@ take__ticket.forEach((item)=> {
 		</div>
 		<div class="tick__service">
 			<p class="service-name">Название услуги:</p>
-			<span>${item.name}</span>
+			<span>${item.description}</span>
 		</div>
                 <div class="tick__date">${moment().format('L')}</div>
         </div>
@@ -91,6 +90,7 @@ take__ticket.forEach((item)=> {
                         }
                         let object = {
                             "id": `${item.service_id}`,
+                            "description":item.description,
                             "number": `${item.letter}${item.pointer}`,
                             "service": `${item.name}`,
                             "nameTerminal": `${terminalId}`,

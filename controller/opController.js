@@ -6,7 +6,6 @@ const selectUser = require('../models/model__test/User/select')
 class opController{
     async renderOp(req,res,next){
         try{
-            console.log(req.session.userdata.user_id,Number(req.query.id))
             if(req.session.userdata.user_id !==Number(req.query.id)){
                 res.status(401).json({'error':'Произошла ошибка'})
             }else{

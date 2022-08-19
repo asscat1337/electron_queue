@@ -1,3 +1,4 @@
+
 const socket = io.connect('http://localhost:8000',{
 	withCredentials:true,
 	extraHeaders:{
@@ -74,8 +75,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     socket.on('await queue',data=>{
         document.querySelector('.op__list h5').insertAdjacentHTML('afterend',`
             <div class="result">
-            <span class="result__ticket">${data.number}</span>
-            <span class="result__service">${data.service}</span>
+            <div class="container__ticket">
+                <span>Талон:</span>
+                <span class="result__ticket">${data.number}</span>
+            </div>
+            <div class="container__service">
+                <span>Услуга:</span>
+                <span class="result__service">${data.description}</span>
+            </div>
             </div> 
             `)
         let list = document.querySelectorAll('.result')
@@ -96,8 +103,14 @@ document.addEventListener('DOMContentLoaded',()=>{
         data.map(item=>{
                 document.querySelector('.op__list h5').insertAdjacentHTML('afterend',`
             <div class="result">
-            <span class="result__ticket">${item.number}</span>
-            <span class="result__service">${item.service}</span>
+            <div class="container__ticket">
+                <span>Талон:</span>
+                <span class="result__ticket">${item.number}</span>
+            </div>
+            <div class="container__service">
+                <span>Услуга:</span>
+                <span class="result__service">${item.description}</span>
+            </div>
             </div> 
             `)
         })
@@ -111,13 +124,21 @@ document.addEventListener('DOMContentLoaded',()=>{
         });
     })
     socket.on('show notice',(data)=>{
-        //if(!data.length) return false;
         data.map(item=>{
             document.querySelector('.op__list h5').insertAdjacentHTML('afterend',`
             <div class="result">
-            <span class="result__ticket">${item.number}</span>
-            <span class="result__service">${item.service}</span>
-            <span class="result__notice">${item.notice}</span>
+              <div class="container__ticket">
+                    <span>Талон:</span>
+                    <span class="result__ticket">${item.number}</span>
+                </div>
+                <div class="container__service">
+                    <span>Услуга:</span>
+                    <span class="result__service">${item.description}</span>
+                </div>
+                 <div class="container__notice">
+                    <span>Услуга:</span>
+                    <span class="result__notice">${item.notice}</span>
+                </div>
             </div> 
             `)
         })
@@ -141,8 +162,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 let dataTicket
 socket.on('show test',data=>{
         dataTicket = data
-        ticket__text.innerHTML = data.number;
-        service___text.innerHTML = data.service;
+        ticket__text.textContent = data.number;
+        service___text.textContent = data.description;
         terminal = data.terminalName;
         numberSocket=data.number
         roomId=data.terminalName
@@ -157,14 +178,22 @@ socket.on('show test',data=>{
         socket.emit('clicked',{"number":ticket__text.textContent,"tvinfo_id":data.tvinfo_id,date:Date.now(),received:socket.id});
 })
 socket.on('await notice',data=>{
-
     dataTicket = data[0]
     data.map(item=>{
         document.querySelector('.notice-block h5').insertAdjacentHTML('afterend',`
             <div class="result-notice">
-                <span class="result__ticket">${item.number}</span>
-                <span class="result__notice">${item.notice}</span>
-                <span class="result__service">${item.service}</span>
+                   <div class="container__ticket">
+                    <span>Талон:</span>
+                    <span class="result__ticket">${item.number}</span>
+                </div>
+                <div class="container__service">
+                    <span>Услуга:</span>
+                    <span class="result__service">${item.description}</span>
+                </div>
+                 <div class="container__notice">
+                    <span>Услуга:</span>
+                    <span class="result__notice">${item.notice}</span>
+                </div>
                 <button class="btn notice-call">Вызвать</button>
             </div> 
             `)
@@ -172,12 +201,9 @@ socket.on('await notice',data=>{
     const noticeButtons = document.querySelectorAll('.notice-call')
     if(noticeButtons){
         noticeButtons.forEach(button=>{
-            button.addEventListener('click',(e)=>{
-                const {parentNode} = e.target
-                const ticket = parentNode.querySelector('.result__ticket')
-                const service = parentNode.querySelector('.result__service')
-                ticket__text.innerHTML = ticket.textContent;
-                service___text.innerHTML = service.textContent;
+            button.addEventListener('click',()=>{
+                ticket__text.textContent = data[0].ticket;
+                service___text.textContent = data[0].service;
                 for (let i=1;i<buttonMain.length;i++) {
                     if (ticketText.textContent) {
                         buttonMain[i].disabled = false
@@ -271,7 +297,7 @@ transferButton.addEventListener('click',()=>{
             "receive":getData,
             "number": document.querySelector('.ticket__text').textContent,
             "tvinfo_id":dataTicket.tvinfo_id,
-            service:service___text.textContent,
+            service:dataTicket.service,
             notice:inputNotice ? inputNotice.value:getTextNoticeNode
         })
         socket.emit('transfer tv',[{"number":ticket__text.textContent,"cab":optionVal,

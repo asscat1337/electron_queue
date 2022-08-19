@@ -2,16 +2,13 @@ const fs = require("fs").promises;
 
 async function soundData(ticket,cabinet,isCab) {
     const initialArray = ['public/sound/client.wav']
-    const data = await fs.readdir('public/sound')
     const letters = await fs.readFile('public/sound/russia_letters.json',"utf-8")
 
     const letter = ticket.slice(0,1)
     const number = ticket.slice(1)
+
     const findSound=(num)=> {
-        const currentSound = data.find(file=>{
-            return file.includes(num)
-        })
-        return `public/sound/${currentSound}`
+        return `public/sound/${num}.wav`
     }
     const parseLetters = JSON.parse(letters)
     initialArray.push(parseLetters[letter])
@@ -21,21 +18,23 @@ async function soundData(ticket,cabinet,isCab) {
     }
 
     const addStatus=()=>{
-        const toStatus = isCab ? 'public/sound/tocabinet.wav' : 'public/sound/towindow.wav'
+        const toStatus = isCab ? 'public/sound/towindow.wav' : 'public/sound/tocabinet.wav'
         initialArray.push(toStatus)
     }
 
-    const generateSound=(object)=>{
-        return Object.keys(object).map(item=>{
-            return findSound(object[item])
-        }).sort()
+    const generateSound=(array)=>{
+        return array
+            .filter(f=>f !== 0)
+            .sort((a,b)=>b-a)
+            .map(item=>findSound(item))
     }
     const returnRest=(number)=>{
         const restNumber = number % 100
-        return {
+        const minusRest = number - restNumber
+        return [
             restNumber,
-            minusRest:number - restNumber
-        }
+            minusRest
+        ]
     }
     const generateNumber=()=>{
         if(checkNumberLength(number) === 3){
@@ -57,11 +56,8 @@ async function soundData(ticket,cabinet,isCab) {
         }
         initialArray.push(findSound(cabinet))
     }
-    ///
     generateNumber()
     generateCabinet()
-    ///
-
     return initialArray
 }
 

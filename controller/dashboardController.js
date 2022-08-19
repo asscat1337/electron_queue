@@ -19,15 +19,9 @@ const selectRoles = require('../models/model__test/Roles/select')
 const moment = require('moment')
 class dashboardController {
     async renderDashboard(req,res,next){
-        // const users = await Users.findAll({raw:true})
         const terminal = await Terminal.findAll({raw:true});
-        // const services = await Service.findAll({raw:true})
-        // let sum = services.reduce((acc,current)=>acc+current.pointer,0)
         res.render('dashboard',{
-            // data:users,
             data1:terminal,
-            // stats:services,
-            // total:sum
         })
     }
     async deleteUserService(req,res,next){
@@ -89,7 +83,6 @@ class dashboardController {
     }
     async addUser(req,res,next){
         const {user,terminal,cabinet,isReg,id} = req.body;
-	console.log(req.body)
         try{
             const service = await Service.findOne({
                 where: {
@@ -154,7 +147,6 @@ class dashboardController {
     }
     async disableUser(req,res,next){
         const {id,status} = req.body
-        console.log(req.body)
         await Users.update({isActive:status},{
             where:{
                 role_id:id
@@ -176,7 +168,6 @@ class dashboardController {
            const {terminalName} = req.body
 
             const data = await updateService.updateCurrentService(terminalName,req.body)
-            console.log(data)
            return  res.status(200).json({'message':'Данные о терминале обновились'})
         }catch (e) {
             console.log(e)
@@ -185,7 +176,6 @@ class dashboardController {
     }
     async addNewService(req,res,next){
         try{
-            console.log(req.body)
             const {setTerminalName,roles} = req.body
 
             const createService = await insertService.up(setTerminalName,req.body)

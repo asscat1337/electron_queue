@@ -143,22 +143,24 @@ body{
     object-position: center; width: 120px;}
 
 .btn__ticket {
-    height: calc(100% - 65px);
+    height: 130px;
     position: relative;
     background: rgb(127,168,0);
     background: linear-gradient(351deg, rgba(127,168,0,1) 0%, rgba(168,208,1,1) 100%);
     border-radius: 10px;
-    padding-bottom: 10%;
-    align-items: center;
     box-shadow: 0px 13px 0 0 #425602;
     border-bottom: 1px solid #92c000;
     /*margin: 10px;*/
 }
-.btn__ticket span {
-    text-align: center;
-    font-size: 48px;
+
+.btn__text{
+    font-size: 32px;
     color: #ffff;
+    font-weight: 600;
     display: flex;
     justify-content: center;
+    align-items: center;
+    height: 110px;
+    text-align: center;
 }
 

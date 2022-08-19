@@ -17,10 +17,6 @@ async function socket(socket){
     socket.on('room', async (data1) => {
         socket.join(data1);
         mapConnect.set(data1,new Map([['queue',[]]]))
-        // await subClient.subscribe('test',(error,channel)=>{
-        //     if(error) console.log(error)
-        //     console.log(`Подписан на канала %${channel}`)
-        // })
         socket.on('update queue', async (data) => {
             data.map(async (item) => {
                 const findUserAll = await RolesSelectAll.selectAll(item.terminalName)
@@ -40,8 +36,7 @@ async function socket(socket){
         socket.on('connect data', async (data) => {
             /// подумать как сделать правильно
             const {userdata} = socket.handshake.session
-            console.log(userdata)
-            const {user_id,terminal} = userdata
+            const {user_id} = userdata
             /// говнокод
             if(userdata.sendNotice){
                 await TicketSelect.selectTicket(userdata.terminal,user_id)
@@ -100,16 +95,7 @@ async function socket(socket){
             socket.emit('prepare active',data)
         })
         socket.on('ping',async(rooms,cb)=>{
-            console.log(mapConnect.get(rooms).get('queue'))
             if(typeof cb === 'function'){
-                // const keys = await client.sendCommand(['keys','*'])
-                // const sortedData = keys.sort()
-                // const data = await client.get(sortedData[0])
-                // console.log(data)
-                // const toObject = JSON.parse(data)
-                // if(toObject?.rooms === rooms){
-                //     cb(data)
-                // }
                 const data = mapConnect.get(rooms).get('queue')[0]
                 cb(data)
 
@@ -141,76 +127,9 @@ async function socket(socket){
                     }
                     mapConnect.get(userdata.terminal).get('queue').push(objects)
 
-                   // await pubClient.publish(userdata.terminal,objects)
-                    // await client.set(ticket,JSON.stringify(objects))
-
                 })
                 .catch(err=>console.log(err))
         })
-        // async function soundData(ticket,cabinet,isCab) {
-        //     const initialArray = ['public/sound/client.wav']
-        //     const data = await fs.readdir('public/sound')
-        //     const letters = await fs.readFile('public/sound/russia_letters.json',"utf-8")
-        //
-        //     const letter = ticket.slice(0,1)
-        //     const number = ticket.slice(1)
-        //     const findSound=(num)=> {
-        //      const currentSound = data.find(file=>{
-        //             return file.includes(num)
-        //         })
-        //         return `public/sound/${currentSound}`
-        //     }
-        //     const parseLetters = JSON.parse(letters)
-        //     initialArray.push(parseLetters[letter])
-        //
-        //     const checkNumberLength=(number)=>{
-        //         return number.toString().length
-        //     }
-        //
-        //     const addStatus=()=>{
-        //         const toStatus = isCab ? 'public/sound/tocabinet.wav' : 'public/sound/towindow.wav'
-        //         initialArray.push(toStatus)
-        //     }
-        //
-        //     const generateSound=(object)=>{
-        //         return Object.keys(object).map(item=>{
-        //             return findSound(object[item])
-        //         }).sort()
-        //     }
-        //     const returnRest=(number)=>{
-        //         const restNumber = number % 100
-        //         return {
-        //             restNumber,
-        //             minusRest:number - restNumber
-        //         }
-        //     }
-        //     const generateNumber=()=>{
-        //         if(checkNumberLength(number) === 3){
-        //             const restNumber = returnRest(number)
-        //             const sortedNumber = generateSound(restNumber)
-        //             initialArray.push(...sortedNumber)
-        //             addStatus()
-        //             return
-        //         }
-        //             initialArray.push(findSound(number))
-        //             addStatus()
-        //     }
-        //     const generateCabinet=()=>{
-        //         if(checkNumberLength(cabinet) === 3){
-        //             const restCabinet = returnRest(cabinet)
-        //             const sortedCabinet = generateSound(restCabinet)
-        //             initialArray.push(...sortedCabinet)
-        //             return
-        //         }
-        //             initialArray.push(findSound(cabinet))
-        //     }
-        //     ///
-        //     generateNumber()
-        //     generateCabinet()
-        //     ///
-        //
-        //     return initialArray
-        // }
         socket.on('repeat data',async(data)=>{
             const {userdata} = socket.handshake.session
             const {terminal,ticket,date} = data
@@ -221,7 +140,6 @@ async function socket(socket){
                         rooms:terminal,
                         ticket
                     }
-                    ///
                     await mapConnect.get(userdata.terminal).get('queue').unshift(objects)
                 })
                 .catch(err=>console.log(err))

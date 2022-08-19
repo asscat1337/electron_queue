@@ -260,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (input.type === "checkbox"){
                             input.checked = false
                         }
+                        data.length = 0
                     })
                 })
         }
@@ -401,7 +402,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             const isCab = document.querySelector('.is-cab');
                             const isNotice = document.querySelector('.is-notice');
                             const sendNotice = document.querySelector('.send-notice')
-                            console.log(isCab,isNotice,sendNotice)
                             const editObject = {
                                 "role_id":item.dataset.id,
                                 "setPrivilege":login.value,
@@ -508,7 +508,6 @@ const termninalButton = document.querySelector('.terminal__button');
 termninalButton.addEventListener('click', () => {
     const terminalInput = document.querySelector('.terminal__input').value;
     const terminalDesc = document.querySelector('.terminal__desc').value;
-    console.log({"terminalName": terminalInput, "descriptionText": terminalDesc});
 
     async function addNewTerminal() {
         await fetch('dashboard/addNewTerminal', {

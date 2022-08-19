@@ -1,18 +1,12 @@
 const {QueryTypes} = require('sequelize')
 const sequelize = require('../core/config1')
+const createTableTicket = require('../models/model__test/Tickets/create')
 const moment = require('moment')()
 
 class TicketService {
     async createTable(service){
         try{
-            await sequelize.query(`CREATE TABLE IF NOT EXISTS tvinfo__${service}${moment.format('DMMYYYY')} 
-                (tvinfo_id INTEGER PRIMARY KEY AUTO_INCREMENT NOT NULL ,date DATE NOT NULL,time TIME NOT NULL,service TEXT NOT NULL,number TEXT NOT NULL,terminalName TEXT NOT NULL,cabinet INTEGER NOT NULL,
-                isCall BOOLEAN NOT NULL,services_id INTEGER NOT NULL,
-                isComplete BOOLEAN NOT NULL,
-                type INTEGER NOT NULL, notice TEXT NOT NULL)`)
-                .then(()=>{
-                    return {message:'Таблица создана!'}
-                })
+        await createTable(service)
         }catch (e) {
             return e
         }
@@ -28,16 +22,6 @@ class TicketService {
             }
             return {length:true}
         }catch (e) {
-            console.log(e)
-            return e
-        }
-    }
-
-    async insertTable(service,fields){
-        try{
-            await sequelize.query(`INSERT INTO tvinfo__${service}${moment.format('DDMMYYYY')} 
-VALUES (${fields})`,{type:QueryTypes.INSERT})
-        }catch(e){
             console.log(e)
             return e
         }

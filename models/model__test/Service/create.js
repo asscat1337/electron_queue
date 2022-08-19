@@ -1,5 +1,5 @@
 const sequelize = require('../../../core/config1')
-const {Sequelize,DataTypes}= require('sequelize')
+const {DataTypes}= require('sequelize')
 const queryInterface = sequelize.getQueryInterface()
 
 
@@ -14,6 +14,10 @@ async function up(tableName){
        name:{
             type:DataTypes.STRING,
            allowNull: false
+       },
+       description:{
+            type:DataTypes.STRING,
+           allowNull:false,
        },
        letter:{
             type:DataTypes.STRING,

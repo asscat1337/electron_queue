@@ -43,7 +43,6 @@ confirm.addEventListener('click',(event)=> {
     const formData = new FormData();
     for (let file of files) {
         formData.append('files', file)
-        console.log(file)
     }
     const init = async()=>{
       await  fetch('/uploads', {
@@ -53,7 +52,6 @@ confirm.addEventListener('click',(event)=> {
           .then(response=>response.json())
         .then(data=>{
             document.querySelectorAll('.preview-info').forEach(item=>{
-                console.log(data.size);
                 const percentage = (data.size *100)/data.size;
                 item.style.bottom = '4px';
                 item.innerHTML = '<div class="preview-info-progress"></div>'

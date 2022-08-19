@@ -72,7 +72,6 @@ if(getRoomId.status === "0"){
 let test;
 let prepareActive = {}
 socket.on('completed',data=>{
-    console.log(data)
    const numbers = Array.from(document.querySelectorAll('.number'));
    numbers.forEach(number=>{
        if(number.textContent === data.number){
@@ -125,8 +124,6 @@ setInterval(()=>{
     const start = Date.now();
     socket.volatile.emit('ping',getRoomId.id,(data)=>{
         if(data===null) return;
-        // const dataSound = JSON.parse(data)
-        console.log(data)
         play_all(data)
 
 
@@ -163,10 +160,8 @@ setInterval(()=>{
                 if(document.querySelectorAll('.ticket').length>=20){
                     tvInfo.lastChild.remove()
                 }
-            //play_all(dataSound,ticket)
         }
         socket.on('repeat ticket',data=> {
-            console.log(data)
             play_all(data)
         });
 

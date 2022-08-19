@@ -127,7 +127,7 @@ body{margin: 0; box-sizing: border-box; font-family: Arial, sans-serif; height: 
     flex-direction: column;
 }
 .service__text{
-    font-size: 30pt;
+    font-size: 24px;
 }
 .service span{
  text-align: center;
@@ -141,13 +141,16 @@ body{margin: 0; box-sizing: border-box; font-family: Arial, sans-serif; height: 
 
 .result{
     display: flex;
-    justify-content: space-around;
+    flex-flow: column wrap;
     width: 100%;
     border-bottom: 1px solid #bf0a8e;
     cursor:pointer;
 }
+.result div{
+    margin-left:15px;
+}
 .result span{
-    font-size: 48px;
+    font-size: 30px;
 }
 .result__service{
     width:70%;
