@@ -88,7 +88,7 @@ async function init(){
             service.map(async (terminal)=>{
                 const {nameTerminal,isNotice,isActive} = terminal
                 if(isActive){
-                    await createTableTicket(nameTerminal,nextDate)
+                    await createTableTicket(nameTerminal,moment().format('DMMYYYY'))
                     await resetPointer(nameTerminal)
                     await delay(5000)
                 }
@@ -99,7 +99,7 @@ async function init(){
     }
 }
 
-const job = new cron('45 11 * * 0-6',async()=>{
+const job = new cron('30 15 * * 0-6',async()=>{
     try{
         await sequelize.query(`UPDATE service SET pointer = 1`,{type:QueryTypes.UPDATE})
 	    await init()

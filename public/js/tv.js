@@ -71,6 +71,12 @@ if(getRoomId.status === "0"){
 }
 let test;
 let prepareActive = {}
+
+socket.on('clear',()=>{
+    console.log('Очищено')
+    window.location.reload()
+})
+
 socket.on('completed',data=>{
    const numbers = Array.from(document.querySelectorAll('.number'));
    numbers.forEach(number=>{

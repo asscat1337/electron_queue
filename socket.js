@@ -1,11 +1,10 @@
 const RolesSelectAll = require("./models/model__test/Roles/select");
 const ticketAction = require("./databases/ticket-service");
-const {pubClient,subClient}= require("./core/redis");
 const TicketUpdate = require('./models/model__test/Tickets/update')
 const TicketSelect = require('./models/model__test/Tickets/select')
 const soundData = require('./sound/sound')
-const {use} = require("express/lib/router");
-const fs = require("fs").promises;
+const moment = require('moment')()
+const cron = require('cron')
 
 const connections = new Set()
 
@@ -33,6 +32,13 @@ async function socket(socket){
 
             await TicketUpdate.updateIsComplete(userdata.terminal,tvinfo_id)
         })
+
+        const cronJob = new cron.job('5 15 * * 0-6',()=>{
+            socket.emit('clear')
+        },null,null,'Asia/Yekaterinburg')
+
+        cronJob.start()
+
         socket.on('connect data', async (data) => {
             /// подумать как сделать правильно
             const {userdata} = socket.handshake.session

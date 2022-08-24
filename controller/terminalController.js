@@ -18,7 +18,7 @@ class TerminalController {
             const service = await selectService.selectAll(id)
             const terminal = await Terminal.findOne({where:{nameTerminal:req.query.id}})
                res.render('ts',{
-                   data:service,
+                   data:service.filter(item=>item.status !== 0),
                    data1:terminal
                })
            //}
