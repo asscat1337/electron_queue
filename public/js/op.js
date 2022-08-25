@@ -1,4 +1,3 @@
-
 const socket = io.connect('http://localhost:8000',{
 	withCredentials:true,
 	extraHeaders:{
@@ -31,7 +30,7 @@ socket.on('disconnect',()=>{
         document.body.classList.add('loaded');
     }, 500);
 });
-
+let dataTicket
 
 const getQueryStringParams = query => {
     return query
@@ -93,11 +92,11 @@ document.addEventListener('DOMContentLoaded',()=>{
             })
         });
             })
-    nextButton.addEventListener('click',(event)=>{
-        socket.emit('test data',{'received':socket.id})
+    nextButton.addEventListener('click', (event)=>{
+         socket.emit('test data',{'received':socket.id})
         setTimeout(()=>{
             socket.emit('show active',dataTicket)
-        },3000)
+        },500)
     });
     socket.on('show data',data=>{
         data.map(item=>{
@@ -159,7 +158,6 @@ document.addEventListener('DOMContentLoaded',()=>{
             })
     })
 });
-let dataTicket
 socket.on('show test',data=>{
         dataTicket = data
         ticket__text.textContent = data.number;

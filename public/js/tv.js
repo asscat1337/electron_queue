@@ -73,11 +73,13 @@ let test;
 let prepareActive = {}
 
 socket.on('clear',()=>{
-    console.log('Очищено')
     window.location.reload()
 })
 
 socket.on('completed',data=>{
+    setTimeout(()=>{
+        prepareActive = {}
+    },1000)
    const numbers = Array.from(document.querySelectorAll('.number'));
    numbers.forEach(number=>{
        if(number.textContent === data.number){
@@ -93,7 +95,7 @@ socket.on('completed',data=>{
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
     }
 })
-let index = 12000;
+let index = 14000;
 async function testFunction(data){
     const sound = data.sound
     for(let i=0;i<sound.length;i++){
@@ -123,7 +125,7 @@ async function play_all(data){
 }
 
 socket.on('prepare active',data=>{
-    prepareActive = data
+        prepareActive = data
 })
 
 setInterval(()=>{
@@ -134,7 +136,8 @@ setInterval(()=>{
 
 
         if(data.hasOwnProperty('data')){
-            const {cabinet,isCab,ticket} = data?.data
+            const {cabinet,isCab,ticket} = data.data
+            console.log(prepareActive,ticket)
             const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
 
 

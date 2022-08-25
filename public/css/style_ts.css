@@ -95,10 +95,20 @@ body{
     height: 133px;
 }
 .btn__ticket.small{
-    height: 133px;
+    height: 200px;
+    width: 900px;
+    padding: 20px 20px 15px;
 }
+
+.small .btn__text{
+    margin: 20px;
+    text-transform: uppercase;
+    font-size:48px
+}
+
 .centered.btn__col{
     width: 100%;
+    margin-top:50px;
 }
 
 .btn__col{
