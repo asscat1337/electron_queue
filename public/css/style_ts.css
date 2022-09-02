@@ -79,10 +79,6 @@ body{
     font-family:"Arial";
     font-weight: bold;
 }
-/*.take__ticket {*/
-/*    width:80%;*/
-/*    display: inline-block;*/
-/*}*/
 .ticket__wrapper{
     display: flex;
     flex-wrap: wrap;
@@ -109,6 +105,10 @@ body{
 .centered.btn__col{
     width: 100%;
     margin-top:50px;
+}
+.active .centered{
+    display: flex;
+    justify-content: center;
 }
 
 .btn__col{
@@ -148,9 +148,11 @@ body{
     /* width: 130px !important; */
     /* margin: 20px auto 0; */
     padding: 5px 0 0 0;}
-.tick__logo img {-o-object-fit: cover;
+.tick__logo img {
+    -o-object-fit: cover;
     object-fit: cover;
-    object-position: center; width: 120px;}
+    object-position: center; width: 120px;
+}
 
 .btn__ticket {
     height: 130px;
@@ -173,4 +175,8 @@ body{
     height: 110px;
     text-align: center;
 }
-
+.active{
+    background-color: #c0c0c0;
+    opacity: 0.6;
+    width: 100%;
+}

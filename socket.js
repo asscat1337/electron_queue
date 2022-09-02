@@ -27,6 +27,7 @@ async function socket(socket){
             })
         })
         socket.on('add data', async (data) => {
+            console.log(data)
             const {number,user,tvinfo_id} = data;
             const {userdata} = socket.handshake.session
 
@@ -96,6 +97,19 @@ async function socket(socket){
 
             socket.emit('show test',ticketData[0])
         })
+        socket.on('get current',async(data)=>{
+            const {received,id} = data
+            const {userdata} = socket.handshake.session
+            const currentTicket = await ticketAction.getCurrentTicket({
+                users_id:userdata.user_id,
+                terminalName:userdata.terminal,
+                cabinet:userdata.cab,
+                tvinfo_id:id
+            })
+            console.log(currentTicket)
+            socket.emit('show test',currentTicket[0])
+
+        })
 
         socket.on('show active',(data)=>{
             socket.emit('prepare active',data)
@@ -131,6 +145,7 @@ async function socket(socket){
                         ticket,
                         rooms:userdata.terminal
                     }
+                    console.log(mapConnect)
                     mapConnect.get(userdata.terminal).get('queue').push(objects)
 
                 })

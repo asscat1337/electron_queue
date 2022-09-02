@@ -2,7 +2,8 @@ const wrapper = document.querySelector('.wrapper');
 const take__ticket = document.querySelectorAll('.btn__ticket');
 const time =  moment().format('HH:mm:ss');
 const socket = io('http://localhost:8000',{
-    transport:['websocket']
+    transport:['websocket'],
+    forceNew:true
 });
 window.addEventListener('unload',()=>{
 socket.emit('end')
@@ -29,7 +30,7 @@ const terminalId = url.searchParams.get('id')
 take__ticket.forEach((item)=> {
     item.addEventListener('click', async (event) => {
         event.target.closest('.take__ticket').classList.add('disable')
-        document.body.classList.add('active')
+        document.querySelector('.wrapper').classList.add('active')
         await fetch('/ts/getTicket', {
             method: 'POST',
             headers: {
@@ -118,6 +119,7 @@ take__ticket.forEach((item)=> {
                                                 window.print()
                                                 delay(1000).then(()=>{
                                                     document.querySelector('.modal__ticket').remove()
+                                                    document.querySelector('.wrapper').classList.remove('active')
                                                 })
                                             })
                                         }
