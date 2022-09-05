@@ -115,11 +115,12 @@ async function socket(socket){
             socket.emit('prepare active',data)
         })
         socket.on('ping',async(rooms,cb)=>{
-            if(typeof cb === 'function'){
+            // if(typeof cb === 'function'){
                 const data = mapConnect.get(rooms).get('queue')[0]
-                cb(data)
-
-            }
+                socket.to(rooms).broadcast.emit('pong',data)
+            //     cb(data)
+            //
+            // }
         })
 
         socket.on('delete sound',async(data)=>{
@@ -145,7 +146,6 @@ async function socket(socket){
                         ticket,
                         rooms:userdata.terminal
                     }
-                    console.log(mapConnect)
                     mapConnect.get(userdata.terminal).get('queue').push(objects)
 
                 })

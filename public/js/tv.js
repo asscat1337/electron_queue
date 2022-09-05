@@ -50,6 +50,20 @@ socket.on('disconnect',()=>{
         document.body.classList.add('loaded');
     }, 500);
 });
+
+const createCurrent=(data)=>{
+    const isCabCheck = data.isCab ? `Окно ${data.cabinet}` : `Кабинет ${data.cabinet}`
+    document.querySelector('.current').insertAdjacentHTML('beforeend',`
+        <div class="current__container">
+                 <h4 class="current__ticket">${data.ticket}</h4>
+                <div class="arrow-down">
+                    <img src="../public/img/arrow-down.svg" alt="">
+                </div>
+                <h4 class="current__cab">${isCabCheck}</h4>
+        </div>
+    `)
+}
+
 if(getRoomId.status === "0"){
     socket.on('show result',data=>{
         data.map(item=>{
@@ -94,6 +108,12 @@ socket.on('completed',data=>{
     if(document.querySelectorAll('.ticket').length<20){
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
     }
+
+    const currentContainer=document?.querySelector('.current__container')
+
+    if(currentContainer){
+        document?.querySelector('.current__container').remove()
+    }
 })
 let index = 14000;
 async function testFunction(data){
@@ -129,55 +149,105 @@ socket.on('prepare active',data=>{
 })
 
 setInterval(()=>{
-    const start = Date.now();
-    socket.volatile.emit('ping',getRoomId.id,(data)=>{
-        if(data===null) return;
-        play_all(data)
+    socket.emit('ping',getRoomId.id)
+},index)
+
+socket.on('pong',(data)=>{
+    if(data===null) return;
+    play_all(data)
 
 
-        if(data.hasOwnProperty('data')){
-            const {cabinet,isCab,ticket} = data.data
-            console.log(prepareActive,ticket)
-            const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
+    if(data.hasOwnProperty('data')){
+        const {cabinet,isCab,ticket} = data.data
+        const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
 
+        createCurrent(data.data)
+        if(getRoomId.status === "0"){
+            const tickets = document.querySelectorAll('.ticket')
 
-            if(getRoomId.status === "0"){
-                const tickets = document.querySelectorAll('.ticket')
+            tickets.forEach(ticketBlock=>{
+                const number = ticketBlock.querySelector('.number');
+                const status = ticketBlock.querySelector('.status')
 
-                tickets.forEach(ticketBlock=>{
-                    const number = ticketBlock.querySelector('.number');
-                    const status = ticketBlock.querySelector('.status')
-
-                    if(number.textContent === ticket){
-                        ticketBlock.classList.add('active')
-                        if(isCab) {
-                            status.textContent = `Окно ${cabinet}`
-                        }
-                        if(!isCab){
-                            status.textContent = `Кабинет ${cabinet}`
-                        }
+                if(number.textContent === ticket){
+                    ticketBlock.classList.add('active')
+                    if(isCab) {
+                        status.textContent = `Окно ${cabinet}`
                     }
-                })
-            }else{
-                tvInfo.insertAdjacentHTML('afterbegin',`<div class="${setActive}">
+                    if(!isCab){
+                        status.textContent = `Кабинет ${cabinet}`
+                    }
+                }
+            })
+        }else{
+            tvInfo.insertAdjacentHTML('afterbegin',`<div class="${setActive}">
                     <div class="number">${ticket}</div> 
                       <div class="status">
                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }                      
                       </div>
             </div>`)
-            }
-                if(document.querySelectorAll('.ticket').length>=20){
-                    tvInfo.lastChild.remove()
-                }
         }
-        socket.on('repeat ticket',data=> {
-            play_all(data)
-        });
+        if(document.querySelectorAll('.ticket').length>=20){
+            tvInfo.lastChild.remove()
+        }
+    }
+    socket.on('repeat ticket',data=> {
+        play_all(data)
+    });
 
 
-    })
-
-},index)
+})
+//
+//
+// setInterval(()=>{
+//     const start = Date.now();
+//     socket.volatile.emit('ping',getRoomId.id,(data)=>{
+//         if(data===null) return;
+//         play_all(data)
+//
+//
+//         if(data.hasOwnProperty('data')){
+//             const {cabinet,isCab,ticket} = data.data
+//             const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
+//
+//             createCurrent(data.data)
+//             if(getRoomId.status === "0"){
+//                 const tickets = document.querySelectorAll('.ticket')
+//
+//                 tickets.forEach(ticketBlock=>{
+//                     const number = ticketBlock.querySelector('.number');
+//                     const status = ticketBlock.querySelector('.status')
+//
+//                     if(number.textContent === ticket){
+//                         ticketBlock.classList.add('active')
+//                         if(isCab) {
+//                             status.textContent = `Окно ${cabinet}`
+//                         }
+//                         if(!isCab){
+//                             status.textContent = `Кабинет ${cabinet}`
+//                         }
+//                     }
+//                 })
+//             }else{
+//                 tvInfo.insertAdjacentHTML('afterbegin',`<div class="${setActive}">
+//                     <div class="number">${ticket}</div>
+//                       <div class="status">
+//                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }
+//                       </div>
+//             </div>`)
+//             }
+//                 if(document.querySelectorAll('.ticket').length>=20){
+//                     tvInfo.lastChild.remove()
+//                 }
+//         }
+//         socket.on('repeat ticket',data=> {
+//             play_all(data)
+//         });
+//
+//
+//     })
+//
+// },start - index)
 
 socket.on('message',data=>{
     console.log(data)

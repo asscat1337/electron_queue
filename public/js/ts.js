@@ -1,6 +1,8 @@
 const wrapper = document.querySelector('.wrapper');
 const take__ticket = document.querySelectorAll('.btn__ticket');
+
 const time =  moment().format('HH:mm:ss');
+const controller = new AbortController()
 const socket = io('http://localhost:8000',{
     transport:['websocket'],
     forceNew:true
@@ -100,12 +102,12 @@ take__ticket.forEach((item)=> {
                             "pointer":item.pointer
                         };
                         const fetchData = async () => {
-                            try {
                                  await fetch('ts/setStateTicket', {
                                     method: 'POST',
                                     headers: {
                                         "Content-type": "application/json;charset=utf-8"
                                     },
+                                     signal:controller.signal,
                                     body: JSON.stringify(object)
                                 })
                                     .then(res=>res.json())
@@ -123,11 +125,9 @@ take__ticket.forEach((item)=> {
                                                 })
                                             })
                                         }
+                                        // setTimeout(()=>controller.abort(),15000)
                                     })
-
-                            } catch (e) {
-                                console.log(`Произошла ошибка:${e}`);
-                            }
+                                     .catch(e=>console.log(e))
                         };
                         fetchData();
                     }

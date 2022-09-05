@@ -8,6 +8,7 @@ const socket = io.connect('http://localhost:8000', {
         'my-custom-headers': 'abcd'
     }
 });
+
 const ticketText = document.querySelector('.ticket__text');
 const nextButton = document.querySelector('.next__button');
 const repeatButton = document.querySelector('.repeat__button');
@@ -66,7 +67,12 @@ const ButtonDisabled=(btn1,btn2)=>{
     }
 }
 
+const asyncGetTicket=async ()=>{
+    const response = await fetch('/op/get-ticket')
+    const data = await response.json()
 
+    console.log(data)
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -106,12 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('currentTicket',JSON.stringify(dataTicket))
     })
     const callTicket = (event) => {
-        const mainNode = event.target.parentNode
+        const mainNode = event.target.parentNode.parentNode
         const dataId = mainNode.dataset.id
         socket.emit('get current', {'received': socket.id, id: dataId})
-        setTimeout(() => {
-            socket.emit('show active', dataTicket)
-        }, 500)
+        socket.emit('show active', dataTicket)
+        // setTimeout(() => {
+        // }, 500)
     }
     const completeTicket = () => {
         nextButton.disabled = false;
@@ -138,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             item.disabled = true
         })
         localStorage.setItem('currentTicket',{})
+        disabledButton(false)
     }
     const timeManipulate = (start) => {
             const currentTime = moment().format('HH:mm:ss')
@@ -145,9 +152,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const disabledButton=(boolean)=>{
-        document.querySelectorAll('.call__button')
+        document.querySelectorAll('.buttons__block')
             .forEach(item=>{
-                item.disabled = boolean
+                const callButton = item.querySelector('.call__button')
+                const completeButton = item.querySelector('.complete')
+
+                callButton.disabled = boolean
+                completeButton.disabled = boolean
             })
     }
 
@@ -166,8 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span>Время ожидания:</span>
                 <span class="time-queue">${timeManipulate(data.time)}</span>
             </div>
-            <button class="btn call__button light-green darken-2">Вызвать</button>
-            <button class="btn complete light-green darken-2">Обслужен</button>
+            <div class="buttons__block">
+             <button class="btn call__button light-green darken-2">Вызвать</button>
+             <button class="btn complete light-green darken-2">Обслужен</button>
+            </div>
             </div> 
             `)
         document.querySelector('.call__button').addEventListener('click', (event) => {
@@ -187,16 +200,29 @@ document.addEventListener('DOMContentLoaded', () => {
            }
        })
     }
+    const generateNotice=(data)=>{
+        document.querySelector('.op__list h5').insertAdjacentHTML('afterend', `
+            <div class="result">
+              <div class="container__ticket">
+                    <span>Талон:</span>
+                    <span class="result__ticket">${data.number}</span>
+                </div>
+                <div class="container__service">
+                    <span>Услуга:</span>
+                    <span class="result__service">${data.description}</span>
+                </div>
+                 <div class="container__notice">
+                    <span>Заметка:</span>
+                    <span class="result__notice">${data.notice}</span>
+                </div>
+            </div> 
+            `)
+    }
+
+
 
     socket.on('await queue', data => {
         generateQueue(data)
-        let list = document.querySelectorAll('.result')
-        list.forEach(item => {
-            item.addEventListener('click', () => {
-                list.forEach(el => el.classList.remove('active'))
-                item.classList.add('active')
-            })
-        });
     })
     nextButton.addEventListener('click', () => {
         disabledButton(true)
@@ -207,39 +233,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     btnComplete.addEventListener('click', () => {
         completeTicket()
+        disabledButton(false)
     })
     socket.on('show data', data => {
+
         data.map(item => {
             generateQueue(item)
         })
     })
     socket.on('show notice', (data) => {
         data.map(item => {
-            document.querySelector('.op__list h5').insertAdjacentHTML('afterend', `
-            <div class="result">
-              <div class="container__ticket">
-                    <span>Талон:</span>
-                    <span class="result__ticket">${item.number}</span>
-                </div>
-                <div class="container__service">
-                    <span>Услуга:</span>
-                    <span class="result__service">${item.description}</span>
-                </div>
-                 <div class="container__notice">
-                    <span>Услуга:</span>
-                    <span class="result__notice">${item.notice}</span>
-                </div>
-            </div> 
-            `)
+            generateNotice(item)
         })
-        let list = document.querySelectorAll('.result')
-        /// дублируется код,позже переделать
-        list.forEach(item => {
-            item.addEventListener('click', () => {
-                list.forEach(el => el.classList.remove('active'))
-                item.classList.add('active')
-            })
-        });
     })
     socket.on('updates queue', data => {
         document.querySelectorAll('.result').forEach(item => {
@@ -293,12 +298,6 @@ socket.on('await notice', data => {
             button.addEventListener('click', () => {
                 ticket__text.textContent = data[0].ticket;
                 service___text.textContent = data[0].service;
-                // for (let i = 1; i < buttonMain.length; i++) {
-                //     if (ticketText.textContent) {
-                //         buttonMain[i].disabled = false
-                //         nextButton.disabled = true
-                //     }
-                // }
                 ButtonDisabled(false,true)
                 socket.emit('test', {number: ticket__text.textContent})
                 socket.emit('clicked', {
@@ -380,12 +379,6 @@ transferButton.addEventListener('click', () => {
             "Letter": letter, "pointer": pointer
         }])
         socket.emit('complete data', {"number": ticket__text.textContent})
-        // for (let i = 1; i < buttonMain.length; i++) {
-        //     if (ticketText.textContent) {
-        //         buttonMain[i].disabled = true
-        //         nextButton.disabled = false
-        //     }
-        // }
         ButtonDisabled(true,false)
         document.querySelectorAll('.result').forEach(item => {
             if (ticketText.textContent === item.querySelector('.result__ticket').textContent) {

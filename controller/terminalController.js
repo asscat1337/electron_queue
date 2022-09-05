@@ -38,15 +38,14 @@ class TerminalController {
     }
     async setStateTicket(req,res,next){
         try{
-              const {number,service,nameTerminal,description,id,type,pointer}=req.body
-            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:time,:date,:service,:description,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
-                replacements:{tvinfo_id:null,time:moment().format('YYYY-MM-DD'),date:moment().format('HH:mm:ss'),service:service,description,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
+            const timeCreated = moment().tz('Asia/Yekaterinburg').format('HH:mm:ss')
+
+            const {number,service,nameTerminal,description,id,type,pointer}=req.body
+            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:date,:time,:service,:description,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
+                replacements:{tvinfo_id:null,date:moment().format('YYYY-MM-DD'),time:timeCreated,service:service,description,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
                 type:QueryTypes.INSERT
             })
             const addedDataId = addedData[0]
-                    // await Service.increment({pointer:1},{
-                    //     where:{id}
-                    // })
             await updateService.updatePointer(nameTerminal,pointer,id)
             const dataTicket = await sequelize.query(`SELECT * from tvinfo__${nameTerminal}${moment().format('DMMYYYY')} WHERE tvinfo_id = :tvinfo_id`,{
                 replacements:{tvinfo_id:addedDataId},
@@ -55,12 +54,14 @@ class TerminalController {
             return res.status(200).json(dataTicket)
         }
         catch (e) {
-            console.log(e)
+            return res.status(500).json({
+                message:'Произошла ошибка при выполнении запроса'
+            })
         }
     }
 async updatePointerNull(req,res,next){
         try{
-            const {service,terminal} = req.body
+           const {service,terminal} = req.body
            await Service.update({pointer:1},{
                 where:{
                     terminal,
