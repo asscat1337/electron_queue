@@ -39,7 +39,7 @@ const videoRouter = require('./routes/videosRouter');
 const sequelize = require('./core/config1');
 const createTableTicket = require('./models/model__test/Tickets/create')
 const {resetPointer} = require('./models/model__test/Service/update')
-const socket1 = require('./socket')
+const socketConnection = require('./socket')
 
 
 app.use(cookieParser());
@@ -86,9 +86,9 @@ async function init(){
         const nextDate = moment().add(1,'days').format('DMMYYYY')
         await Terminal.findAll().then(async (service)=>{
             service.map(async (terminal)=>{
-                const {nameTerminal,isNotice,isActive} = terminal
+                const {nameTerminal,isActive} = terminal
                 if(isActive){
-                    await createTableTicket(nameTerminal,moment().format('DMMYYYY'))
+                    await createTableTicket(nameTerminal,nextDate)
                     await resetPointer(nameTerminal)
                     await delay(5000)
                 }
@@ -109,8 +109,8 @@ const job = new cron('30 15 * * 0-6',async()=>{
 },null,true,'Asia/Yekaterinburg')
 job.start()
 
-// io.adapter(adapter.adapter)
-io.on('connection',socket1)
+
+socketConnection(io)
 
     http.listen(port, () => {
         console.log(`Listen in $${port}`);

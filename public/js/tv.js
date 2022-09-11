@@ -1,13 +1,13 @@
-const socket = io.connect('http://localhost:8000',{
-    transport:['pooling'],
-    withCredentials:true
+const socket = io.connect('http://localhost:8000', {
+    transport: ['pooling'],
+    withCredentials: true
 });
 const tvInfo = document.querySelector('.columns__container');
 
-setInterval(()=>{
+setInterval(() => {
     document.querySelector('.clock').textContent = moment().format('HH:mm:ss')
     document.querySelector('.date').textContent = moment().format('DD/MM/YYYY')
-},1000)
+}, 1000)
 
 
 const getQueryStringParams = query => {
@@ -23,21 +23,21 @@ const getQueryStringParams = query => {
         : {}
 };
 const getRoomId = getQueryStringParams(`${window.location.search}`)
-socket.on('connect',()=>{
-    socket.emit('room',getRoomId.id)
-    if(document.querySelectorAll('.preloader')){
-        document.querySelectorAll('.preloader').forEach(item=>item.remove())
+socket.on('connect', () => {
+    socket.emit('room', getRoomId.id)
+    if (document.querySelectorAll('.preloader')) {
+        document.querySelectorAll('.preloader').forEach(item => item.remove())
         document.body.classList.remove('loaded')
     }
 });
 
-window.addEventListener('unload',()=>{
+window.addEventListener('unload', () => {
     socket.emit('end')
 })
-document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`,`<audio class="player" autoplay></audio>`)
+document.querySelector('.sound-container').insertAdjacentHTML(`beforebegin`, `<audio class="player" autoplay></audio>`)
 
-socket.on('disconnect',()=>{
- document.body.insertAdjacentHTML(`beforebegin`,`
+socket.on('disconnect', () => {
+    document.body.insertAdjacentHTML(`beforebegin`, `
  <div class="preloader">
   <svg class="preloader__image" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path fill="currentColor"
@@ -51,9 +51,9 @@ socket.on('disconnect',()=>{
     }, 500);
 });
 
-const createCurrent=(data)=>{
+const createCurrent = (data) => {
     const isCabCheck = data.isCab ? `Окно ${data.cabinet}` : `Кабинет ${data.cabinet}`
-    document.querySelector('.current').insertAdjacentHTML('beforeend',`
+    document.querySelector('.current').insertAdjacentHTML('beforeend', `
         <div class="current__container">
                  <h4 class="current__ticket">${data.ticket}</h4>
                 <div class="arrow-down">
@@ -64,191 +64,143 @@ const createCurrent=(data)=>{
     `)
 }
 
-if(getRoomId.status === "0"){
-    socket.on('show result',data=>{
-        data.map(item=>{
-            tvInfo.insertAdjacentHTML('beforeend',`<div class="ticket">
+if (getRoomId.status === "0") {
+    socket.on('show result', data => {
+        data.map(item => {
+            tvInfo.insertAdjacentHTML('beforeend', `<div class="ticket">
                     <div class="number">${item.number}</div> 
                       <div class="status">Ожидание</div>
             </div>`)
         })
         let score = 0
         const testtest = document.querySelectorAll('.ticket:not(.hide)')
-        if(testtest.length >= 20){
+        if (testtest.length >= 20) {
             score = testtest.length
-            testtest[score-1].classList.add('hide')
+            testtest[score - 1].classList.add('hide')
         }
-        setInterval(()=>{
-            document.querySelectorAll('.left-ticket').forEach(item=>item.remove())
-        },15000)
+        setInterval(() => {
+            document.querySelectorAll('.left-ticket').forEach(item => item.remove())
+        }, 15000)
     })
 }
 let test;
-let prepareActive = {}
 
-socket.on('clear',()=>{
+socket.on('clear', () => {
     window.location.reload()
 })
 
-socket.on('completed',data=>{
-    setTimeout(()=>{
-        prepareActive = {}
-    },1000)
-   const numbers = Array.from(document.querySelectorAll('.number'));
-   numbers.forEach(number=>{
-       if(number.textContent === data.number){
-               if(getRoomId.status === "1"){
-                   number.parentNode.classList.remove('active')
-               }
-               if(getRoomId.status === "0"){
-                   number.parentNode.remove()
-               }
-       }
-   })
-    if(document.querySelectorAll('.ticket').length<20){
-        Array.from(document.querySelectorAll('.hide')).reverse().forEach(item=>item.classList.remove('hide'))
+
+const clearActive = (ticket) => {
+    const numbers = Array.from(document.querySelectorAll('.number'));
+    numbers.forEach(number => {
+        if (number.textContent === ticket) {
+            if (getRoomId.status === "1") {
+                number.parentNode.classList.remove('active')
+            }
+            if (getRoomId.status === "0") {
+                number.parentNode.remove()
+            }
+        }
+    })
+}
+
+
+socket.on('completed', data => {
+    clearActive(data.number)
+    if (document.querySelectorAll('.ticket').length < 20) {
+        Array.from(document.querySelectorAll('.hide')).reverse().forEach(item => item.classList.remove('hide'))
     }
-
-    const currentContainer=document?.querySelector('.current__container')
-
-    if(currentContainer){
-        document?.querySelector('.current__container').remove()
+    const currentContainer = document.querySelector('.current__container')
+    if (currentContainer) {
+        currentContainer.remove()
     }
 })
-let index = 14000;
-async function testFunction(data){
-    const sound = data.sound
-    for(let i=0;i<sound.length;i++){
-        const audio = new Audio(sound[i])
-        await playAudio(audio)
-        if(i+1 === sound.length){
-            prepareActive = {}
-            socket.emit('delete sound',data)
+
+const callTicketFunc = async (data) => {
+    if (data === null) return
+    play_all(data)
+    if (data.hasOwnProperty('data')) {
+        const currentContainer = document.querySelector('.current__container')
+        const {cabinet, isCab, ticket} = data.data
+        if(currentContainer){
+            currentContainer.remove()
+        }
+        createCurrent(data.data)
+        if (getRoomId.status === "0") {
+            const tickets = document.querySelectorAll('.ticket')
+
+            tickets.forEach(ticketBlock => {
+                const number = ticketBlock.querySelector('.number');
+                const status = ticketBlock.querySelector('.status')
+
+                if (number.textContent === ticket) {
+                    ticketBlock.classList.add('active')
+                    if (isCab) {
+                        status.textContent = `Окно ${cabinet}`
+                    }
+                    if (!isCab) {
+                        status.textContent = `Кабинет ${cabinet}`
+                    }
+                }
+            })
+        } else {
+            tvInfo.insertAdjacentHTML('afterbegin', `<div class="ticket active">
+                    <div class="number">${ticket}</div>
+                      <div class="status">
+                        ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}`}
+                      </div>
+            </div>`)
+        }
+        if (document.querySelectorAll('.ticket').length >= 20) {
+            tvInfo.lastChild.remove()
         }
     }
 }
-async function playAudio(sound){
+
+
+async function testFunction(data) {
+    const sound = data.sound
+    for (let i = 0; i < sound.length; i++) {
+        const audio = new Audio(sound[i])
+        await playAudio(audio)
+        if (i + 1 === sound.length) {
+            console.log('test')
+            socket.emit('delete sound', data, (soundData) => {
+                if(soundData){
+                    callTicketFunc(soundData)
+                    // document.querySelector('.current__container').remove()
+                    // clearActive(soundData.ticket)
+                }
+            })
+        }
+    }
+}
+
+async function playAudio(sound) {
     sound.play()
-    await new Promise((resolve,reject)=>{
-        sound.addEventListener('ended',()=>{
+    await new Promise((resolve, reject) => {
+        sound.addEventListener('ended', () => {
             resolve()
         })
-        sound.addEventListener('error',()=>{
+        sound.addEventListener('error', () => {
             reject()
         })
     })
 
 }
 
-async function play_all(data){
-   await testFunction(data)
+async function play_all(data) {
+    await testFunction(data)
 }
 
-socket.on('prepare active',data=>{
-        prepareActive = data
+
+socket.on('pong', async (data) => {
+    await callTicketFunc(data)
 })
 
-setInterval(()=>{
-    socket.emit('ping',getRoomId.id)
-},index)
-
-socket.on('pong',(data)=>{
-    if(data===null) return;
-    play_all(data)
-
-
-    if(data.hasOwnProperty('data')){
-        const {cabinet,isCab,ticket} = data.data
-        const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
-
-        createCurrent(data.data)
-        if(getRoomId.status === "0"){
-            const tickets = document.querySelectorAll('.ticket')
-
-            tickets.forEach(ticketBlock=>{
-                const number = ticketBlock.querySelector('.number');
-                const status = ticketBlock.querySelector('.status')
-
-                if(number.textContent === ticket){
-                    ticketBlock.classList.add('active')
-                    if(isCab) {
-                        status.textContent = `Окно ${cabinet}`
-                    }
-                    if(!isCab){
-                        status.textContent = `Кабинет ${cabinet}`
-                    }
-                }
-            })
-        }else{
-            tvInfo.insertAdjacentHTML('afterbegin',`<div class="${setActive}">
-                    <div class="number">${ticket}</div> 
-                      <div class="status">
-                        ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }                      
-                      </div>
-            </div>`)
-        }
-        if(document.querySelectorAll('.ticket').length>=20){
-            tvInfo.lastChild.remove()
-        }
-    }
-    socket.on('repeat ticket',data=> {
-        play_all(data)
-    });
-
-
-})
-//
-//
-// setInterval(()=>{
-//     const start = Date.now();
-//     socket.volatile.emit('ping',getRoomId.id,(data)=>{
-//         if(data===null) return;
-//         play_all(data)
-//
-//
-//         if(data.hasOwnProperty('data')){
-//             const {cabinet,isCab,ticket} = data.data
-//             const setActive = prepareActive.number === ticket ? "ticket active":"ticket"
-//
-//             createCurrent(data.data)
-//             if(getRoomId.status === "0"){
-//                 const tickets = document.querySelectorAll('.ticket')
-//
-//                 tickets.forEach(ticketBlock=>{
-//                     const number = ticketBlock.querySelector('.number');
-//                     const status = ticketBlock.querySelector('.status')
-//
-//                     if(number.textContent === ticket){
-//                         ticketBlock.classList.add('active')
-//                         if(isCab) {
-//                             status.textContent = `Окно ${cabinet}`
-//                         }
-//                         if(!isCab){
-//                             status.textContent = `Кабинет ${cabinet}`
-//                         }
-//                     }
-//                 })
-//             }else{
-//                 tvInfo.insertAdjacentHTML('afterbegin',`<div class="${setActive}">
-//                     <div class="number">${ticket}</div>
-//                       <div class="status">
-//                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}` }
-//                       </div>
-//             </div>`)
-//             }
-//                 if(document.querySelectorAll('.ticket').length>=20){
-//                     tvInfo.lastChild.remove()
-//                 }
-//         }
-//         socket.on('repeat ticket',data=> {
-//             play_all(data)
-//         });
-//
-//
-//     })
-//
-// },start - index)
-
-socket.on('message',data=>{
+socket.on('message', data => {
     console.log(data)
 })
+socket.on('repeat ticket', data => {
+    play_all(data)
+});

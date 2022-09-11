@@ -12,15 +12,15 @@ async function updateIsComplete(tableName,tvinfo_id){
     })
 }
 
-async function updateTransferTicket(tableName,cab,isNotice,number,notice,service_id){
-    return queryInterface.sequelize.query(`UPDATE tvinfo__${tableName}${moment().format('DMMYYYY')}  SET cabinet = :cabinet,notice = :notice,isCall = :isCall,services_id = :services_id WHERE number = :number ORDER BY tvinfo_id DESC LIMIT 1`, {
-        replacements: {isCall: 0,cabinet:cab,notice:isNotice ? notice:"",number:number,services_id:service_id},
+async function updateTransferTicket(tableName,user_id,isNotice,number,notice){
+    return queryInterface.sequelize.query(`UPDATE tvinfo__${tableName}${moment().format('DMMYYYY')}  SET user_id = :user_id,notice = :notice,isCall = :isCall WHERE number = :number ORDER BY tvinfo_id DESC LIMIT 1`, {
+        replacements: {isCall: 0,user_id,notice:isNotice ? notice:"",number:number},
         type:QueryTypes.UPDATE
     })
 }
-async function updateIsCall(tableName,number,tvinfo_id,cab){
-    return await queryInterface.sequelize.query(`UPDATE tvinfo__${tableName}${moment().format('DMMYYYY')} SET isCall = :isCall,cabinet = :cabinet WHERE tvinfo_id = :tvinfo_id`,{
-        replacements:{isCall:1,number,tvinfo_id,cabinet:cab},
+async function updateIsCall(tableName,number,tvinfo_id,user_id){
+    return await queryInterface.sequelize.query(`UPDATE tvinfo__${tableName}${moment().format('DMMYYYY')} SET isCall = :isCall,user_id = :user_id WHERE tvinfo_id = :tvinfo_id`,{
+        replacements:{isCall:1,number,tvinfo_id,user_id},
         type:QueryTypes.UPDATE
     })
 }

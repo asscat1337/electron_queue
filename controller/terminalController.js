@@ -1,11 +1,13 @@
 const Service = require('../models/model__test/Service');
 const Terminal = require('../models/model__test/Terminal')
 const TicketService = require('../databases/ticket-service')
-const {QueryTypes,Sequelize} = require('sequelize')
+const {QueryTypes} = require('sequelize')
 const moment = require('moment')
 const sequelize = require('../core/config1')
 const selectService = require('../models/model__test/Service/select')
 const updateService = require('../models/model__test/Service/update')
+const {insert} = require('../models/model__test/Tickets/insert')
+const {selectByTvInfo} = require('../models/model__test/Tickets/select')
 
 class TerminalController {
     async renderTerminal(req,res,next){
@@ -38,22 +40,16 @@ class TerminalController {
     }
     async setStateTicket(req,res,next){
         try{
-            const timeCreated = moment().tz('Asia/Yekaterinburg').format('HH:mm:ss')
-
             const {number,service,nameTerminal,description,id,type,pointer}=req.body
-            const addedData = await sequelize.query(`INSERT into tvinfo__${nameTerminal}${moment().format('DMMYYYY')} VALUES (:tvinfo_id,:date,:time,:service,:description,:number,:terminalName,:cabinet,:isCall,:service_id,:isComplete,:type,:notice)`,{
-                replacements:{tvinfo_id:null,date:moment().format('YYYY-MM-DD'),time:timeCreated,service:service,description,number:number,terminalName:nameTerminal,cabinet:0,isCall:0,service_id:id,isComplete:0,type:type,notice:''},
-                type:QueryTypes.INSERT
-            })
-            const addedDataId = addedData[0]
+            const addedData = await insert(nameTerminal,service,nameTerminal,id,type,number,description)
+
+
+            const dataTicket = await selectByTvInfo(nameTerminal,addedData)
             await updateService.updatePointer(nameTerminal,pointer,id)
-            const dataTicket = await sequelize.query(`SELECT * from tvinfo__${nameTerminal}${moment().format('DMMYYYY')} WHERE tvinfo_id = :tvinfo_id`,{
-                replacements:{tvinfo_id:addedDataId},
-                type:QueryTypes.SELECT
-            })
             return res.status(200).json(dataTicket)
         }
         catch (e) {
+            console.log(e)
             return res.status(500).json({
                 message:'Произошла ошибка при выполнении запроса'
             })

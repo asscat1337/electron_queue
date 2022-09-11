@@ -28,12 +28,12 @@ class TicketService {
     }
 
     async selectTicket(info){
-        const {users_id,terminalName,cabinet} = info
+        const {users_id,terminalName} = info
         try{
           const data =  await sequelize.query(`SELECT * from tvinfo__${terminalName}${moment.format('DMMYYYY')}  INNER JOIN roles__${terminalName}
-                WHERE tvinfo__${terminalName}${moment.format('DMMYYYY')}.services_id = roles__${terminalName}.service_id AND isCall = :isCall AND cabinet BETWEEN 0 and :cab
-                AND isComplete = :isComplete AND user_id = :user_id ORDER BY tvinfo_id ASC LIMIT 1`, {
-                replacements: {isComplete:0,isCall:0,user_id:users_id,cab:cabinet},
+                WHERE tvinfo__${terminalName}${moment.format('DMMYYYY')}.services_id = roles__${terminalName}.service_id AND isCall = :isCall AND roles__${terminalName}.user_id BETWEEN 0 and :user_id
+                AND isComplete = :isComplete ORDER BY tvinfo_id ASC LIMIT 1`, {
+                replacements: {isComplete:0,isCall:0,user_id:users_id},
                 type: QueryTypes.SELECT
             })
 
@@ -43,15 +43,13 @@ class TicketService {
         }
     }
     async getCurrentTicket(info){
-        const {users_id,terminalName,cabinet,tvinfo_id} = info
+        const {terminalName,tvinfo_id} = info
+        const tableName = `tvinfo__${terminalName}${moment.format('DMMYYYY')}`
         try{
-            const data =  await sequelize.query(`SELECT * from tvinfo__${terminalName}${moment.format('DMMYYYY')}  INNER JOIN roles__${terminalName}
-                WHERE tvinfo__${terminalName}${moment.format('DMMYYYY')}.services_id = roles__${terminalName}.service_id AND isCall = :isCall AND cabinet BETWEEN 0 and :cab
-                AND isComplete = :isComplete AND user_id = :user_id  AND tvinfo_id = :tvinfo_id ORDER BY tvinfo_id ASC LIMIT 1`, {
-                replacements: {isComplete:0,isCall:0,user_id:users_id,cab:cabinet,tvinfo_id:tvinfo_id},
-                type: QueryTypes.SELECT
+            const data = await sequelize.query(`SELECT * from ${tableName} WHERE tvinfo_id = :tvinfo_id`,{
+                replacements:{tvinfo_id},
+                type:QueryTypes.SELECT
             })
-
             return data
         }catch (e) {
             console.log(e)

@@ -1,4 +1,3 @@
-
 const socket = io.connect('http://localhost:8000', {
     withCredentials: true,
     reconnection:true,
@@ -116,8 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const dataId = mainNode.dataset.id
         socket.emit('get current', {'received': socket.id, id: dataId})
         socket.emit('show active', dataTicket)
-        // setTimeout(() => {
-        // }, 500)
     }
     const completeTicket = () => {
         nextButton.disabled = false;
@@ -227,9 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
     nextButton.addEventListener('click', () => {
         disabledButton(true)
         socket.emit('test data', {'received': socket.id})
-        setTimeout(() => {
-            socket.emit('show active', dataTicket)
-        }, 500)
     });
     btnComplete.addEventListener('click', () => {
         completeTicket()
@@ -372,12 +366,16 @@ transferButton.addEventListener('click', () => {
             "number": document.querySelector('.ticket__text').textContent,
             "tvinfo_id": dataTicket.tvinfo_id,
             service: dataTicket.service,
+            description:dataTicket.description,
+            time:dataTicket.time,
             notice: inputNotice ? inputNotice.value : getTextNoticeNode
         })
         socket.emit('transfer tv', [{
             "number": ticket__text.textContent, "cab": optionVal,
             "Letter": letter, "pointer": pointer
         }])
+        dataTicket = {}
+        localStorage.setItem('currentTicket',{})
         socket.emit('complete data', {"number": ticket__text.textContent})
         ButtonDisabled(true,false)
         document.querySelectorAll('.result').forEach(item => {
