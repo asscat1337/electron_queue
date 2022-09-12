@@ -66,12 +66,7 @@ const ButtonDisabled=(btn1,btn2)=>{
     }
 }
 
-const asyncGetTicket=async ()=>{
-    const response = await fetch('/op/get-ticket')
-    const data = await response.json()
-
-    console.log(data)
-}
+const userInfo = getStringParams(`${Object.values(window.location.search).join('')}`)
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -116,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('get current', {'received': socket.id, id: dataId})
         socket.emit('show active', dataTicket)
     }
-    const completeTicket = () => {
+    const completeTicket = (objectTicket) => {
         nextButton.disabled = false;
         document.querySelectorAll('.result').forEach(item => {
             if (ticketText.textContent === item.querySelector('.result__ticket').textContent) {
@@ -129,11 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
         socket.emit('complete data', {"number": ticket__text.textContent})
-        socket.emit('add data', {
-            "number": ticket__text.textContent,
-            "tvinfo_id": dataTicket.tvinfo_id,
-            user: getStringParams(`${Object.values(window.location.search).join('')}`)
-        });
+        socket.emit('add data', objectTicket);
         ticket__text.textContent = "";
         service___text.textContent = "";
         dataTicket = {}
@@ -184,8 +175,25 @@ document.addEventListener('DOMContentLoaded', () => {
             callTicket(event)
             disabledButton(true)
         })
-        document.querySelector('.complete').addEventListener('click', () => {
-            completeTicket()
+        document.querySelector('.complete').addEventListener('click', (event) => {
+            const result = document.querySelectorAll('.result')
+
+
+            const parentDiv = event.target.closest('.result')
+            const ticketId = parentDiv.getAttribute('data-id')
+            result.forEach(res=>{
+                const dataId = res.dataset.id
+                if(dataId === ticketId){
+                    res.remove()
+                }
+            })
+            const ticketNumber = parentDiv.querySelector('.result__ticket').textContent
+            const objectTicket = {
+                "number":ticketNumber,
+                tvinfo_id:ticketId,
+                user:userInfo
+            }
+             completeTicket(objectTicket)
             disabledButton(false)
         })
        document.querySelectorAll('.result').forEach(item=>{
@@ -216,17 +224,54 @@ document.addEventListener('DOMContentLoaded', () => {
             `)
     }
 
+    let isVisible
+    document.addEventListener('visibilitychange',()=>{
+        if(document.visibilityState === "hidden"){
+            isVisible = false
+        }else{
+            isVisible = true
+        }
+
+    })
 
 
     socket.on('await queue', data => {
         generateQueue(data)
+
+        if(!isVisible){
+            console.log('Вышел за пределы окна')
+            showNotification(data)
+        }
     })
+
+
+    const showNotification=(data)=>{
+        Notification.requestPermission().then((perm)=>{
+            if(perm === "granted"){
+                const notification = new Notification('Уведомление о талона', {
+                    body: `Появился новый талон с номером ${data.number}. Услуга:${data.description}`,
+                });
+
+                setInterval(()=>{
+                    notification.close()
+                },5000)
+            }
+        })
+    }
+
+
     nextButton.addEventListener('click', () => {
         disabledButton(true)
-        socket.emit('test data', {'received': socket.id})
+         socket.emit('test data', {'received': socket.id})
     });
     btnComplete.addEventListener('click', () => {
-        completeTicket()
+
+        const objectTicketComplete = {
+            tvinfo_id:dataTicket.tvinfo_id,
+            number:dataTicket.number,
+            user:userInfo
+        }
+        completeTicket(objectTicketComplete)
         disabledButton(false)
     })
     socket.on('show data', data => {

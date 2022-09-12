@@ -6,7 +6,7 @@ const queryInterface = sequelize.getQueryInterface()
 
 
 async function updateIsComplete(tableName,tvinfo_id){
-    return queryInterface.sequelize.query(`UPDATE tvinfo__${tableName}${moment().format('DMMYYYY')} set isComplete = 1 WHERE tvinfo_id = :tvinfo_id`, {
+    return queryInterface.sequelize.query(`UPDATE tvinfo__${tableName}${moment().format('DMMYYYY')} set isComplete = 1,isCall = 1 WHERE tvinfo_id = :tvinfo_id`, {
         replacements: {tvinfo_id},
         type: QueryTypes.UPDATE
     })

@@ -2,11 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let terminalObject;
     let terminalName
     const deleteTerminalDiv = document.querySelector('.delete-terminal__button');
+    const datepicker = document.querySelector('.datepicket')
     const modal = document.querySelectorAll('.modal');
     const select = document.querySelectorAll('select')
     M.Modal.init(modal)
     M.Tabs.init(document.querySelector('.tabs'))
     M.FormSelect.init(select)
+    M.Datepicker.init(datepicker)
     const elems = document.querySelectorAll('select');
     M.FormSelect.init(elems);
     const selectOptions = document.querySelector('.select-service')
