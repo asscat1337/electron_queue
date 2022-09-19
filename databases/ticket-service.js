@@ -29,9 +29,10 @@ class TicketService {
 
     async selectTicket(info){
         const {users_id,terminalName} = info
+        const currentDate = moment.tz('Asia/Yekaterinburg').format('DMMYYYY')
         try{
-          const data =  await sequelize.query(`SELECT * from tvinfo__${terminalName}${moment.format('DMMYYYY')}  INNER JOIN roles__${terminalName}
-                WHERE tvinfo__${terminalName}${moment.format('DMMYYYY')}.services_id = roles__${terminalName}.service_id AND isCall = :isCall 
+          const data =  await sequelize.query(`SELECT * from tvinfo__${terminalName}${currentDate}  INNER JOIN roles__${terminalName}
+                WHERE tvinfo__${terminalName}${currentDate}.services_id = roles__${terminalName}.service_id AND isCall = :isCall 
                 AND roles__${terminalName}.user_id = :user_id
                 AND isComplete = :isComplete ORDER BY tvinfo_id ASC LIMIT 1`, {
                 replacements: {isComplete:0,isCall:0,user_id:users_id},

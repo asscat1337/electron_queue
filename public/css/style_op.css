@@ -99,8 +99,8 @@ body{margin: 0; box-sizing: border-box; font-family: Arial, sans-serif; height: 
 .op__main{
     position: relative;
     margin: 10px;
-    height: 90vh;
-    width: 50vh;
+    height: 80vh;
+    width: 40vh;
     border-radius: 5px;
     border: 1px solid black;
 }
@@ -181,8 +181,8 @@ color:red;
 .op__main-button{
     display: flex;
     flex-direction: column;
-    margin: 0 5px;
-    width: 50%;
+    margin: 10px 5px;
+    width: 55%;
 }
 .btn{
     margin: 3px 0px;
@@ -199,11 +199,10 @@ color:red;
 .op__list{
     position: relative;
     margin: 10px;
-    height: 90vh;
-    width: 70vh;
+    height: 80vh;
+    padding:5px;
     border-radius: 5px;
     border: 1px solid black;
-    /*z-index: 9999;*/
     overflow-x: scroll;
 }
 .op__patients{
@@ -270,4 +269,23 @@ color:red;
 .result-notice{
     font-size: 22px;
     border-bottom: 1px solid #bf0a8e;
+}
+.nav-info__user{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 10px;
+}
+.nav-info__user li {
+    float: none;
+    font-size: 18px;
+    height: 21px;
+    color:#000000;
+}
+.op__nav{
+    height: 64px;
+    background-color:#ffffff;
+}
+.btn span{
+    font-size: 14px;
 }

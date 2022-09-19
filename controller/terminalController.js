@@ -38,24 +38,23 @@ class TerminalController {
             console.log(e)
         }
     }
-    async setStateTicket(req,res,next){
+    async setStateTicket(req,res){
         try{
             const {number,service,nameTerminal,description,id,type,pointer}=req.body
             const addedData = await insert(nameTerminal,service,nameTerminal,id,type,number,description)
-
-
-            const dataTicket = await selectByTvInfo(nameTerminal,addedData)
             await updateService.updatePointer(nameTerminal,pointer,id)
+            const dataTicket = await selectByTvInfo(nameTerminal,addedData)
             return res.status(200).json(dataTicket)
         }
         catch (e) {
             console.log(e)
             return res.status(500).json({
-                message:'Произошла ошибка при выполнении запроса'
+                message:'Произошла ошибка при выполнении запроса',
+                error:e
             })
         }
     }
-async updatePointerNull(req,res,next){
+async updatePointerNull(req,res){
         try{
            const {service,terminal} = req.body
            await Service.update({pointer:1},{

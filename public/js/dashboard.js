@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (input.type === "checkbox"){
                             input.checked = false
                         }
-                        data.length = 0
+                        data = []
                     })
                 })
         }

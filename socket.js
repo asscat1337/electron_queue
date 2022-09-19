@@ -39,7 +39,7 @@ const socketConnection=(io)=>{
 
             cronJob.start()
 
-            socket.on('connect data', async (data) => {
+            socket.on('connect data', async () => {
                 /// подумать как сделать правильно
                 const {userdata} = socket.handshake.session
                 const {user_id} = userdata
@@ -82,8 +82,7 @@ const socketConnection=(io)=>{
                 socket.broadcast.emit('updates queue', number)
             })
             ////
-            socket.on('test data', async (data,cb) => {
-                const {received} = data
+            socket.on('test data', async () => {
                 const {userdata} = socket.handshake.session
                 const ticketData = await ticketAction.selectTicket({users_id:userdata.user_id,terminalName:userdata.terminal,cabinet:userdata.cab})
                 console.log(ticketData)
@@ -91,7 +90,7 @@ const socketConnection=(io)=>{
                 socket.emit('show test',ticketData[0])
             })
             socket.on('get current',async(data)=>{
-                const {received,id} = data
+                const {id} = data
                 const {userdata} = socket.handshake.session
                 const currentTicket = await ticketAction.getCurrentTicket({
                     users_id:userdata.user_id,

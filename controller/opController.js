@@ -1,17 +1,17 @@
-const Roles = require('../models/model__test/Roles')
-const User = require('../models/model__test/User')
-const {Op} = require('sequelize')
 const selectUser = require('../models/model__test/User/select')
 const TicketSelect = require('../models/model__test/Tickets/select')
 
 class opController{
     async renderOp(req,res,next){
         try{
+            const {userdata} = req.session
+            console.log(userdata)
             if(req.session.userdata.user_id !==Number(req.query.id)){
                 res.status(401).json({'error':'Произошла ошибка'})
             }else{
                 res.render('op',{
-                    notice:req.session.userdata.isNotice
+                    notice:userdata.isNotice,
+                    login:userdata.name
                 })
             }
         }catch (e) {

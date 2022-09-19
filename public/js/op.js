@@ -68,9 +68,22 @@ const ButtonDisabled=(btn1,btn2)=>{
 
 const userInfo = getStringParams(`${Object.values(window.location.search).join('')}`)
 
+
+window.addEventListener('unload', () => {
+    socket.emit('end')
+})
+window.addEventListener('unload',()=>{
+    localStorage.setItem('currentTicket',JSON.stringify(dataTicket))
+})
+
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    const currentTicket = JSON.parse(localStorage.getItem('currentTicket'))
+    let currentTicket
+    const current = localStorage.getItem('currentTicket')
+    if(current){
+        currentTicket = JSON.parse(current)
+    }
 
     if(currentTicket && currentTicket.isComplete === 0){
         ticket__text.textContent = currentTicket.number
@@ -99,12 +112,6 @@ document.addEventListener('DOMContentLoaded', () => {
         },1000)
         window.addEventListener('unload',()=>clearInterval(timer))
     }
-    window.addEventListener('unload', () => {
-        socket.emit('end')
-    })
-    window.addEventListener('unload',()=>{
-        localStorage.setItem('currentTicket',JSON.stringify(dataTicket))
-    })
     const callTicket = (event) => {
         const mainNode = event.target.parentNode.parentNode
         const dataId = mainNode.dataset.id
@@ -127,11 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('add data', objectTicket);
         ticket__text.textContent = "";
         service___text.textContent = "";
-        dataTicket = {}
         Array.from(buttonMain).slice(1).forEach(item => {
             item.disabled = true
         })
-        localStorage.setItem('currentTicket',{})
+        localStorage.removeItem('currentTicket')
+        dataTicket = {}
         disabledButton(false)
     }
     const timeManipulate = (start) => {
@@ -226,11 +233,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isVisible
     document.addEventListener('visibilitychange',()=>{
-        if(document.visibilityState === "hidden"){
+        document.visibilityState === "hidden" ?
             isVisible = false
-        }else{
+            :
             isVisible = true
-        }
 
     })
 
@@ -420,7 +426,7 @@ transferButton.addEventListener('click', () => {
             "Letter": letter, "pointer": pointer
         }])
         dataTicket = {}
-        localStorage.setItem('currentTicket',{})
+        localStorage.removeItem('currentTicket')
         socket.emit('complete data', {"number": ticket__text.textContent})
         ButtonDisabled(true,false)
         document.querySelectorAll('.result').forEach(item => {

@@ -90,23 +90,8 @@ socket.on('clear', () => {
 })
 
 
-const clearActive = (ticket) => {
-    const numbers = Array.from(document.querySelectorAll('.number'));
-    numbers.forEach(number => {
-        if (number.textContent === ticket) {
-            if (getRoomId.status === "1") {
-                number.parentNode.classList.remove('active')
-            }
-            if (getRoomId.status === "0") {
-                number.parentNode.remove()
-            }
-        }
-    })
-}
-
 
 socket.on('completed', data => {
-    clearActive(data.number)
     if (document.querySelectorAll('.ticket').length < 20) {
         Array.from(document.querySelectorAll('.hide')).reverse().forEach(item => item.classList.remove('hide'))
     }
@@ -134,7 +119,6 @@ const callTicketFunc = async (data) => {
                 const status = ticketBlock.querySelector('.status')
 
                 if (number.textContent === ticket) {
-                    ticketBlock.classList.add('active')
                     if (isCab) {
                         status.textContent = `Окно ${cabinet}`
                     }
@@ -144,7 +128,7 @@ const callTicketFunc = async (data) => {
                 }
             })
         } else {
-            tvInfo.insertAdjacentHTML('afterbegin', `<div class="ticket active">
+            tvInfo.insertAdjacentHTML('afterbegin', `<div class="ticket">
                     <div class="number">${ticket}</div>
                       <div class="status">
                         ${isCab ? `Окно ${cabinet}` : `Кабинет ${cabinet}`}
@@ -164,12 +148,12 @@ async function testFunction(data) {
         const audio = new Audio(sound[i])
         await playAudio(audio)
         if (i + 1 === sound.length) {
-            console.log('test')
             socket.emit('delete sound', data, (soundData) => {
                 if(soundData){
                     callTicketFunc(soundData)
-                    // document.querySelector('.current__container').remove()
-                    // clearActive(soundData.ticket)
+                    if(document.querySelector('.current__container')){
+                        document.querySelector('.current__container').remove()
+                    }
                 }
             })
         }
@@ -177,16 +161,17 @@ async function testFunction(data) {
 }
 
 async function playAudio(sound) {
-    sound.play()
-    await new Promise((resolve, reject) => {
-        sound.addEventListener('ended', () => {
-            resolve()
-        })
-        sound.addEventListener('error', () => {
-            reject()
+    window.addEventListener('load',async ()=>{
+        sound.play()
+        await new Promise((resolve, reject) => {
+            sound.addEventListener('ended', () => {
+                resolve()
+            })
+            sound.addEventListener('error', () => {
+                reject()
+            })
         })
     })
-
 }
 
 async function play_all(data) {

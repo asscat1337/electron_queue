@@ -29,20 +29,23 @@ socket.on('connect',()=>{
 const url = new URL(window.location.href);
 const terminalId = url.searchParams.get('id')
 
-take__ticket.forEach((item)=> {
-    item.addEventListener('click', async (event) => {
-        event.target.closest('.take__ticket').classList.add('disable')
+const delay = ms => new Promise(((resolve) => setTimeout(resolve,ms)))
+
+take__ticket.forEach((ticketBtn)=> {
+    ticketBtn.addEventListener('click', async (event) => {
+        const target = event.target.closest('.take__ticket')
+        target.classList.add('disable')
         document.querySelector('.wrapper').classList.add('active')
         await fetch('/ts/getTicket', {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json;charset=utf-8'
             },
-            body: JSON.stringify({'data': item.getAttribute('data-id'),terminalId})
+            body: JSON.stringify({'data': ticketBtn.getAttribute('data-id'),terminalId})
         })
             .then(res => res.json())
-            .then(data => {
-                let res = data;
+            .then(ticketData => {
+                let res = ticketData;
                 res.forEach(item => {
                     if (time >= item.end_time || time <= item.start_time) {
                         document.body.insertAdjacentHTML('beforeend', `
@@ -111,21 +114,20 @@ take__ticket.forEach((item)=> {
                                     body: JSON.stringify(object)
                                 })
                                     .then(res=>res.json())
-                                    .then(data=>{
-                                        socket.emit('update queue', data);
-                                        socket.emit('show tv', data);
+                                    .then(newTicket=>{
                                         let ticket = document.querySelector('.ticket');
-                                        const delay = ms => new Promise(((resolve, reject) => setTimeout(resolve,ms)))
                                         if(ticket){
                                             delay(2000).then(()=>{
                                                 window.print()
                                                 delay(1000).then(()=>{
                                                     document.querySelector('.modal__ticket').remove()
                                                     document.querySelector('.wrapper').classList.remove('active')
+                                                    socket.emit('update queue', newTicket);
+                                                    socket.emit('show tv', newTicket);
+                                                    target.classList.remove('disable')
                                                 })
                                             })
                                         }
-                                        // setTimeout(()=>controller.abort(),15000)
                                     })
                                      .catch(e=>console.log(e))
                         };
