@@ -65,7 +65,7 @@ const ButtonDisabled=(btn1,btn2)=>{
         }
     }
 }
-
+const isEmpty=(object)=>Object.keys(object).length === 0
 const userInfo = getStringParams(`${Object.values(window.location.search).join('')}`)
 
 
@@ -73,7 +73,10 @@ window.addEventListener('unload', () => {
     socket.emit('end')
 })
 window.addEventListener('unload',()=>{
-    localStorage.setItem('currentTicket',JSON.stringify(dataTicket))
+    const isEmptyObject = isEmpty(dataTicket)
+    if(!isEmptyObject){
+        localStorage.setItem('currentTicket',JSON.stringify(dataTicket))
+    }
 })
 
 
