@@ -2,13 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let terminalObject;
     let terminalName
     const deleteTerminalDiv = document.querySelector('.delete-terminal__button');
-    const datepicker = document.querySelector('.datepicket')
     const modal = document.querySelectorAll('.modal');
     const select = document.querySelectorAll('select')
     M.Modal.init(modal)
     M.Tabs.init(document.querySelector('.tabs'))
     M.FormSelect.init(select)
-    M.Datepicker.init(datepicker)
     const elems = document.querySelectorAll('select');
     M.FormSelect.init(elems);
     const selectOptions = document.querySelector('.select-service')
@@ -29,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                         .then(response => response.json())
                         .then(data => {
-                           terminalName = item.textContent
+                            terminalName = item.textContent
                             terminalObject = data
                             data.map(item => {
                                 if (item.status === 1) {
@@ -78,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                             headers: {
                                                 'Content-type': 'application/json;charset=utf-8'
                                             },
-                                            body: JSON.stringify({id: deleteId,terminalName:terminalName})
+                                            body: JSON.stringify({id: deleteId, terminalName: terminalName})
                                         })
                                             .then(res => res.json())
                                             .then(data => {
@@ -196,8 +194,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const serviceConfirm = document.querySelector('.service__confirm');
     const selectTerminal = document.querySelector('.select__terminal');
-    let data = []
+    let dataUsers = []
     selectTerminal.addEventListener('change', event => {
+        const users = document.querySelectorAll('.users p')
+        if(users.length){
+            users.forEach(user=>user.remove())
+        }
         async function fetchData() {
             await fetch('dashboard/showTerminalUsers', {
                 method: 'POST',
@@ -208,8 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
             })
                 .then(response => response.json())
                 .then(data => {
+
                     data.map(item => {
-                        document.querySelector('.add__service').insertAdjacentHTML(`beforeend`, `
+                        document.querySelector('.users').insertAdjacentHTML(`beforeend`, `
                        <p>
                         <label>
                             <input type="checkbox" class="filled-in service__user" data-id=${item.user_id}>
@@ -221,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             document.querySelectorAll('.service__user').forEach(item => {
                 item.addEventListener('click', (event) => {
-                    data.push(event.target.dataset.id)
+                    dataUsers.push(event.target.dataset.id)
                 })
             });
         }
@@ -238,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "description": descriptionInput,
             "pointer": 1,
             "status": 1,
-            "roles": data,
+            "roles": dataUsers,
             "setTerminalName": selectTerminal.value,
             "start_time": document.querySelector('.service__start').value,
             "end_time": document.querySelector('.service__end').value,
@@ -257,12 +260,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(res => res.json())
                 .then(data => {
                     M.toast({html: data.message})
-                    addServiceInput.forEach(input=>{
+                    addServiceInput.forEach(input => {
                         input.value = ""
-                        if (input.type === "checkbox"){
+                        if (input.type === "checkbox") {
                             input.checked = false
                         }
-                        data = []
+                        dataUsers = []
                     })
                 })
         }
@@ -290,34 +293,38 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteTerminal()
         })
     })
+    let userTerminal
     const selectUserTerminal = document.querySelector('.user_terminal')
-    selectUserTerminal.addEventListener('change',(e)=>{
+    selectUserTerminal.addEventListener('change', (e) => {
         const {value} = e.target;
-        if(document.querySelectorAll('.result__role')){
-            document.querySelectorAll('.result__role').forEach(item=>item.remove())
+        userTerminal = value
+        if (document.querySelectorAll('.result__role')) {
+            document.querySelectorAll('.result__role').forEach(item => item.remove())
         }
+
         async function selectUser() {
-            const response = await fetch('dashboard/selectUserTerminal',{
-                method:'POST',
-                headers:{
-                    'Content-type':'application/json;charset=utf-8'
+            const response = await fetch('dashboard/selectUserTerminal', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json;charset=utf-8'
                 },
-                body:JSON.stringify({terminalName:value})
+                body: JSON.stringify({terminalName: value})
             })
             return await response.json()
         }
-        selectUser().then(users=>{
-            users.map(user=>{
-                selectUserTerminal.insertAdjacentHTML('afterend',`
+
+        selectUser().then(users => {
+            users.map(user => {
+                selectUserTerminal.insertAdjacentHTML('afterend', `
                     <div class="result__role" data-id=${user.user_id}>
                         <span>${user.name}</span>
                         <button class="btn delete__role">Удалить пользователя</button>
                                                 <div class="switch">
                             <label>
-                                Off
-                                ${user.isActive ? `<input type="checkbox" checked class="state__user filled-in"/>` : `<input type="checkbox"  class="state__user filled-in"/>` }
+                                Отключить
+                                ${user.isActive ? `<input type="checkbox" checked class="state__user filled-in"/>` : `<input type="checkbox"  class="state__user filled-in"/>`}
                                 <span class="lever"></span>
-                                On
+                                Включить
                             </label>
                         </div>
                         <a class="waves-effect waves-light btn modal-trigger show__current-user" href="#modal1">Показать подробности</a>
@@ -325,42 +332,42 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `)
             })
-            document.querySelectorAll('.result__role').forEach(item=>{
+            document.querySelectorAll('.result__role').forEach(item => {
                 const currentButton = item.querySelector('.delete__role')
                 const currentCheckBox = item.querySelector('.state__user');
                 const showCurrentUser = item.querySelector('.show__current-user')
-                showCurrentUser.addEventListener('click',(e)=>{
-                    async function showUserData(){
+                showCurrentUser.addEventListener('click', (e) => {
+                    async function showUserData() {
                         const userId = item.dataset.id
-                        const response = await fetch(`dashboard/showCurrentUser?userId=${userId}&terminal=${value}`,{
-                            method:'GET',
-                            headers:{
-                                'Content-type':'application/json;charset=utf-8'
+                        const response = await fetch(`dashboard/showCurrentUser?userId=${userId}&terminal=${value}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-type': 'application/json;charset=utf-8'
                             },
                         })
                         return await response.json()
                     }
 
-                    showUserData().then(data=>{
-                        const {services,user} = data
-                        const {name,cab,isReg,isNotice,sendNotice,user_id} = user[0]
-                        document.querySelector('.modal-content').insertAdjacentHTML('beforeend',`
-                        <div>
+                    showUserData().then(data => {
+                        const {services, user} = data
+                        const {name, cab, isReg, isNotice, sendNotice, user_id} = user[0]
+                        document.querySelector('.modal-content').insertAdjacentHTML('beforeend', `
+                        <div class="user-info">
                         <form method="post" class="edit-user">
                             <label for="login">Имя пользователя</label>
                             <input type="text" class="login" value=${name} placeholder="Введите имя пользователя">
                             <label for="cabinet">Кабинет/окно</label>
                             <input type="text" class="cabinet" value=${cab} placeholder="Введите кабинет/окно">
                             <label>
-                                ${isReg ? `<input type="checkbox" class="filled-in is-cab" checked="checked" />` :`<input class="filled-in is-cab" type="checkbox"/>`}
+                                ${isReg ? `<input type="checkbox" class="filled-in is-cab" checked="checked" />` : `<input class="filled-in is-cab" type="checkbox"/>`}
                                 <span>Относится к кабинету/окну</span>
                             </label>
                              <label>
-                                ${isNotice ? `<input type="checkbox" class="filled-in is-notice" checked="checked" />` :`<input class="filled-in is-notice" type="checkbox"/>`}
+                                ${isNotice ? `<input type="checkbox" class="filled-in is-notice" checked="checked" />` : `<input class="filled-in is-notice" type="checkbox"/>`}
                                 <span>Оставлять заметки</span>
                             </label>
                              <label>
-                                ${sendNotice ? `<input type="checkbox" class="filled-in send-notice" checked="checked" />` :`<input class="filled-in send-notice" type="checkbox"/>`}
+                                ${sendNotice ? `<input type="checkbox" class="filled-in send-notice" checked="checked" />` : `<input class="filled-in send-notice" type="checkbox"/>`}
                                 <span>Показывать ФИО</span>
                             </label>
                             <button class="btn button-edit">Редактировать</button>
@@ -373,63 +380,80 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         `)
                         const selectService = document.querySelector('.select_service')
-                        services.map(service=>{
+                        const selectDefault = document.createElement('option')
+                        selectService.appendChild(selectDefault)
+                        selectDefault.disabled = true
+                        selectDefault.selected = true
+                        selectDefault.label = "Выберите значение"
+                        services.map(service => {
                             const optionService = document.createElement('option')
                             optionService.value = service.service_id
-                            optionService.text = service.name
+                            optionService.text = service.description
                             selectService.appendChild(optionService)
                         })
                         let selectedService
-                        selectService.addEventListener('change',(event)=>{
+                        selectService.addEventListener('change', (event) => {
                             selectedService = event.target.value;
+                            console.log(selectedService)
                         })
-                        document.querySelector('.button__add-service').addEventListener('click',(event=>{
-                            async function addNewService(){
-                                const response = await fetch('dashboard/updateServiceUser',{
-                                    method:'POST',
-                                    headers:{
-                                        'Content-type':'application/json'
+                        document.querySelector('.button__add-service').addEventListener('click', (event => {
+                            async function addNewService() {
+                                const response = await fetch('dashboard/updateServiceUser', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-type': 'application/json'
                                     },
-                                    body:JSON.stringify({user_id,service_id:selectedService,terminal:value})
+                                    body: JSON.stringify({user_id, service_id: selectedService, terminal: value})
                                 })
 
                                 return await response.json()
                             }
+
                             addNewService().then(r => console.log(r))
                         }))
-                        document.querySelector('.button-edit').addEventListener('click',(event)=>{
+                        document.querySelector('.button-edit').addEventListener('click', (event) => {
                             event.preventDefault()
+                            console.log(selectedService)
                             const login = document.querySelector('.login');
                             const cabinet = document.querySelector('.cabinet');
                             const isCab = document.querySelector('.is-cab');
                             const isNotice = document.querySelector('.is-notice');
                             const sendNotice = document.querySelector('.send-notice')
                             const editObject = {
-                                "role_id":item.dataset.id,
-                                "setPrivilege":login.value,
-                                "cab":cabinet.value,
-                                "isCab":isCab.checked,
-                                "isNotice":isNotice.checked,
-                                "sendNotice":sendNotice.checked
+                                "role_id": item.dataset.id,
+                                "setPrivilege": login.value,
+                                "cab": cabinet.value,
+                                "isCab": isCab.checked,
+                                "isNotice": isNotice.checked,
+                                "sendNotice": sendNotice.checked,
+                                userTerminal
                             };
-                            async function editCurrentUser(){
-                                const response = await fetch('dashboard/editUser',{
-                                    method:'POST',
-                                    headers:{
-                                        'Content-type':'application/json;charset=utf-8'
+
+                            async function editCurrentUser() {
+                                const response = await fetch('dashboard/editUser', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-type': 'application/json;charset=utf-8'
                                     },
-                                    body:JSON.stringify(editObject)
+                                    body: JSON.stringify(editObject)
                                 })
                                 return await response.json()
                             }
+
                             editCurrentUser()
-                                .then(data=>{
-                                    M.toast({html:data.message})
+                                .then(data => {
+                                    M.toast({html: data.message})
                                 })
                         })
                     })
                 })
-                currentCheckBox.addEventListener('change',(e)=>{
+                const modalClose = document.querySelector('.modal-close')
+                modalClose.addEventListener('click', () => {
+                    if (document.querySelector(('.user-info'))) {
+                        document.querySelector('.user-info').remove()
+                    }
+                })
+                currentCheckBox.addEventListener('change', (e) => {
                     const {checked} = e.target;
                     const id = item.dataset;
                     const changeStateUser = async () => {
@@ -438,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: {
                                 'Content-type': 'application/json;charset=utf-8',
                             },
-                            body: JSON.stringify({"status":checked,...id})
+                            body: JSON.stringify({"status": checked, ...id, userTerminal})
                         })
                             .then(res => res.json())
                             .then(data => {
@@ -448,23 +472,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     changeStateUser()
 
                 })
-                currentButton.addEventListener('click',(e)=>{
-                    const {id} = item.dataset.id
+                currentButton.addEventListener('click', (e) => {
+                    const {id} = item.dataset
 
                     async function deleteUser() {
-                       const response =  await fetch('dashboard/deleteUser',{
-                            method:'DELETE',
-                            headers:{
-                                'Content-type':'application/json;charset=utf-8'
+                        const response = await fetch('dashboard/deleteUser', {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-type': 'application/json;charset=utf-8'
                             },
-                            body:JSON.stringify({'id':id})
+                            body: JSON.stringify({'id': id, userTerminal})
                         })
-                        return await response.json();
+                        const data = await response.json()
+                        if(response.ok && response.status === 200){
+                            item.remove()
+                            M.toast({html: data.message})
+                        }
+                        if(!response.ok && response.status ===  500){
+                            M.toast({html: data.message})
+                        }
                     }
-                    deleteUser().then(deleted=>{
-                        item.remove()
-                        M.toast({html:deleted.message})
-                    })
+
+                    deleteUser()
                 })
             })
         })
@@ -493,10 +522,10 @@ roleButton.addEventListener('click', () => {
         })
             .then(res => res.json())
             .then(data => {
-                const rolesInput = document.querySelectorAll('.role__button input')
-                rolesInput.forEach(input=>{
+                const rolesInput = document.querySelectorAll('.add__role input')
+                rolesInput.forEach(input => {
                     input.value = ""
-                    if(input.type ==="checkbox"){
+                    if (input.type === "checkbox") {
                         input.checked = false
                     }
                 })
@@ -519,9 +548,9 @@ termninalButton.addEventListener('click', () => {
             },
             body: JSON.stringify({"terminalName": terminalInput, "descriptionText": terminalDesc})
         })
-            .then(()=>{
+            .then(() => {
                 const terminalInput = document.querySelectorAll('.add__terminal input')
-                terminalInput.forEach(input=>{
+                terminalInput.forEach(input => {
                     input.value = ""
                 })
             })
@@ -532,43 +561,46 @@ termninalButton.addEventListener('click', () => {
 
 const terminalStats = document.querySelector('.terminal__stats')
 const statsContainer = document.querySelector('.stats__container')
-terminalStats.addEventListener('change',(event)=>{
-
-    async function getStat(){
-        const response = await fetch(`http://localhost:8000/dashboard/get-stat?terminal=${event.target.value}`,{
-            method:'GET',
-            headers:{
-                'Content-type':'application/json;charset=utf-8'
-            }
-        })
-
-        return response.json()
-    }
-    getStat().then(data=>{
-        statsContainer.insertAdjacentHTML('afterbegin',`
+terminalStats.addEventListener('change', (event) => {
+    statsContainer.insertAdjacentHTML('afterbegin', `
             <div class="current__terminal">
-                <h5>Текущая статистика о терминале ${event.target.value}</h5>   
-                <div class="stats">
-                <div class="stats__header">
-                    <span class="header__name">Название талонов</span>
-                     <span class="header__pointer">Количество талонов</span>
-                </div>
-                </div>
+             <input type="date" class="datepicker">
             </div>
-        `)
-        const stats = document.querySelector('.stats__header')
+      `)
+    const datepicker = document.querySelector('.datepicker')
+    datepicker.addEventListener('change', ({target}) => {
+        const {value} = target
+        const getStat = async () => {
+            const response = await fetch(`/dashboard/get-stat?terminal=${event.target.value}&date=${value}`)
+            const data = await response.json()
 
-        data.map(item=>{
-            stats.insertAdjacentHTML('afterend',`
-                <div class="stats__item">
+            statsContainer.insertAdjacentHTML('beforeend', `
+                <div class="stats__tickets">
+                    <div class="ticket__header">
+                        <span class="head__name">Название</span> 
+                        <span class="head__call">Вызванные</span>
+                        <span class="head_complete">Выполненные</span> 
+                    </div>
+                </div> 
+            `)
+
+            data.map(item => {
+                document.querySelector('.stats__tickets').insertAdjacentHTML('beforeend', `
+                  <div class="stats__item">
                     <div class="stats__name">
-                        ${item.name}
+                        ${item.description}
                     </div>
                     <div class="stats__pointer">
-                        ${item.pointer}
+                        ${item.isCall}
+                    </div>
+                     <div class="stats__pointer">
+                        ${item.isComplete}
                     </div>
                 </div>
-            `)
-        })
+               
+               `)
+            })
+        }
+        getStat()
     })
 })

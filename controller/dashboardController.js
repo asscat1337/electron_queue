@@ -1,8 +1,5 @@
-const Users = require('../models/model__test/User');
 const Terminal = require('../models/model__test/Terminal');
-const Service = require('../models/model__test/Service');
-const Roles = require('../models/model__test/Roles');
-const {Op,QueryTypes}= require('sequelize')
+const {QueryTypes}= require('sequelize')
 const sequelize = require('../core/config1')
 const createService = require('../models/model__test/Service/create')
 const createUser = require('../models/model__test/User/create')
@@ -15,27 +12,18 @@ const selectUser = require('../models/model__test/User/select')
 const updateService = require('../models/model__test/Service/update')
 const deleteService = require('../models/model__test/Service/delete')
 const selectRoles = require('../models/model__test/Roles/select')
-
+const {selectByStat} = require('../models/model__test/Tickets/select')
+const {updateUser,updateIsActive} = require('../models/model__test/User/update')
+const {deleteUser} = require('../models/model__test/User/delete')
+const {deleteRole} = require('../models/model__test/Roles/delete')
 const moment = require('moment')
+
 class dashboardController {
     async renderDashboard(req,res,next){
         const terminal = await Terminal.findAll({raw:true});
         res.render('dashboard',{
             data1:terminal,
         })
-    }
-    async deleteUserService(req,res,next){
-        const {user} = req.body
-        await Users.update({isActive:0},{
-            where:{
-                setPrivilege:user
-            }
-        }).then(res.json({'message':'Пользователь отключен'}))
-    }
-    async showFreeUsers(req,res,next){
-        const {terminal} = req.body
-        await Users.findAll({where:{terminalName:terminal,isActive:0}})
-            .then(data=>res.json(data))
     }
     async showService(req,res,next){
         try{
@@ -48,27 +36,10 @@ class dashboardController {
             return res.status(500).json(e)
         }
     }
-    async updateUserTerminal(req,res,next){
-        const {serviceName,user} = req.body
-        await Users.update({isActive:1},{
-            where:{
-                setPrivilege: user,
-                terminalName:serviceName
-            }
-        }).then(res.json({'message':'Пользователь активирован'}))
-    }
-    async enableUser(req,res,next){
-        const {user,status} = req.body
-        const messageData = status ? 'Пользователь активирован' : 'Пользователь отключен'
-        await Users.update({isActive:status},{
-            where:{
-                setPrivilege:user
-            }
-        }).then(res.json({'message':messageData}))
-    }
     async showTerminalUser(req,res,next){
         const {data} = req.body
         const allUsers = await selectUser.selectAll(data)
+        console.log(allUsers)
         return res.status(200).json(allUsers)
     }
     async registerUser(req,res,next) {
@@ -81,93 +52,33 @@ class dashboardController {
             console.log(e)
         }
     }
-    async addUser(req,res,next){
-        const {user,terminal,cabinet,isReg,id} = req.body;
+    async deleteUser(req,res){
         try{
-            const service = await Service.findOne({
-                where: {
-		    id:id,setTerminalName:terminal
-      },
-            });
-            if(user === "" || cabinet === '' || isReg ==='' ){
-                return res.status(400).json({'message':'Не заполнены поля'})
-            }
-            const checkUser = await Users.findAll(
-                {
-                    where:{
-                        setPrivilege:user,
-                        terminalName:terminal,
-                        cab:cabinet
-                    }
-                })
-            if(checkUser.cab === cabinet || checkUser.setPrivilege === user){
-                return res.status(400).json({'message':'Данные дублируются'})
-            }
-            if(!checkUser.length){
-                await Users.create({
-                    setPrivilege:user,
-                    terminalName:terminal,
-                    isActive:1,
-                    cab:cabinet,
-                    isCab:isReg
-                },{raw:true}).then(async (data)=>{
-                    const {dataValues}=data
-                    await Roles.create({
-                        services_id:service.id,
-                        users_id:dataValues.role_id,
-                        terminalName:dataValues.terminalName,
-                        cab:dataValues.cab,
-                    })
-                }).then(res.json({'message':'Пользователь добавлен'}))
-            }
-            if(checkUser.length){
-                res.json({'message':'Пользователь уже существует'})
-            }
+            await deleteUser(req.body)
+            await deleteRole(req.body)
+
+            return res.status(200).json({message:'Пользователь удален'})
         }catch (e) {
             console.log(e)
+            return res.status(500).json({
+                message:'Произошла ошибка при выполнении запроса'
+            })
         }
     }
-    async deleteUser(req,res,next){
+    async disableUser(req,res){
         try{
-            const {id} = req.body
-            await Users.destroy({
-                where:{
-                    role_id:id
-                }
-            }).then(async ()=>{
-                await Roles.destroy({
-                    where:{
-                        users_id:id
-                    }
-                })
-            }).then(res.json({'message':'Пользователь удален'}))
+            const {status} = req.body
+            await updateIsActive(req.body)
+            return res.status(200).json({message:status ? 'Пользователь активирован':'Пользователь отключен'})
         }catch (e) {
-            console.log(e)
+            return res.status(500).json(e)
         }
-    }
-    async disableUser(req,res,next){
-        const {id,status} = req.body
-        await Users.update({isActive:status},{
-            where:{
-                role_id:id
-            }
-        }).then(status ? res.json({'message':'Пользователь активирован'}):res.json({'message':'Пользователь отключен'}))
-    }
-    async changeUserData(req,res,next){
-        const {user,cabinet,terminal,isNotice,sendNotice} = req.body
-        await Users.update({setPrivilege:user,cab:cabinet,isNotice,sendNotice},
-            {
-                where:{
-                    terminalName:terminal,
-                    setPrivilege:user
-                }
-            }).then(res.json({'message':'Данные о пользователе обновились'}))
     }
     async updateServiceData(req,res,next){
         try{
            const {terminalName} = req.body
 
-            const data = await updateService.updateCurrentService(terminalName,req.body)
+            await updateService.updateCurrentService(terminalName,req.body)
            return  res.status(200).json({'message':'Данные о терминале обновились'})
         }catch (e) {
             console.log(e)
@@ -187,29 +98,6 @@ class dashboardController {
             }
 
             return res.status(200).json({message:'услуга добавлена'})
-
-            // const {letter,ServiceName,description,pointer,Priority,status,setTerminalName,roles,start_time,end_time,type} = req.body;
-            //  await Service.create({
-            //      Letter:letter,ServiceName,description,pointer,Priority,status,setTerminalName,start_time,end_time,type
-            //  }).then(async(data)=>{
-            //      const {id} = data.dataValues
-            //      if(roles.length){
-            //          roles.map(async(role)=>{
-            //              await Roles.create({services_id:id,users_id:role,terminalName:setTerminalName})
-            //          })
-            //      }
-            //    const findTerminal = await Terminal.findOne({where:{
-            //         nameTerminal:setTerminalName
-            //         }
-            //     })
-            //      const {terminal_id} = findTerminal
-            //      await Service.update({terminalTerminalId:terminal_id},{
-            //          where:{
-            //              id
-            //          }
-            //      })
-            //
-            //  }).then(res.json({'message':'Сервис добавлен'}))
 
         }catch (e) {
             console.log(e)
@@ -295,17 +183,13 @@ class dashboardController {
             console.log(e)
         }
     }
-    async editUser(req,res,next){
+    async editUser(req,res){
         try{
-            const {role_id,setPrivilege,cab,isCab,isNotice,sendNotice} = req.body
-            await Users.update({setPrivilege,cab,isCab,isNotice,sendNotice},{
-                where:{
-                    role_id
-                }
-            }).then(res.json({'message':'Данные о пользователе обновились'}))
+            await updateUser(req.body)
+            return res.status(200).json({'message':'Данные о пользователе обновились'})
         }
         catch (e) {
-
+            return res.status(500).json(e)
         }
     }
 
@@ -321,10 +205,19 @@ class dashboardController {
     }
     async getStat(req,res,next){
         try{
-           const {terminal} = req.query
-            const getData = await selectService.selectAll(terminal)
+            const {terminal,date} = req.query
+            const selectedDate = moment(date).format('DMMYYYY')
+            const getData = await selectByStat(terminal,selectedDate)
+
+            if(!getData){
+                return res.status(400).json({
+                    message:'Не найдено информации'
+                })
+            }
+
             return res.status(200).json(getData)
         }catch (e) {
+            console.log(e)
             return res.status(500).json(e)
         }
     }

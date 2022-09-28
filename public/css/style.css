@@ -72,8 +72,8 @@ div.left {
 
 .item {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    /*justify-content: center;*/
+    /*align-items: center;*/
     background-color: #0084ff;
     border-radius: 3px;
     padding: 20px 0;
@@ -123,13 +123,11 @@ div.left {
 
 .number {
     font-weight: 900;
-    width: 31%;
+    width: 28%;
     text-align: center;
-    height: 100%;
     line-height: 2em;
     border-right: 1px solid #6d874b;
     border-right: 1px solid #3f3f3f;
-    box-sizing: border-box;
     margin-left: 20px;
 
 }
@@ -142,6 +140,7 @@ div.left {
     line-height: 2em;
     text-align: center;
     box-sizing: border-box;
+    margin:0 auto;
 }
 .arrow-bottom-4 {
     width: 55px;

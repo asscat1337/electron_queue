@@ -161,15 +161,16 @@ async function testFunction(data) {
 }
 
 async function playAudio(sound) {
-    window.addEventListener('load',async ()=>{
-        sound.play()
-        await new Promise((resolve, reject) => {
-            sound.addEventListener('ended', () => {
-                resolve()
-            })
-            sound.addEventListener('error', () => {
-                reject()
-            })
+        sound.addEventListener('loadedmetadata', (event)=>{
+            console.log(event)
+            sound.play()
+        })
+    await new Promise((resolve, reject) => {
+        sound.addEventListener('ended', () => {
+            resolve()
+        })
+        sound.addEventListener('error', () => {
+            reject()
         })
     })
 }
@@ -181,10 +182,6 @@ async function play_all(data) {
 
 socket.on('pong', async (data) => {
     await callTicketFunc(data)
-})
-
-socket.on('message', data => {
-    console.log(data)
 })
 socket.on('repeat ticket', data => {
     play_all(data)

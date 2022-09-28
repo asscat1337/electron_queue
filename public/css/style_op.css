@@ -204,6 +204,7 @@ color:red;
     border-radius: 5px;
     border: 1px solid black;
     overflow-x: scroll;
+    min-width: 400px;
 }
 .op__patients{
     position: relative;

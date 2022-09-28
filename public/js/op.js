@@ -1,8 +1,8 @@
 const socket = io.connect('http://localhost:8000', {
     withCredentials: true,
-    reconnection:true,
-    transport:['websocket'],
-    forceNew:true,
+    reconnection: true,
+    transport: ['websocket'],
+    forceNew: true,
     extraHeaders: {
         'my-custom-headers': 'abcd'
     }
@@ -57,7 +57,7 @@ const getStringParams = query => {
     }, {})
 }
 
-const ButtonDisabled=(btn1,btn2)=>{
+const ButtonDisabled = (btn1, btn2) => {
     for (let i = 1; i < buttonMain.length; i++) {
         if (ticketText.textContent) {
             buttonMain[i].disabled = btn1
@@ -65,36 +65,42 @@ const ButtonDisabled=(btn1,btn2)=>{
         }
     }
 }
-const isEmpty=(object)=>Object.keys(object).length === 0
+const isEmpty = (object) => Object.keys(object).length === 0
 const userInfo = getStringParams(`${Object.values(window.location.search).join('')}`)
-
 
 window.addEventListener('unload', () => {
     socket.emit('end')
-})
-window.addEventListener('unload',()=>{
     const isEmptyObject = isEmpty(dataTicket)
-    if(!isEmptyObject){
-        localStorage.setItem('currentTicket',JSON.stringify(dataTicket))
+    if (!isEmptyObject) {
+        localStorage.setItem('currentTicket', JSON.stringify(dataTicket))
     }
 })
+let tickets = []
 
+
+const getTicket = async () => {
+    const response = await fetch('/op/get-ticket')
+
+    const data = await response.json()
+
+    return data
+}
 
 document.addEventListener('DOMContentLoaded', () => {
 
     let currentTicket
     const current = localStorage.getItem('currentTicket')
-    if(current){
+    if (current) {
         currentTicket = JSON.parse(current)
     }
 
-    if(currentTicket && currentTicket.isComplete === 0){
+    if (currentTicket && currentTicket.isComplete === 0) {
         ticket__text.textContent = currentTicket.number
         service___text.textContent = currentTicket.description
-        ButtonDisabled(false,true)
+        ButtonDisabled(false, true)
         dataTicket = currentTicket
-
     }
+    
     const modals = document.querySelectorAll('.modal');
     M.Modal.init(modals, {
         onOpenStart: function () {
@@ -109,11 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('loaded')
         }
     })
-    const startTimer = (timeTicket,time)=>{
-        const timer = setInterval(()=>{
+    const startTimer = (timeTicket, time) => {
+        const timer = setInterval(() => {
             timeTicket.textContent = timeManipulate(time)
-        },1000)
-        window.addEventListener('unload',()=>clearInterval(timer))
+        }, 1000)
+        window.addEventListener('unload', () => clearInterval(timer))
     }
     const callTicket = (event) => {
         const mainNode = event.target.parentNode.parentNode
@@ -142,16 +148,19 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         localStorage.removeItem('currentTicket')
         dataTicket = {}
+
+        tickets = tickets.filter(item => item.tvinfo_id !== objectTicket.tvinfo_id)
+
         disabledButton(false)
     }
     const timeManipulate = (start) => {
-            const currentTime = moment().format('HH:mm:ss')
-            return moment.utc((moment.duration(currentTime)) - moment.duration(start)).format('HH:mm:ss')
+        const currentTime = moment().format('HH:mm:ss')
+        return moment.utc((moment.duration(currentTime)) - moment.duration(start)).format('HH:mm:ss')
     }
 
-    const disabledButton=(boolean)=>{
+    const disabledButton = (boolean) => {
         document.querySelectorAll('.buttons__block')
-            .forEach(item=>{
+            .forEach(item => {
                 const callButton = item.querySelector('.call__button')
                 const completeButton = item.querySelector('.complete')
 
@@ -188,34 +197,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.complete').addEventListener('click', (event) => {
             const result = document.querySelectorAll('.result')
 
-
             const parentDiv = event.target.closest('.result')
             const ticketId = parentDiv.getAttribute('data-id')
-            result.forEach(res=>{
+            result.forEach(res => {
                 const dataId = res.dataset.id
-                if(dataId === ticketId){
+                if (dataId === ticketId) {
                     res.remove()
                 }
             })
             const ticketNumber = parentDiv.querySelector('.result__ticket').textContent
             const objectTicket = {
-                "number":ticketNumber,
-                tvinfo_id:ticketId,
-                user:userInfo
+                "number": ticketNumber,
+                tvinfo_id: ticketId,
+                user: userInfo
             }
-             completeTicket(objectTicket)
+            completeTicket(objectTicket)
             disabledButton(false)
         })
-       document.querySelectorAll('.result').forEach(item=>{
-           const timeTicket = item.querySelector('.time-queue')
-           const resultTicket = item.querySelector('.result__ticket').textContent
+        document.querySelectorAll('.result').forEach(item => {
+            const timeTicket = item.querySelector('.time-queue')
+            const resultTicket = item.querySelector('.result__ticket').textContent
 
-           if(data.number === resultTicket){
-               startTimer(timeTicket,data.time)
-           }
-       })
+            if (data.number === resultTicket) {
+                startTimer(timeTicket, data.time)
+            }
+        })
     }
-    const generateNotice=(data)=>{
+    const generateNotice = (data) => {
         document.querySelector('.op__list h5').insertAdjacentHTML('afterend', `
             <div class="result">
               <div class="container__ticket">
@@ -235,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let isVisible
-    document.addEventListener('visibilitychange',()=>{
+    document.addEventListener('visibilitychange', () => {
         document.visibilityState === "hidden" ?
             isVisible = false
             :
@@ -245,25 +253,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     socket.on('await queue', data => {
+        tickets.push(data)
         generateQueue(data)
 
-        if(!isVisible){
+        if (!isVisible) {
             console.log('Вышел за пределы окна')
             showNotification(data)
         }
     })
 
 
-    const showNotification=(data)=>{
-        Notification.requestPermission().then((perm)=>{
-            if(perm === "granted"){
+    const showNotification = (data) => {
+        Notification.requestPermission().then((perm) => {
+            if (perm === "granted") {
                 const notification = new Notification('Уведомление о талона', {
                     body: `Появился новый талон с номером ${data.number}. Услуга:${data.description}`,
                 });
 
-                setInterval(()=>{
+                setInterval(() => {
                     notification.close()
-                },5000)
+                }, 5000)
             }
         })
     }
@@ -271,24 +280,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nextButton.addEventListener('click', () => {
         disabledButton(true)
-         socket.emit('test data', {'received': socket.id})
+        socket.emit('test data', {'received': socket.id})
+        console.log(tickets)
     });
     btnComplete.addEventListener('click', () => {
 
         const objectTicketComplete = {
-            tvinfo_id:dataTicket.tvinfo_id,
-            number:dataTicket.number,
-            user:userInfo
+            tvinfo_id: dataTicket.tvinfo_id,
+            number: dataTicket.number,
+            user: userInfo
         }
         completeTicket(objectTicketComplete)
         disabledButton(false)
     })
-    socket.on('show data', data => {
 
-        data.map(item => {
-            generateQueue(item)
+    getTicket()
+        .then((data) => {
+            tickets.push(...data)
+            data.map(item => {
+                generateQueue(item)
+            })
         })
-    })
+
     socket.on('show notice', (data) => {
         data.map(item => {
             generateNotice(item)
@@ -301,28 +314,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         })
     })
-});
-socket.on('show test', data => {
-    dataTicket = data
-    ticket__text.textContent = data.number;
-    service___text.textContent = data.description;
-    terminal = data.terminalName;
-    numberSocket = data.number
-    roomId = data.terminalName
-    ButtonDisabled(false,true)
+// });
+    socket.on('show test', data => {
+        dataTicket = data
+        ticket__text.textContent = data.number;
+        service___text.textContent = data.description;
+        terminal = data.terminalName;
+        numberSocket = data.number
+        roomId = data.terminalName
+        ButtonDisabled(false, true)
 
-    socket.emit('test', {number: ticket__text.textContent})
-    socket.emit('clicked', {
-        "number": ticket__text.textContent,
-        "tvinfo_id": data.tvinfo_id,
-        date: Date.now(),
-        received: socket.id
-    });
-})
-socket.on('await notice', data => {
-    dataTicket = data[0]
-    data.map(item => {
-        document.querySelector('.notice-block h5').insertAdjacentHTML('afterend', `
+        socket.emit('test', {number: ticket__text.textContent})
+        socket.emit('clicked', {
+            "number": ticket__text.textContent,
+            "tvinfo_id": data.tvinfo_id,
+            date: Date.now(),
+            received: socket.id
+        });
+    })
+    socket.on('await notice', data => {
+        dataTicket = data[0]
+        data.map(item => {
+            document.querySelector('.notice-block h5').insertAdjacentHTML('afterend', `
             <div class="result-notice">
                    <div class="container__ticket">
                     <span>Талон:</span>
@@ -339,36 +352,36 @@ socket.on('await notice', data => {
                 <button class="btn notice-call">Вызвать</button>
             </div> 
             `)
-    })
-    const noticeButtons = document.querySelectorAll('.notice-call')
-    if (noticeButtons) {
-        noticeButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                ticket__text.textContent = data[0].ticket;
-                service___text.textContent = data[0].service;
-                ButtonDisabled(false,true)
-                socket.emit('test', {number: ticket__text.textContent})
-                socket.emit('clicked', {
-                    "number": ticket__text.textContent,
-                    "tvinfo_id": data[0].tvinfo_id,
-                    date: Date.now(),
-                    received: socket.id
-                });
-
-            })
         })
-    }
-})
-repeatButton.addEventListener('click', () => {
-    const data = getStringParams(`${Object.values(window.location.search).join('')}`)
-    socket.emit('repeat data', {
-        "ticket": document.querySelector('.ticket__text').textContent,
-        "terminal": data.service, 'tvinfo_id': dataTicket.tvinfo_id, date: Date.now()
+        const noticeButtons = document.querySelectorAll('.notice-call')
+        if (noticeButtons) {
+            noticeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    ticket__text.textContent = data[0].ticket;
+                    service___text.textContent = data[0].service;
+                    ButtonDisabled(false, true)
+                    socket.emit('test', {number: ticket__text.textContent})
+                    socket.emit('clicked', {
+                        "number": ticket__text.textContent,
+                        "tvinfo_id": data[0].tvinfo_id,
+                        date: Date.now(),
+                        received: socket.id
+                    });
+
+                })
+            })
+        }
     })
-})
-transferButton.addEventListener('click', () => {
-    document.querySelector('.modal-content').insertAdjacentHTML('afterbegin',
-        `
+    repeatButton.addEventListener('click', () => {
+        const data = getStringParams(`${Object.values(window.location.search).join('')}`)
+        socket.emit('repeat data', {
+            "ticket": document.querySelector('.ticket__text').textContent,
+            "terminal": data.service, 'tvinfo_id': dataTicket.tvinfo_id, date: Date.now()
+        })
+    })
+    transferButton.addEventListener('click', () => {
+        document.querySelector('.modal-content').insertAdjacentHTML('afterbegin',
+            `
             <div class="transfer__block">
             <span>Укажите кабинет для перевода</span>
             <select name="" class="option__transfer browser-default">
@@ -376,84 +389,85 @@ transferButton.addEventListener('click', () => {
             </select>
             <button class="btn accept__transfer">Перевести</button>
             </div>`);
-    let transferBlock = document.querySelector('.option__transfer');
-    let usersCabinet
+        let transferBlock = document.querySelector('.option__transfer');
+        let usersCabinet
 
-    async function fetchGetCab() {
-        const data = getStringParams(Object.values(window.location.search).join(''))
-        await fetch('/op/getCabinet', {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify(data)
-        })
-            .then(res => res.json())
-            .then(data => {
-                usersCabinet = data
-                data.map(num => {
-                    let option = document.createElement('option')
-                    transferBlock.appendChild(option)
-                    option.textContent = num.cab;
-                })
+        async function fetchGetCab() {
+            const data = getStringParams(Object.values(window.location.search).join(''))
+            await fetch('/op/getCabinet', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(data)
             })
-    }
-
-    fetchGetCab()
-    let optionVal;
-    transferBlock.addEventListener('change', () => {
-        optionVal = transferBlock.value
-    });
-    let acceptButton = document.querySelector('.accept__transfer');
-    acceptButton.addEventListener('click', () => {
-
-        const pointer = Array.from(ticket__text.textContent).splice(1).join('')
-        const letter = Array.from(ticket__text.textContent).splice(0, 1).join()
-        const noticeText = document.querySelector('.result__notice');
-        let getTextNoticeNode
-        if (noticeText) {
-            getTextNoticeNode = noticeText.textContent
+                .then(res => res.json())
+                .then(data => {
+                    usersCabinet = data
+                    data.map(num => {
+                        let option = document.createElement('option')
+                        transferBlock.appendChild(option)
+                        option.textContent = num.cab;
+                    })
+                })
         }
-        const getData = usersCabinet.find(item => item.cab === +optionVal)
-        socket.emit('transfer ticket', {
-            "receive": getData,
-            "number": document.querySelector('.ticket__text').textContent,
-            "tvinfo_id": dataTicket.tvinfo_id,
-            service: dataTicket.service,
-            description:dataTicket.description,
-            time:dataTicket.time,
-            notice: inputNotice ? inputNotice.value : getTextNoticeNode
-        })
-        socket.emit('transfer tv', [{
-            "number": ticket__text.textContent, "cab": optionVal,
-            "Letter": letter, "pointer": pointer
-        }])
-        dataTicket = {}
-        localStorage.removeItem('currentTicket')
-        socket.emit('complete data', {"number": ticket__text.textContent})
-        ButtonDisabled(true,false)
-        document.querySelectorAll('.result').forEach(item => {
-            if (ticketText.textContent === item.querySelector('.result__ticket').textContent) {
-                item.remove()
+
+        fetchGetCab()
+        let optionVal;
+        transferBlock.addEventListener('change', () => {
+            optionVal = transferBlock.value
+        });
+        let acceptButton = document.querySelector('.accept__transfer');
+        acceptButton.addEventListener('click', () => {
+
+            const pointer = Array.from(ticket__text.textContent).splice(1).join('')
+            const letter = Array.from(ticket__text.textContent).splice(0, 1).join()
+            const noticeText = document.querySelector('.result__notice');
+            let getTextNoticeNode
+            if (noticeText) {
+                getTextNoticeNode = noticeText.textContent
             }
-        })
-        ticket__text.textContent = '';
-        service___text.textContent = '';
-        if (inputNotice) {
-            inputNotice.value = ''
-        }
-    });
-    document.querySelector('.modal-close').addEventListener('click', () => {
-        if (document.querySelector('.transfer__block')) {
-
-            document.querySelector('.transfer__block').remove();
-        }
-    })
-    document.addEventListener('click', event => {
-        if (event.target.className === 'modal-overlay') {
+            const getData = usersCabinet.find(item => item.cab === +optionVal)
+            socket.emit('transfer ticket', {
+                "receive": getData,
+                "number": document.querySelector('.ticket__text').textContent,
+                "tvinfo_id": dataTicket.tvinfo_id,
+                service: dataTicket.service,
+                description: dataTicket.description,
+                time: dataTicket.time,
+                notice: inputNotice ? inputNotice.value : getTextNoticeNode
+            })
+            socket.emit('transfer tv', [{
+                "number": ticket__text.textContent, "cab": optionVal,
+                "Letter": letter, "pointer": pointer
+            }])
+            dataTicket = {}
+            localStorage.removeItem('currentTicket')
+            socket.emit('complete data', {"number": ticket__text.textContent})
+            ButtonDisabled(true, false)
+            document.querySelectorAll('.result').forEach(item => {
+                if (ticketText.textContent === item.querySelector('.result__ticket').textContent) {
+                    item.remove()
+                }
+            })
+            ticket__text.textContent = '';
+            service___text.textContent = '';
+            if (inputNotice) {
+                inputNotice.value = ''
+            }
+        });
+        document.querySelector('.modal-close').addEventListener('click', () => {
             if (document.querySelector('.transfer__block')) {
+
                 document.querySelector('.transfer__block').remove();
             }
-        }
+        })
+        document.addEventListener('click', event => {
+            if (event.target.className === 'modal-overlay') {
+                if (document.querySelector('.transfer__block')) {
+                    document.querySelector('.transfer__block').remove();
+                }
+            }
+        })
     })
 });

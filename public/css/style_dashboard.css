@@ -218,3 +218,6 @@ body{margin: 0; padding: 0;}
 .header__pointer{
     margin:45px;
 }
+.head__name,.head__call,.head_complete{
+    margin: 15px;
+}

@@ -65,7 +65,6 @@ const socketConnection=(io)=>{
                 ///update
                 await TicketUpdate.updateTransferTicket(userdata.terminal,receive.user_id,userdata.isNotice,number,notice)
                 const received = `${userdata.terminal}${receive.user_id}`
-                console.log(data)
                 if(userdata.isNotice){
                     socket.broadcast.emit('show notice',[data])
                 }
@@ -85,7 +84,6 @@ const socketConnection=(io)=>{
             socket.on('test data', async () => {
                 const {userdata} = socket.handshake.session
                 const ticketData = await ticketAction.selectTicket({users_id:userdata.user_id,terminalName:userdata.terminal,cabinet:userdata.cab})
-                console.log(ticketData)
 
                 socket.emit('show test',ticketData[0])
             })
@@ -190,7 +188,11 @@ const socketConnection=(io)=>{
                 const {userdata} = socket.handshake.session
                 socket.broadcast.to(userdata.terminal).emit('prepare active',data)
             })
-            socket.on('end', data => {
+            socket.on('update pointer',(data)=>{
+                const {room,...rest} = data
+                socket.broadcast.to(room).emit('new pointer',rest)
+            })
+            socket.on('end', ()=> {
                 console.log(`socket ${socket.id} disconnected`)
                 connections.delete(socket)
                 socket.disconnect(true)

@@ -6,7 +6,6 @@ class LoginController{
     async renderLogin(req,res,next){
         try{
             const findUsers = await selectUser.selectAll(req.query.uch)
-            // const findUser = await User.findAll({where:{terminalName:req.query.uch,isActive:1},raw:true})
             res.render('login',{
                 result:Array.from(findUsers)
             })

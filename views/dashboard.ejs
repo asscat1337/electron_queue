@@ -8,9 +8,6 @@
     <title>Панель администратора</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="public/css/style_dashboard.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="node_modules/moment/moment.js"></script>
-    <script src="node_modules/moment/locale/ru.js"></script>
 </head>
 <body>
 <div class="row">
@@ -32,7 +29,6 @@
                     <option><%=JSON.stringify(data1[i].nameTerminal).replace(/"/g,'')%></option>
                 <%}%>
             </select>
-            <input type="text" class="datepicket">
             <div class="stats__container"></div>
         </div>
         <div id="show__service" class="show__service">
@@ -78,12 +74,13 @@
                     <option><%=JSON.stringify(data1[j].nameTerminal).replace(/"/g,'')%></option>
                     <%}%>
                 </select>
+                <div class="users"></div>
                 <button class="btn service__confirm">Добавить сервис</button>
             </div>
             <div  class="card-panel  add__role">
                 <h4>Добавить пользователя</h4>
                 <input type="text" name="role__input" class="role__input" placeholder="Введите роль">
-                <input type="text" name="role__cab" class="role__cab" placeholder="Введите номер кабинета">
+                <input type="number" name="role__cab" class="role__cab" placeholder="Введите номер кабинета">
                 <label>Выберите терминал</label>
                 <select  class="role_terminal browser-default">
                     <option disabled selected>Выберите значение</option>
@@ -130,11 +127,15 @@
                 <div id="modal1" class="modal">
                     <div class="modal-content"></div>
                     <div class="modal-footer">
-                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
+                        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Закрыть</a>
                     </div>
                 </div>
             </div>
     </div>
+</div>
     <script src="public/js/dashboard.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="node_modules/moment/moment.js"></script>
+    <script src="node_modules/moment/locale/ru.js"></script>
 </body>
 </html>

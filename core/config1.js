@@ -4,7 +4,8 @@ const sequelize = new Sequelize(process.env.DB,process.env.DB_USER,process.env.D
     dialect: 'mysql',
     query:{
         raw:true
-    }
+    },
+    logging:process.env.NODE_ENV === "production" ? false : true
 })
 async function init(){
     try{

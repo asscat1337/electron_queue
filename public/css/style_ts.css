@@ -127,6 +127,45 @@ body{
     user-select: none;
 }
 
+.preloader {
+    position: fixed;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    /* фоновый цвет */
+    background: #e0e0e0;
+    z-index: 1001;
+}
+
+.preloader__image {
+    position: relative;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    margin-top: -35px;
+    margin-left: -35px;
+    text-align: center;
+    animation: preloader-rotate 2s infinite linear;
+}
+
+@keyframes preloader-rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loaded_hiding .preloader {
+    transition: 0.3s opacity;
+    opacity: 0;
+}
+
+.loaded .preloader {
+    display: none;
+}
+
 .ticket{
     position: relative;
     margin: 0 auto;
@@ -146,9 +185,8 @@ body{
 .service-name {margin:0;}
 .tick__logo {
     height: 45px;
-    /* width: 130px !important; */
-    /* margin: 20px auto 0; */
-    padding: 5px 0 0 0;}
+    padding: 5px 0 0 0;
+}
 .tick__logo img {
     -o-object-fit: cover;
     object-fit: cover;
@@ -185,4 +223,19 @@ body{
     pointer-events: none;
     opacity: 0.4;
     user-select: none;
+}
+@media screen and (min-width: 1700px) and (min-height: 800px) {
+    .btn__col{
+        padding:10px 40px 0px;
+        width: 600px;
+        margin: 10px;
+        height: 130px;
+    }
+}
+.header p{
+    margin: 20px;
+}
+.btn__active{
+    margin: 13px auto;
+    box-shadow: none;
 }
