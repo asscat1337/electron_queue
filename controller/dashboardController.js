@@ -15,7 +15,8 @@ const selectRoles = require('../models/model__test/Roles/select')
 const {selectByStat} = require('../models/model__test/Tickets/select')
 const {updateUser,updateIsActive} = require('../models/model__test/User/update')
 const {deleteUser} = require('../models/model__test/User/delete')
-const {deleteRole} = require('../models/model__test/Roles/delete')
+const {deleteRole,deleteServiceRoles} = require('../models/model__test/Roles/delete')
+const {selectUserService} = require('../models/model__test/Service/select')
 const moment = require('moment')
 
 class dashboardController {
@@ -169,15 +170,14 @@ class dashboardController {
             const {userId,terminal} = req.query
             const userData = await selectUser.select(terminal,userId)
             const currentRoles = await selectRoles.selectCurrent(terminal,userId)
-
+            const userService = await selectUserService(terminal,userId)
             const selectAll= await selectService.selectAll(terminal)
             const serviceUser = currentRoles.map(item=>item.service_id)
             const filterServices = selectAll.filter(item=>{
                 return !serviceUser.includes(item.service_id)
             })
 
-
-            return res.status(200).json({user:userData,services:currentRoles ? filterServices : selectAll})
+            return res.status(200).json({user:userData,services:currentRoles ? filterServices : selectAll,userService})
 
         }catch (e) {
             console.log(e)
@@ -222,6 +222,15 @@ class dashboardController {
         }
     }
 
+    async disableUserService(req,res){
+        try{
+            await deleteServiceRoles(req.query)
+
+            return res.status(200).send()
+        }catch (e) {
+            return res.status(500).json(e)
+        }
+    }
 }
 
 module.exports = new dashboardController()

@@ -18,5 +18,6 @@ dashboardRouter.get('/showCurrentUser',dashboardController.showCurrentUser)
 dashboardRouter.post('/editUser',dashboardController.editUser)
 dashboardRouter.post('/updateServiceUser',dashboardController.updateServiceUser)
 dashboardRouter.get('/get-stat',dashboardController.getStat)
+dashboardRouter.delete('/disableUserService',dashboardController.disableUserService)
 
 module.exports = dashboardRouter;

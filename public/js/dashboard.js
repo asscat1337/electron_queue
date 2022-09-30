@@ -197,9 +197,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let dataUsers = []
     selectTerminal.addEventListener('change', event => {
         const users = document.querySelectorAll('.users p')
-        if(users.length){
-            users.forEach(user=>user.remove())
+        if (users.length) {
+            users.forEach(user => user.remove())
         }
+
         async function fetchData() {
             await fetch('dashboard/showTerminalUsers', {
                 method: 'POST',
@@ -339,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showCurrentUser.addEventListener('click', (e) => {
                     async function showUserData() {
                         const userId = item.dataset.id
-                        const response = await fetch(`dashboard/showCurrentUser?userId=${userId}&terminal=${value}`, {
+                        const response = await fetch(`/dashboard/showCurrentUser?userId=${userId}&terminal=${value}`, {
                             method: 'GET',
                             headers: {
                                 'Content-type': 'application/json;charset=utf-8'
@@ -349,8 +350,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     showUserData().then(data => {
-                        const {services, user} = data
+                        const {services, user,userService} = data
                         const {name, cab, isReg, isNotice, sendNotice, user_id} = user[0]
+
+
                         document.querySelector('.modal-content').insertAdjacentHTML('beforeend', `
                         <div class="user-info">
                         <form method="post" class="edit-user">
@@ -377,8 +380,38 @@ document.addEventListener('DOMContentLoaded', () => {
                              <select class="select_service"></select>
                                   <button class="btn button__add-service">Добавить сервис</button>
                         </div>
+                        <div class="user-service">
+                            <h5>Список услуг</h5>
+                        </div>
                         </div>
                         `)
+
+                        userService.map(item=>{
+                            document.querySelector('.user-service').insertAdjacentHTML('beforeend',`
+                            <div class="service" data-service=${item.service_id}>
+                                <div>Номер услуги:${item.service_id}</div>
+                                <div>Название:${item.description}</div>
+                                <button class="btn disable-service">Отключить</button>
+                            </div>                            
+                        `)
+                        })
+
+                        const btnDisable = document.querySelectorAll('.disable-service')
+
+                        btnDisable.forEach(btn=>{
+                            btn.addEventListener('click',(event)=>{
+                                const {service} = event.target.parentNode.dataset
+
+                                async function disableService(){
+                                    await fetch(`/dashboard/disableUserService?service=${service}&user=${user_id}&terminal=${userTerminal}`,{
+                                        method:"DELETE"
+                                    })
+                                        .then(()=>event.target.parentNode.remove())
+                                }
+                                disableService()
+                            })
+                        })
+
                         const selectService = document.querySelector('.select_service')
                         const selectDefault = document.createElement('option')
                         selectService.appendChild(selectDefault)
@@ -470,7 +503,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             })
                     }
                     changeStateUser()
-
                 })
                 currentButton.addEventListener('click', (e) => {
                     const {id} = item.dataset
@@ -484,11 +516,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             body: JSON.stringify({'id': id, userTerminal})
                         })
                         const data = await response.json()
-                        if(response.ok && response.status === 200){
+                        if (response.ok && response.status === 200) {
                             item.remove()
                             M.toast({html: data.message})
                         }
-                        if(!response.ok && response.status ===  500){
+                        if (!response.ok && response.status === 500) {
                             M.toast({html: data.message})
                         }
                     }
@@ -562,6 +594,11 @@ termninalButton.addEventListener('click', () => {
 const terminalStats = document.querySelector('.terminal__stats')
 const statsContainer = document.querySelector('.stats__container')
 terminalStats.addEventListener('change', (event) => {
+
+    if(document.querySelector('.current__terminal')){
+        document.querySelector('.current__terminal').remove()
+    }
+
     statsContainer.insertAdjacentHTML('afterbegin', `
             <div class="current__terminal">
              <input type="date" class="datepicker">

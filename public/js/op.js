@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const generateQueue = (data) => {
-        document.querySelector('.op__list h5').insertAdjacentHTML('afterend', `
+        document.querySelector('.op__list').insertAdjacentHTML('beforeend', `
             <div class="result" data-id="${data.tvinfo_id}">
             <div class="container__ticket">
                 <span>Талон:</span>
@@ -281,7 +281,6 @@ document.addEventListener('DOMContentLoaded', () => {
     nextButton.addEventListener('click', () => {
         disabledButton(true)
         socket.emit('test data', {'received': socket.id})
-        console.log(tickets)
     });
     btnComplete.addEventListener('click', () => {
 

@@ -11,7 +11,17 @@ const deleteRole=async(object)=>{
     })
 }
 
+const deleteServiceRoles=async (object)=>{
+    const {service,user,terminal} = object
+
+    return await sequelize.query(`DELETE FROM roles__${terminal} WHERE service_id = :service AND user_id = :user`,{
+        type:QueryTypes.DELETE,
+        replacements:{service,user}
+    })
+}
+
 
 module.exports = {
-    deleteRole
+    deleteRole,
+    deleteServiceRoles
 }

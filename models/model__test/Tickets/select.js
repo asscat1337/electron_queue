@@ -7,7 +7,7 @@ const queryInterface = sequelize.getQueryInterface()
 async function selectTicket(tableName, user_id) {
     try {
         return await queryInterface.sequelize.query(`SELECT * from tvinfo__${tableName}${moment().format('DMMYYYY')}  INNER JOIN roles__${tableName}
-                WHERE  tvinfo__${tableName}${moment().format('DMMYYYY')}.services_id = roles__${tableName}.service_id AND roles__${tableName}.user_id = :users_id AND isComplete = :isComplete AND isCall = :isCall`, {
+                WHERE  tvinfo__${tableName}${moment().format('DMMYYYY')}.services_id = roles__${tableName}.service_id AND roles__${tableName}.user_id = :users_id AND isComplete = :isComplete AND isCall = :isCall ORDER BY tvinfo_id ASC`, {
             replacements: {isComplete: 0, isCall: 0, users_id: user_id},
             type: QueryTypes.SELECT
         })
