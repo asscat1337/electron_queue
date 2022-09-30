@@ -3,7 +3,6 @@ const take__ticket = document.querySelectorAll('.btn__ticket');
 const abortController = new AbortController()
 
 const time = moment().format('HH:mm:ss');
-console.log(time)
 const socket = io('http://localhost:8000', {
     transport: ['websocket'],
     forceNew: true
@@ -55,6 +54,11 @@ const terminalId = url.searchParams.get('id')
 const delay = ms => new Promise(((resolve) => setTimeout(resolve, ms)))
 
 let serviceArray = []
+
+socket.on('clear',()=>{
+    window.location.reload()
+})
+
 
 const modalTicket = (insertSelect, item) => {
     insertSelect.insertAdjacentHTML('afterend', `<div class="modal__ticket">

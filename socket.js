@@ -33,8 +33,8 @@ const socketConnection=(io)=>{
                 await TicketUpdate.updateIsComplete(userdata.terminal,tvinfo_id)
             })
 
-            const cronJob = new cron.job('5 15 * * 0-6',()=>{
-                socket.emit('clear')
+            const cronJob = new cron.job('20 12 * * 0-6',()=>{
+                socket.broadcast.emit('clear')
             },null,null,'Asia/Yekaterinburg')
 
             cronJob.start()
@@ -124,6 +124,8 @@ const socketConnection=(io)=>{
                         const soundData = getSoundQueue(mapConnect,userdata.terminal,'queue')
                         const isPlaying = getSoundQueue(mapConnect,userdata.terminal,'isPlaying')
                         soundData.push(objects)
+
+                        console.log(soundData)
                         if(!isPlaying){
                             setSoundQueue(mapConnect,userdata.terminal,{key:'isPlaying',value:true})
                             const sound = soundData[0]
