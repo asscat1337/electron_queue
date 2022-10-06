@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let letterService
     selectOptions.addEventListener('change', (event) => {
         const {children} = event.target
-        console.log(children)
         if (document.querySelector('.result')) {
             document.querySelectorAll('.result').forEach(item => item.remove())
+            document.querySelector('.links').remove()
         }
         for (let item of Array.from(children)) {
             if (item.selected) {
