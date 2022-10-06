@@ -1,4 +1,5 @@
 const fs = require("fs").promises;
+const audioconcat = require('audioconcat')
 
 async function soundData(ticket,cabinet,isCab) {
     const initialArray = ['public/sound/client.wav']
@@ -19,6 +20,7 @@ async function soundData(ticket,cabinet,isCab) {
 
     const addStatus=()=>{
         const toStatus = isCab ? 'public/sound/towindow.wav' : 'public/sound/tocabinet.wav'
+        console.log(toStatus)
         initialArray.push(toStatus)
     }
 
@@ -58,6 +60,7 @@ async function soundData(ticket,cabinet,isCab) {
     }
     generateNumber()
     generateCabinet()
+
     return initialArray
 }
 

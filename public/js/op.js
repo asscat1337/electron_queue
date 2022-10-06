@@ -170,7 +170,9 @@ window.addEventListener('load', () => {
     }
 
     const buttonsTicket=(selector,callback)=>{
+        const isCallTicket = isEmpty(dataTicket)
         document.querySelectorAll(selector).forEach(btn=>{
+            btn.disabled = !isCallTicket
             btn.addEventListener('click',(event)=>{
                 callback(event)
             })
@@ -178,6 +180,9 @@ window.addEventListener('load', () => {
     }
 
     const generateBlock = (data) => {
+
+        console.log(isEmpty(dataTicket))
+
         document.querySelector('.op__list').insertAdjacentHTML('beforeend', `
             <div class="result" data-id="${data.tvinfo_id}">
             <div class="container__ticket">
@@ -198,6 +203,16 @@ window.addEventListener('load', () => {
             </div>
             </div> 
             `)
+        document.querySelectorAll('.result').forEach(item => {
+            const timeTicket = item.querySelector('.time-queue')
+            const resultTicket = item.querySelector('.result__ticket').textContent
+
+            if (data.number === resultTicket) {
+                startTimer(timeTicket, data.time)
+            }
+        })
+
+
         buttonsTicket('.call__button',(event)=>{
             const resultId = event.target.parentNode.parentElement.dataset.id
 
@@ -232,23 +247,15 @@ window.addEventListener('load', () => {
 
     const generateQueue = (data) => {
         if (data.length) {
+            console.log(data.length)
             data.forEach(item => {
                 generateBlock(item)
             })
             return
         }
+        if(!Array.isArray(data)){
             generateBlock(data)
-
-
-            document.querySelectorAll('.result').forEach(item => {
-                const timeTicket = item.querySelector('.time-queue')
-                const resultTicket = item.querySelector('.result__ticket').textContent
-
-                if (data.number === resultTicket) {
-                    startTimer(timeTicket, data.time)
-                }
-            })
-        }
+        }}
 
 
         const generateNotice = (data) => {

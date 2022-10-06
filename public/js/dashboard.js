@@ -10,8 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const elems = document.querySelectorAll('select');
     M.FormSelect.init(elems);
     const selectOptions = document.querySelector('.select-service')
+    const checkLetter = document.querySelector('.check__letter')
+    let letterService
     selectOptions.addEventListener('change', (event) => {
         const {children} = event.target
+        console.log(children)
         if (document.querySelector('.result')) {
             document.querySelectorAll('.result').forEach(item => item.remove())
         }
@@ -65,6 +68,20 @@ document.addEventListener('DOMContentLoaded', () => {
                    </div>`)
                                 }
                             })
+                            document.querySelector('.show__service').insertAdjacentHTML(`beforeend`, `
+                                <div class="links">
+                                    <h5>Ссылки</h5>
+                                    <div>
+                                        <a href=/ts?id=${item.textContent} target="_blank">Терминал</a>
+                                    </div>
+                                    <div>
+                                        <a href=/tv?id=${item.textContent}&status=1 target="_blank">ТВ</a>
+                                    </div>
+                                    <div>
+                                        <a href=/login?uch=${item.textContent} target="_blank">Панель оператора</a>
+                                    </div>
+                                </div>
+                            `)
                             document.querySelectorAll('.delete__service').forEach((item) => {
                                 item.addEventListener('click', (event) => {
                                     const deleteId = event.target.closest('.result').dataset.id
@@ -105,10 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                   <div class="row">
                                     <form class="col s12">
                                       <div class="row">
-                                        <div class="input-field col s6">
-                                          <input placeholder="Введите название услуги" id="service" type="text" value=${currentTerminal.name}>
-                                          <label for="service">Услуга</label>
-                                        </div> 
                                          <div class="input-field col s6">
                                           <input placeholder="" id="letter" type="text" value="${currentTerminal.letter}">
                                           <label for="letter">Обозначение буквы на талоне</label>
@@ -237,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const descriptionInput = document.querySelector('.service__description').value;
         const isRegService = document.querySelector('.isRegService');
         const object1 = {
-            "letter": serviceInput.split('').slice(0, 1).join('').toUpperCase(),
+            "letter": letterService?.toUpperCase() ?? serviceInput.split('').slice(0, 1).join('').toUpperCase(),
             "name": serviceInput,
             "description": descriptionInput,
             "pointer": 1,
@@ -350,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     showUserData().then(data => {
-                        const {services, user,userService} = data
+                        const {services, user, userService} = data
                         const {name, cab, isReg, isNotice, sendNotice, user_id} = user[0]
 
 
@@ -386,8 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         `)
 
-                        userService.map(item=>{
-                            document.querySelector('.user-service').insertAdjacentHTML('beforeend',`
+                        userService.map(item => {
+                            document.querySelector('.user-service').insertAdjacentHTML('beforeend', `
                             <div class="service" data-service=${item.service_id}>
                                 <div>Номер услуги:${item.service_id}</div>
                                 <div>Название:${item.description}</div>
@@ -398,16 +411,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         const btnDisable = document.querySelectorAll('.disable-service')
 
-                        btnDisable.forEach(btn=>{
-                            btn.addEventListener('click',(event)=>{
+                        btnDisable.forEach(btn => {
+                            btn.addEventListener('click', (event) => {
                                 const {service} = event.target.parentNode.dataset
 
-                                async function disableService(){
-                                    await fetch(`/dashboard/disableUserService?service=${service}&user=${user_id}&terminal=${userTerminal}`,{
-                                        method:"DELETE"
+                                async function disableService() {
+                                    await fetch(`/dashboard/disableUserService?service=${service}&user=${user_id}&terminal=${userTerminal}`, {
+                                        method: "DELETE"
                                     })
-                                        .then(()=>event.target.parentNode.remove())
+                                        .then(() => event.target.parentNode.remove())
                                 }
+
                                 disableService()
                             })
                         })
@@ -530,6 +544,25 @@ document.addEventListener('DOMContentLoaded', () => {
             })
         })
     })
+
+    checkLetter.addEventListener('change', (event) => {
+        const checkedLetter = event.target.checked
+        if (checkedLetter) {
+            document.querySelector(".service__end").insertAdjacentHTML('afterend', `
+            <input type="text" placeholder="Введите литеру" class="service__letter"/>
+        `)
+        }
+        const serviceLetter = document.querySelector('.service__letter')
+        if (!checkedLetter) {
+            document.querySelector('.service__letter').remove()
+            letterService = undefined
+        }
+        serviceLetter.addEventListener('change', (event) => {
+            letterService = event.target.value
+        })
+
+    })
+
 });
 const roleButton = document.querySelector('.role__button');
 roleButton.addEventListener('click', () => {
@@ -591,11 +624,12 @@ termninalButton.addEventListener('click', () => {
     addNewTerminal()
 })
 
+
 const terminalStats = document.querySelector('.terminal__stats')
 const statsContainer = document.querySelector('.stats__container')
 terminalStats.addEventListener('change', (event) => {
 
-    if(document.querySelector('.current__terminal')){
+    if (document.querySelector('.current__terminal')) {
         document.querySelector('.current__terminal').remove()
     }
 

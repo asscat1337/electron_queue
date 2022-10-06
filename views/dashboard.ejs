@@ -42,7 +42,7 @@
                 </select>
             </div>
             <div class="input-field col s12">
-                <span>Список терминалов</span>
+                <span>Список терминалов для удаленияч</span>
                 <select class="select-terminal">
                     <option value="" disabled selected>Выберите терминал</option>
                     <%for (let i=0;i<data1.length;i++){%>
@@ -62,6 +62,12 @@
                 <input type="text" class="service__description" placeholder="Введите описание кнопки">
                 <input type="time" class="service__start" placeholder="Введите начало работы">
                 <input type="time" class="service__end" placeholder="Введите конец работы">
+                <p>
+                    <label>
+                        <input type="checkbox"  class="check__letter"/>
+                        <span>Добавить литеру</span>
+                    </label>
+                </p>
                 <p>
                     <label>
                         <input type="checkbox" class="filled-in isRegService">

@@ -5,6 +5,7 @@ const TicketSelect = require('./models/model__test/Tickets/select')
 const soundData = require('./sound/sound')
 const cron = require('cron')
 const {getSoundQueue,setSoundQueue} = require('./utils/soundQueue')
+const audioconcat = require('audioconcat')
 
 const connections = new Set()
 
@@ -81,11 +82,12 @@ const socketConnection=(io)=>{
                 socket.broadcast.emit('updates queue', number)
             })
             ////
-            socket.on('test data', async () => {
+            socket.on('test data', async (data) => {
+                const {received} = data
                 const {userdata} = socket.handshake.session
                 const ticketData = await ticketAction.selectTicket({users_id:userdata.user_id,terminalName:userdata.terminal,cabinet:userdata.cab})
-
-                socket.emit('show test',ticketData[0])
+                console.log(ticketData)
+                io.sockets.to(received).emit('show test',ticketData[0])
             })
             socket.on('get current',async(data)=>{
                 const {id} = data
@@ -166,7 +168,7 @@ const socketConnection=(io)=>{
                         }
                         setSoundQueue(mapConnect,userdata.terminal,{key:'isPlaying',value:true})
                         await sound.unshift(objects)
-                        socket.broadcast.to(userdata.terminal).emit('repeat ticket',sound[0])
+                        // socket.broadcast.to(userdata.terminal).emit('repeat ticket',sound[0])
                     })
                     .catch(err=>console.log(err))
 

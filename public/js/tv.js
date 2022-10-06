@@ -151,9 +151,6 @@ async function testFunction(data) {
             socket.emit('delete sound', data, (soundData) => {
                 if(soundData){
                     callTicketFunc(soundData)
-                    // if(document.querySelector('.current__container')){
-                    //     document.querySelector('.current__container').remove()
-                    // }
                 }
             })
         }
@@ -161,6 +158,7 @@ async function testFunction(data) {
 }
 
 async function playAudio(sound) {
+    console.log(sound)
         sound.addEventListener('loadedmetadata', (event)=>{
             sound.play()
         })
